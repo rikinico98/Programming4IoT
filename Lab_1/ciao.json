@@ -1,0 +1,23 @@
+{
+    "all_operation": [
+        {
+            "operation": "add",
+            "operands": [
+                1.0,
+                2.0,
+                5.0
+            ],
+            "result": 8.0
+        },
+        {
+            "operation": "mul",
+            "operands": [
+                5.0,
+                6.0,
+                9.0,
+                0.0
+            ],
+            "result": 0.0
+        }
+    ]
+}
