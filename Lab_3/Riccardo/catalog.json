@@ -1,0 +1,145 @@
+{
+    "projectOwner": "Jake Blues",
+    "projectName": "MySmartThingy",
+    "lastUpdate": "2020-11-11-17:33",
+    "devicesList": [
+        {
+            "deviceName": "DHT11",
+            "deviceID": 1,
+            "measureType": [
+                "Temperature",
+                "Humidity"
+            ],
+            "availableServices": [
+                "MQTT",
+                "REST"
+            ],
+            "lastUpdate": "2020-03-30",
+            "servicesDetails": [
+                {
+                    "serviceType": "MQTT",
+                    "serviceIP": "mqtt.eclipse.org",
+                    "topic": [
+                        "MySmartThingy/1/temp",
+                        "MySmartThingy/1/hum"
+                    ]
+                },
+                {
+                    "serviceType": "REST",
+                    "serviceIP": "dht11.org:8080",
+                    "topic": []
+                }
+            ]
+        },
+        {
+            "deviceName": "VCNL4010",
+            "deviceID": 2,
+            "measureType": [
+                "Proximity"
+            ],
+            "availableServices": [
+                "MQTT"
+            ],
+            "lastUpdate": "2020-03-30",
+            "servicesDetails": [
+                {
+                    "serviceType": "MQTT",
+                    "serviceIP": "mqtt.eclipse.org",
+                    "topic": [
+                        "MySmartThingy/2/proximity"
+                    ]
+                }
+            ]
+        },
+        {
+            "deviceName": "hola",
+            "deviceID": 4,
+            "measureType": [
+                "Temperature",
+                "Humidity"
+            ],
+            "availableServices": [
+                "MQTT",
+                "REST"
+            ],
+            "lastUpdate": "2020-11-08-17:21",
+            "servicesDetails": [
+                {
+                    "serviceType": "MQTT",
+                    "serviceIP": "mqtt.eclipse.org",
+                    "topic": [
+                        "MySmartThingy/1/temp",
+                        "MySmartThingy/1/hum"
+                    ]
+                },
+                {
+                    "serviceType": "ciao",
+                    "serviceIP": "dht11.org:8080",
+                    "topic": []
+                }
+            ]
+        },
+        {
+            "deviceName ": "chico",
+            "deviceID": 15,
+            "measureType ": [
+                "Temperature",
+                "Humidity"
+            ],
+            "availableServices": [
+                "MQTT",
+                "REST"
+            ],
+            "lastUpdate": "2020-11-11-17:32",
+            "servicesDetails": [
+                {
+                    "serviceType": "MQTT",
+                    "service": [
+                        "serviceIP"
+                    ],
+                    "topic": [
+                        "MySmartThingy/1/temp",
+                        "MySmartThingy/1/hum"
+                    ]
+                },
+                {
+                    "serviceType": "ciao",
+                    "service": [
+                        "serviceIP"
+                    ]
+                }
+            ]
+        },
+        {
+            "deviceName ": "chico",
+            "deviceID": 18,
+            "measureType ": [
+                "Temperature",
+                "Humidity"
+            ],
+            "availableServices": [
+                "MQTT",
+                "REST"
+            ],
+            "lastUpdate": "2020-11-11-17:33",
+            "servicesDetails": [
+                {
+                    "serviceType": "MQTT",
+                    "service": [
+                        "serviceIP"
+                    ],
+                    "topic": [
+                        "MySmartThingy/1/temp",
+                        "MySmartThingy/1/hum"
+                    ]
+                },
+                {
+                    "serviceType": "ciao",
+                    "service": [
+                        "serviceIP"
+                    ]
+                }
+            ]
+        }
+    ]
+}
