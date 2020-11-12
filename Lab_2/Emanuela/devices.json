@@ -1,0 +1,10 @@
+{
+    "devicesList": [
+        {
+            "deviceID": "Denis",
+            "deviceName": "Ciao",
+            "measureType": "Come",
+            "unit": "Stai?"
+        }
+    ]
+}

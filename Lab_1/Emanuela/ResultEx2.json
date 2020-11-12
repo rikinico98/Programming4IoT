@@ -1,0 +1,41 @@
+{
+"0":{
+    "Operands": [
+        1,
+        2,
+        3,
+        4,
+        5
+    ],
+    "Operation": "add",
+    "Result": 15
+},
+"1":{
+    "Operands": [
+        7,
+        3,
+        2
+    ],
+    "Operation": "sub",
+    "Result": 2
+},
+"2":{
+    "Operands": [
+        2,
+        4,
+        5
+    ],
+    "Operation": "mul",
+    "Result": 40
+},
+"3":{
+    "Operands": [
+        81,
+        9,
+        3,
+        1
+    ],
+    "Operation": "div",
+    "Result": 3.0
+}
+}

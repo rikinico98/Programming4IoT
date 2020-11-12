@@ -1,0 +1,32 @@
+{
+"0":{
+    "FirstOperand": 1,
+    "SecondOperand": 2,
+    "Operation": "add",
+    "Result": 3
+},
+"1":{
+    "FirstOperand": 3,
+    "SecondOperand": 4,
+    "Operation": "sub",
+    "Result": -1
+},
+"2":{
+    "FirstOperand": 5,
+    "SecondOperand": 7,
+    "Operation": "mul",
+    "Result": 35
+},
+"3":{
+    "FirstOperand": 6,
+    "SecondOperand": 2,
+    "Operation": "div",
+    "Result": 3.0
+},
+"4":{
+    "FirstOperand": 6,
+    "SecondOperand": 0,
+    "Operation": "div",
+    "Result": null
+}
+}
