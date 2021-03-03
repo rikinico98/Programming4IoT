@@ -1,0 +1,102 @@
+{
+            "projectOwner": ["Lazzarini Ilaria",
+                             "Lia Caterina",
+                             "Nicolicchia Riccardo",
+                             "Vigliotti Manuela"
+                             ],
+            "projectName": "WareHouse Manager",
+            "lastUpdate": currentTime,
+
+            "roomList": [
+                {"roomID": "R_001",
+                 "devicesList": [
+                     {"deviceID": "D_001", "deviceName": "R1P1", "measureType": "AAA",
+                      "availableServices": ["MQTT", "REST"],"servicesDetails": [
+                         {"serviceType": "MQTT", "serviceIP": "ciao11", "topic": ["mio/prova1","mio/prova11"]},
+                         {"serviceType": "REST", "serviceIP": "ciao12", "topic": []}
+                     ]},
+                     {"deviceID": "D_002", "deviceName": "R1P2", "measureType": "BBB",
+                      "availableServices": ["MQTT", "REST"],
+                      "servicesDetails": [
+                         {"serviceType": "MQTT", "serviceIP": "ciao21", "topic": ["mio/prova2","mio/prova22"]},
+                         {"serviceType": "REST", "serviceIP": "ciao22", "topic": []}
+                     ]},
+                     {"deviceID": "D_003", "deviceName": "R1P3", "measureType": "CCC",
+                      "availableServices": ["MQTT", "REST"],
+                      "servicesDetails": [
+                          {"serviceType": "MQTT", "serviceIP": "ciao31", "topic": ["mio/prova3", "mio/prova33"]},
+                          {"serviceType": "REST", "serviceIP": "ciao32", "topic": []}
+                      ]},
+                     {"deviceID": "D_004", "deviceName": "R1P4", "measureType": "DDD",
+                      "availableServices": ["MQTT", "REST"],"servicesDetails": [
+                         {"serviceType": "MQTT", "serviceIP": "ciao41", "topic": ["mio/prova4","mio/prova44"]},
+                         {"serviceType": "REST", "serviceIP": "ciao42", "topic": []}
+                     ]}
+                 ],
+                 "product_type": "10"},
+                {"roomID": "R_002",
+                 "devicesList": [
+                     {"deviceID": "D_005", "deviceName": "R2P1", "measureType": "AAA",
+                      "availableServices": ["MQTT", "REST"],
+                      "servicesDetails": [
+                         {"serviceType": "MQTT", "serviceIP": "ciao51", "topic": ["mio/prova5","mio/prova55"]},
+                         {"serviceType": "REST", "serviceIP": "ciao52", "topic": []}
+                     ]},
+                     {"deviceID": "D_006", "deviceName": "R2P2", "measureType": "BBB",
+                      "availableServices": ["MQTT", "REST"],
+                      "servicesDetails": [
+                         {"serviceType": "MQTT", "serviceIP": "ciao61", "topic": ["mio/prova6","mio/prova66"]},
+                         {"serviceType": "REST", "serviceIP": "ciao62", "topic": []}
+                     ]},
+                     {"deviceID": "D_007", "deviceName": "R2P3", "measureType": "CCC",
+                      "availableServices": ["MQTT", "REST"],
+                      "servicesDetails": [
+                         {"serviceType": "MQTT", "serviceIP": "ciao71", "topic": ["mio/prova7","mio/prova77"]},
+                         {"serviceType": "REST", "serviceIP": "ciao72", "topic": []}
+                     ]},
+                     {"deviceID": "D_008", "deviceName": "R2P4", "measureType": "DDD",
+                      "availableServices": ["MQTT", "REST"],
+                      "servicesDetails": [
+                         {"serviceType": "MQTT", "serviceIP": "ciao81", "topic": ["mio/prova8","mio/prova88"]},
+                         {"serviceType": "REST", "serviceIP": "ciao82", "topic": []}
+                     ]}
+                 ],
+                 "product_type": "00"},
+                {"roomID": "R_003",
+                 "devicesList": [
+                     {"deviceID": "D_009", "deviceName": "R3P1", "measureType": "AAA",
+                      "availableServices": ["MQTT", "REST"],
+                      "servicesDetails": [
+                          {"serviceType": "MQTT", "serviceIP": "ciao91", "topic": ["mio/prova9", "mio/prova99"]},
+                          {"serviceType": "REST", "serviceIP": "ciao92", "topic": []}
+                      ]},
+                     {"deviceID": "D_010", "deviceName": "R3P2", "measureType": "BBB",
+                      "availableServices": ["MQTT", "REST"],
+                      "servicesDetails": [
+                          {"serviceType": "MQTT", "serviceIP": "ciao101", "topic": ["mio/prova10", "mio/prova1010"]},
+                          {"serviceType": "REST", "serviceIP": "ciao102", "topic": []}
+                      ]},
+                     {"deviceID": "D_011", "deviceName": "R3P3", "measureType": "CCC",
+                      "availableServices": ["MQTT", "REST"],
+                      "servicesDetails": [
+                          {"serviceType": "MQTT", "serviceIP": "ciao111", "topic": ["mio/prova11", "mio/prova1111"]},
+                          {"serviceType": "REST", "serviceIP": "ciao112", "topic": []}
+                      ]},
+                     {"deviceID": "D_012", "deviceName": "R3P4", "measureType": "DDD",
+                      "availableServices": ["MQTT", "REST"],
+                      "servicesDetails": [
+                          {"serviceType": "MQTT", "serviceIP": "ciao121", "topic": ["mio/prova12", "mio/prova1212"]},
+                          {"serviceType": "REST", "serviceIP": "ciao122", "topic": []}
+                      ]}
+                 ],
+                 "product_type": "11"}
+
+            ],
+            "userList": [
+                {"userID": "U_001", "role": "worker", "roomIDs": ["R_001", "R_003"]},
+                {"userID": "U_002", "role": "owner", "roomIDs": ["R_002"]}
+
+            ],
+            "msgBroker": msgBroker,
+            "port": port
+        }
