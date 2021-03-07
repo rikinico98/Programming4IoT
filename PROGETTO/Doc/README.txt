@@ -13,6 +13,14 @@ CATALOG:
         # catalog/ID_stanza/ID_Device/topic
         # catalog/ID_utente/assigned_rooms
         # catalog/ID_stanza/assigned_product_type
+
+**************da aggiungere nei get e poi modificare i files nella cartella "Bot-DM-TP-TS" *******************
+	1. canali thingspeaks apikeys e channelIDs (1 canale per ogni sensore)
+	2. url dei canali per fare read e write dei dati 
+	(es. https://api.thingspeak.com/update?api_key=ZVBAO2QDON8B19X0 per postare
+	https://api.thingspeak.com/channels/1321136/feeds.json?api_key=S6ULMDXZPCVFBR0H per leggere)
+
+******************************************************************************************
         ### POST
         # catalog/ID_stanza/ID_device/new
         # catalog/ID_utente/new
