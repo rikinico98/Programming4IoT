@@ -35,12 +35,15 @@ class WareHouse_Catalog:
         # GET
         # catalog/msg_broker
         # catalog/port
+        # catalog/rooms
+        # catalog/users
         # catalog/ID_stanza/ID_Device/topic
         # catalog/ID_utente/assigned_rooms
         # catalog/ID_stanza/assigned_product_type
         # catalog/ID_utente/role
-        # catalog/ID_stanza/measure_type
-        # catalog/ID_stanza/ID_Device/TS_utilities
+        # catalog/ID_stanza/measure_type/TIPO_DI_MISURA
+        # catalog/ID_stanza/ID_Device/get_field
+        # catalog/ID_stanza/TS_utilities
         # POST
         # catalog/ID_stanza/ID_device/new
         # catalog/ID_utente/new
@@ -53,9 +56,10 @@ class WareHouse_Catalog:
         # catalog/ID_utente/change_role
         # catalog/ID_utente/change_assigned_rooms
         # catalog/ID_stanza/change_product_type
-        # catalog/ID_stanza/ID_Device/TS_channel
-        # catalog/ID_stanza/ID_Device/TS_get
-        # catalog/ID_stanza/ID_Device/TS_post
+        # catalog/ID_stanza/ID_Device/change_field
+        # catalog/ID_stanza/TS_channel
+        # catalog/ID_stanza/TS_get
+        # catalog/ID_stanza/TS_post
 
         # DELETE
         # catalog/ID_stanza/ID_device/delete
@@ -116,15 +120,11 @@ class WareHouse_Catalog:
                                 data, flag = self.DeviceManager.findTopic(
                                     self.catalog, roomID, deviceID)
                                 result = dict(topic=data)
-                            elif cmd == 'TS_utilities':
-                                # Output che da:
-                                # {'channelID':....,
-                                #  'Get_infos':[{"API_key":"S6ULMDXZPCVFBR0H ", "URL":"https://api.thingspeak.com/..."},...],
-                                #  'Post_infos':[{"API_key":"S6ULMDXZPCVFBR0H ", "URL":"https://api.thingspeak.com/..."},...]
-                                #  }
-                                data, flag = self.DeviceManager.getTS_utilities(
+                            elif cmd == 'get_field':
+                                data, flag = self.DeviceManager.get_field(
                                     self.catalog, roomID, deviceID)
-                                result = dict(ThingSpeak=data)
+                                result = dict(field=data)
+
                             else:
                                 raise cherrypy.HTTPError(
                                     401, "Unexpected command - Wrong Command ")
@@ -154,8 +154,15 @@ class WareHouse_Catalog:
                             # E' una lista l'output
                             measureType = uri[3]
                             data, flag = self.RoomManager.findSameMeasureID(
-                                self.catalog, roomID,measureType)
+                                self.catalog, roomID, measureType)
                             result = dict(foundIDs=data)
+                        elif cmd == 'TS_utilities':
+                            # Output che da:
+                            # { ThingSpeak: {“channelID”: 134252, “api_key_read”: ZVBAO2QDON8B19X0,
+                            # “api_key_write”: S6ULMDXZPCVFBR0H}}
+                            data, flag = self.RoomManager.getTS_utilities(
+                                self.catalog, roomID)
+                            result = dict(ThingSpeak=data)
 
                         else:
                             raise cherrypy.HTTPError(
@@ -181,7 +188,7 @@ class WareHouse_Catalog:
                     result = dict(msgBroker=self.catalog['msgBroker'])
                     jsonOut = json.dumps(result)
                     return jsonOut
-                if cmd == 'port':
+                elif cmd == 'port':
                     # controllare se la porta è stata definita in maniera
                     # corretta
                     if self.catalog['port'] == '':
@@ -189,8 +196,23 @@ class WareHouse_Catalog:
                     if not (isinstance(self.catalog['port'], int)):
                         raise cherrypy.HTTPError(
                             502, "Port not properly defined")
-
                     result = dict(port=self.catalog['port'])
+                    jsonOut = json.dumps(result)
+                    return jsonOut
+                elif cmd == 'users':
+                    # controllare se la porta è stata definita in maniera
+                    # corretta
+                    if self.catalog['userList'] == []:
+                        raise cherrypy.HTTPError(509, "User list not defined")
+                    result = dict(userList=self.catalog['userList'])
+                    jsonOut = json.dumps(result)
+                    return jsonOut
+                elif cmd == 'rooms':
+                    # controllare se la porta è stata definita in maniera
+                    # corretta
+                    if self.catalog['roomList'] == []:
+                        raise cherrypy.HTTPError(508, "Room list not defined")
+                    result = dict(roomList=self.catalog['roomList'])
                     jsonOut = json.dumps(result)
                     return jsonOut
 
@@ -374,24 +396,13 @@ class WareHouse_Catalog:
                             newTopic = jsonBody
                             self.catalog, flag = self.DeviceManager.changeTopic(
                                 self.catalog, newTopic, roomID, deviceID)
-                        elif cmd == 'TS_channel':
+                        elif cmd == 'change_field':
                             # il body del messaggio avrà la forma
-                            # {"channelID":..... }
-                            newChannel = jsonBody
-                            self.catalog, flag = self.DeviceManager.updateChannelID(
-                                self.catalog, newChannel, roomID, deviceID)
-                        elif cmd == 'TS_get':
-                            # il body del messaggio avrà la forma
-                            # [{"API_key":"ZVBAO2QDON8B19X0", "URL":"https://api.thingspeak.com/..."},...]
-                            newTSget = jsonBody
-                            self.catalog, flag = self.DeviceManager.updateTSGetInfos(
-                                self.catalog, newTSget, roomID, deviceID)
-                        elif cmd == 'TS_post':
-                            # il body del messaggio avrà la forma
-                            # [{"API_key":"S6ULMDXZPCVFBR0H ", "URL":"https://api.thingspeak.com/..."},...]
-                            newTSpost = jsonBody
-                            self.catalog, flag = self.DeviceManager.updateTSPostInfos(
-                                self.catalog, newTSpost, roomID, deviceID)
+                            # {"field": 'field1'}
+                            newField = jsonBody
+                            self.catalog, flag = self.DeviceManager.changeField(
+                                self.catalog, newField, roomID, deviceID)
+
                         else:
                             raise cherrypy.HTTPError(
                                 401, "Unexpected command - Wrong Command ")
@@ -420,15 +431,29 @@ class WareHouse_Catalog:
                         newProductType = jsonBody
                         self.catalog, flag = self.RoomManager.changeProductType(
                             self.catalog, newProductType, roomID)
-                        if flag == 0:
-                            contents = json.dumps(self.catalog)
-                            return contents
-                        elif flag == 3:
-                            raise cherrypy.HTTPError(506, "Room not found")
-
+                        contents = json.dumps(self.catalog)
+                    elif cmd == 'TS_channel':
+                        # {“channelID”: 134252}
+                        newChannel = jsonBody
+                        self.catalog, flag = self.RoomManager.updateChannelID(
+                            self.catalog, newChannel, roomID)
+                    elif cmd == 'TS_post':
+                        #{“api_key_write”: S6ULMDXZPCVFBR0H}
+                        newApi = jsonBody
+                        self.catalog, flag = self.RoomManager.updateTSPostInfos(
+                            self.catalog, newApi, roomID)
+                    elif cmd == 'TS_get':
+                        #{“api_key_read”: ZVBAO2QDON8B19X0}
+                        newApi = jsonBody
+                        self.catalog, flag = self.RoomManager.updateTSGetInfos(
+                            self.catalog, newApi, roomID)
                     else:
                         raise cherrypy.HTTPError(
                             401, "Unexpected command - Wrong Command ")
+                    if flag == 0:
+                        return contents
+                    elif flag == 3:
+                        raise cherrypy.HTTPError(506, "Room not found")
 
             else:
                 raise cherrypy.HTTPError(

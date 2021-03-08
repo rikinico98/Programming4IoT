@@ -44,6 +44,10 @@ class RoomManager:
                     roomID=roomID,
                     devicesList=newRoom["devicesList"],
                     product_type=newRoom["product_type"],
+                    ThingSpeak={
+                        "channelID": None,
+                        "api_key_read": None,
+                        "api_key_write": None},
                     lastUpdate=currentTime))
             return catalog, flag
 
@@ -92,19 +96,19 @@ class RoomManager:
             room['product_type'] = newProductType['product_type']
             dateTimeObj = datetime.now()
             currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
-            room['lastUpdate']=currentTime
+            room['lastUpdate'] = currentTime
             catalog['lastUpdate'] = currentTime
             flag = 0
             return catalog, flag
 
-    def findSameMeasureID(self,catalog, roomID, measureType):
+    def findSameMeasureID(self, catalog, roomID, measureType):
 
         ###############################
         # Returned flags#
         # 3 ---> room IS NOT FOUND
         # 0 ---> TUTTO E' ANDATO BENE
         ###############################
-        foundDeviceIds=[]
+        foundDeviceIds = []
 
         room, roomFound = self.__searchByID(catalog['roomList'], roomID)
         if roomFound == 1:
@@ -116,3 +120,89 @@ class RoomManager:
                     foundDeviceIds.append(device['deviceID'])
             flag = 0
             return foundDeviceIds, flag
+
+    def getTS_utilities(self, catalog, roomID):
+        ###############################
+        # Returned flags#
+        # 3 ---> room IS NOT FOUND
+        # 0 ---> TUTTO E' ANDATO BENE
+        ###############################
+        data = {}
+        room, roomFound = self.__searchByID(catalog['roomList'], roomID)
+        if roomFound == 1:
+            data = {}
+            flag = 3
+            return data, flag
+        else:
+            data = room['ThingSpeak']
+            flag = 0
+            return data, flag
+
+    def updateChannelID(self, catalog, newChannel, roomID):
+
+        ###############################
+        # Returned flags#
+        # 3 ---> room IS NOT FOUND
+        # 0 ---> TUTTO E' ANDATO BENE
+        ###############################
+        # {“channelID”: 134252}
+        room, roomFound = self.__searchByID(catalog['roomList'], roomID)
+        if roomFound == 1:
+            flag = 3
+            return catalog, flag
+        else:
+            ThingSpeak = room['ThingSpeak']
+            ThingSpeak['channelID'] = newChannel['channelID']
+            dateTimeObj = datetime.now()
+            currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
+            room['lastUpdate'] = currentTime
+            catalog['lastUpdate'] = currentTime
+            flag = 0
+            return catalog, flag
+
+    def updateTSPostInfos(self, catalog, newApi, roomID):
+
+        ###############################
+        # Returned flags#
+        # 3 ---> room IS NOT FOUND
+        # 0 ---> TUTTO E' ANDATO BENE
+        ###############################
+        # {“api_key_write”: S6ULMDXZPCVFBR0H}
+        room, roomFound = self.__searchByID(catalog['roomList'], roomID)
+        if roomFound == 1:
+            flag = 3
+            return catalog, flag
+        else:
+            ThingSpeak = room['ThingSpeak']
+            ThingSpeak['channelID'] = newApi['api_key_write']
+            dateTimeObj = datetime.now()
+            currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
+            room['lastUpdate'] = currentTime
+            catalog['lastUpdate'] = currentTime
+            flag = 0
+            return catalog, flag
+
+    def updateTSGetInfos(self, catalog, newApi, roomID):
+
+        ###############################
+        # Returned flags#
+        # 3 ---> room IS NOT FOUND
+        # 0 ---> TUTTO E' ANDATO BENE
+        ###############################
+        # {“api_key_read”: ZVBAO2QDON8B19X0}
+
+        room, roomFound = self.__searchByID(catalog['roomList'], roomID)
+        if roomFound == 1:
+            flag = 3
+            return catalog, flag
+        else:
+            ThingSpeak = room['ThingSpeak']
+            ThingSpeak['channelID'] = newApi['api_key_read']
+            dateTimeObj = datetime.now()
+            currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
+            room['lastUpdate'] = currentTime
+            catalog['lastUpdate'] = currentTime
+            flag = 0
+            return catalog, flag
+
+

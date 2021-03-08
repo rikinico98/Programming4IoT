@@ -58,7 +58,7 @@ class DeviceManager:
                 'measureType': newDevice['measureType'],
                 'availableServices': newDevice['availableServices'],
                 'servicesDetails': [],
-                'ThingSpeak':[]}
+                'field': None}
             for service in newDevice['servicesDetails']:
                 if 'topic' in service.keys():
                     device_new['servicesDetails'].append(
@@ -284,14 +284,14 @@ class DeviceManager:
         flag = 3
         return catalog, flag
 
-    def updateTSGetInfos(self,catalog, newTSget, roomID, deviceID):
+    def changeField(self, catalog, newField, roomID, deviceID):
         ###############################
         # Returned flags#
         # 2 ---> if room is found device IS NOT FOUND
         # 3 ---> room IS NOT FOUND
         # 0 ---> if room is found device is found
         ###############################
-        # [{"API_key":"S6ULMDXZPCVFBR0H ", "URL":"https://api.thingspeak.com/..."},...]
+        # {"field": 'field1'}
         for room in catalog['roomList']:
             if room['roomID'] == roomID:
                 device, deviceFound = self.__searchByID(room, deviceID)
@@ -301,11 +301,7 @@ class DeviceManager:
                     flag = 2
                     return catalog, flag
                 else:
-                    ThingSpeak = device['ThingSpeak']
-                    GetInfos = ThingSpeak['Get_infos']
-                    for info in newTSget:
-                        GetInfos.append(info)
-
+                    device['field'] = newField['field']
                     dateTimeObj = datetime.now()
                     currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
                     room['lastUpdate'] = currentTime
@@ -316,45 +312,14 @@ class DeviceManager:
         flag = 3
         return catalog, flag
 
-    def updateTSPostInfos(self,catalog, newTSPost, roomID, deviceID):
+    def get_field(self, catalog, roomID, deviceID):
         ###############################
         # Returned flags#
         # 2 ---> if room is found device IS NOT FOUND
         # 3 ---> room IS NOT FOUND
         # 0 ---> if room is found device is found
         ###############################
-        # [{"API_key":"S6ULMDXZPCVFBR0H ", "URL":"https://api.thingspeak.com/..."},...]
-        for room in catalog['roomList']:
-            if room['roomID'] == roomID:
-                device, deviceFound = self.__searchByID(room, deviceID)
-                if deviceFound == 1:
-                    # intero che viene usato nella classe a livello
-                    # superiore per identificare l'errore
-                    flag = 2
-                    return catalog, flag
-                else:
-                    ThingSpeak = device['ThingSpeak']
-                    PostInfos = ThingSpeak['Post_infos']
-                    for info in newTSPost:
-                        PostInfos.append(info)
-
-                    dateTimeObj = datetime.now()
-                    currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
-                    room['lastUpdate'] = currentTime
-                    catalog['lastUpdate'] = currentTime
-                    device['lastUpdate'] = currentTime
-                    flag = 0
-                    return catalog, flag
-        flag = 3
-        return catalog, flag
-    def getTS_utilities(self,catalog, roomID, deviceID):
-        ###############################
-        # Returned flags#
-        # 2 ---> if room is found device IS NOT FOUND
-        # 3 ---> room IS NOT FOUND
-        # 0 ---> if room is found device is found
-        ###############################
-        data = {}
+        data=None
         for room in catalog['roomList']:
             if room['roomID'] == roomID:
                 device, deviceFound = self.__searchByID(room, deviceID)
@@ -365,38 +330,9 @@ class DeviceManager:
                     return data, flag
                 else:
                     flag = 0
-                    data=device['ThingSpeak']
+                    data = device['field']
                     return data, flag
         flag = 3
         return data, flag
-
-    def updateChannelID(self,catalog, newChannel, roomID, deviceID):
-        ###############################
-        # Returned flags#
-        # 2 ---> if room is found device IS NOT FOUND
-        # 3 ---> room IS NOT FOUND
-        # 0 ---> if room is found device is found
-        ###############################
-        # {"channelID":..... }
-        for room in catalog['roomList']:
-            if room['roomID'] == roomID:
-                device, deviceFound = self.__searchByID(room, deviceID)
-                if deviceFound == 1:
-                    # intero che viene usato nella classe a livello
-                    # superiore per identificare l'errore
-                    flag = 2
-                    return catalog, flag
-                else:
-                    ThingSpeak = device['ThingSpeak']
-                    ThingSpeak['channelID'] = newChannel
-                    dateTimeObj = datetime.now()
-                    currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
-                    room['lastUpdate'] = currentTime
-                    catalog['lastUpdate'] = currentTime
-                    device['lastUpdate'] = currentTime
-                    flag = 0
-                    return catalog, flag
-        flag = 3
-        return catalog, flag
 
 

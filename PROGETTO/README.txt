@@ -10,15 +10,18 @@ CATALOG:
         ### GET
         # catalog/msg_broker
         # catalog/port
-	# catalog/rooms
-	# catalog/users
         # catalog/ID_stanza/ID_Device/topic
         # catalog/ID_utente/assigned_rooms
         # catalog/ID_stanza/assigned_product_type
 	# catalog/ID_utente/role
 	# catalog/ID_stanza/measure_type/TIPO_DI_MISURA
-	# catalog/ID_stanza/ID_Device/get_field
-	# catalog/ID_stanza/TS_utilities
+	# catalog/ID_stanza/ID_Device/TS_utilities(***)
+
+------- (***)modificare i files nella cartella "Bot-DM-TP-TS" 
+	1. canali thingspeaks apikeys e channelIDs (1 canale per ogni sensore)
+	2. url dei canali per fare read e write dei dati 
+	(es. https://api.thingspeak.com/update?api_key=ZVBAO2QDON8B19X0 per postare
+	https://api.thingspeak.com/channels/1321136/feeds.json?api_key=S6ULMDXZPCVFBR0H per leggere)
 
 ******************************************************************************************
         ### POST
@@ -33,12 +36,9 @@ CATALOG:
         # catalog/ID_utente/change_role
         # catalog/ID_utente/change_assigned_rooms
         # catalog/ID_stanza/change_product_type
-        # catalog/ID_stanza/ID_Device/change_field
-        # catalog/ID_stanza/TS_channel
-        # catalog/ID_stanza/TS_get
-        # catalog/ID_stanza/TS_post
-
-	
+        # catalog/ID_stanza/ID_Device/TS_channel
+        # catalog/ID_stanza/ID_Device/TS_get
+        # catalog/ID_stanza/ID_Device/TS_post
         ### DELETE
         # catalog/ID_stanza/ID_device/delete
         # catalog/ID_utente/delete
@@ -52,12 +52,6 @@ CATALOG:
 
 -La porta di accesso non è definita nel catalog
 (501, "Port not defined")
-
---La room list è vuota
-(508, "Port not defined")
-
---La user list è vuota
-(509, "User list not defined")
 
 -La porta di accesso  è definita in maniera errata  nel catalog, cioè non è un intero
 (502, "Port not properly defined")
