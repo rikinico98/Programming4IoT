@@ -21,6 +21,22 @@ class UserManager:
             assignedRoomIDs = user['roomIDs']
             flag = 0
             return assignedRoomIDs, flag
+    def findRole(self, catalog, userID):
+
+        ###############################
+        # Returned flags#
+        # 1 ---> user IS NOT FOUND
+        # 0 ---> TUTTO E' ANDATO BENE
+        ###############################
+        user, userFound = self.__searchByID(catalog['userList'], userID)
+        if userFound == 1:
+            role = ""
+            flag = 1
+            return role, flag
+        else:
+            role = user['role']
+            flag = 0
+            return role, flag
 
     def addNewUser(self, catalog, newUser, userID):
         ###############################

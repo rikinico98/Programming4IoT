@@ -96,3 +96,23 @@ class RoomManager:
             catalog['lastUpdate'] = currentTime
             flag = 0
             return catalog, flag
+
+    def findSameMeasureID(self,catalog, roomID, measureType):
+
+        ###############################
+        # Returned flags#
+        # 3 ---> room IS NOT FOUND
+        # 0 ---> TUTTO E' ANDATO BENE
+        ###############################
+        foundDeviceIds=[]
+
+        room, roomFound = self.__searchByID(catalog['roomList'], roomID)
+        if roomFound == 1:
+            flag = 3
+            return foundDeviceIds, flag
+        else:
+            for device in room['devicesList']:
+                if device["measureType"] == measureType:
+                    foundDeviceIds.append(device['deviceID'])
+            flag = 0
+            return foundDeviceIds, flag

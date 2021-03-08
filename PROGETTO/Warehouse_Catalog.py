@@ -38,7 +38,9 @@ class WareHouse_Catalog:
         # catalog/ID_stanza/ID_Device/topic
         # catalog/ID_utente/assigned_rooms
         # catalog/ID_stanza/assigned_product_type
-
+        # catalog/ID_utente/role
+        # catalog/ID_stanza/measure_type
+        # catalog/ID_stanza/ID_Device/TS_utilities
         # POST
         # catalog/ID_stanza/ID_device/new
         # catalog/ID_utente/new
@@ -51,6 +53,10 @@ class WareHouse_Catalog:
         # catalog/ID_utente/change_role
         # catalog/ID_utente/change_assigned_rooms
         # catalog/ID_stanza/change_product_type
+        # catalog/ID_stanza/ID_Device/TS_channel
+        # catalog/ID_stanza/ID_Device/TS_get
+        # catalog/ID_stanza/ID_Device/TS_post
+
         # DELETE
         # catalog/ID_stanza/ID_device/delete
         # catalog/ID_utente/delete
@@ -83,6 +89,15 @@ class WareHouse_Catalog:
                             return jsonOut
                         elif flag == 1:
                             raise cherrypy.HTTPError(507, "User not found")
+                    if cmd == 'role':
+                        role, flag = self.UserManager.findRole(
+                            self.catalog, userID)
+                        if flag == 0:
+                            result = dict(role=role)
+                            jsonOut = json.dumps(result)
+                            return jsonOut
+                        elif flag == 1:
+                            raise cherrypy.HTTPError(507, "User not found")
 
                 elif ID_type.upper() == 'R_':
                     # controllare se è un'azione riferita alle camere o a un
@@ -98,22 +113,30 @@ class WareHouse_Catalog:
                             # restituzione del topic
                             if cmd == 'topic':
                                 # TOPIC E' UNA LISTAAAA
-                                topic, flag = self.DeviceManager.findTopic(
+                                data, flag = self.DeviceManager.findTopic(
                                     self.catalog, roomID, deviceID)
-                                if flag == 0:
-                                    result = dict(topic=topic)
-                                    jsonOut = json.dumps(result)
-                                    return jsonOut
-                                elif flag == 2:
-                                    raise cherrypy.HTTPError(
-                                        505, "Device not found")
-                                elif flag == 3:
-                                    raise cherrypy.HTTPError(
-                                        506, "Room not found")
-
+                                result = dict(topic=data)
+                            elif cmd == 'TS_utilities':
+                                # Output che da:
+                                # {'channelID':....,
+                                #  'Get_infos':[{"API_key":"S6ULMDXZPCVFBR0H ", "URL":"https://api.thingspeak.com/..."},...],
+                                #  'Post_infos':[{"API_key":"S6ULMDXZPCVFBR0H ", "URL":"https://api.thingspeak.com/..."},...]
+                                #  }
+                                data, flag = self.DeviceManager.getTS_utilities(
+                                    self.catalog, roomID, deviceID)
+                                result = dict(ThingSpeak=data)
                             else:
                                 raise cherrypy.HTTPError(
                                     401, "Unexpected command - Wrong Command ")
+                            if flag == 0:
+                                jsonOut = json.dumps(result)
+                                return jsonOut
+                            elif flag == 2:
+                                raise cherrypy.HTTPError(
+                                    505, "Device not found")
+                            elif flag == 3:
+                                raise cherrypy.HTTPError(
+                                    506, "Room not found")
                         else:
                             raise cherrypy.HTTPError(
                                 400, "Unexpected command - ID NOT CLASSIFIED ")
@@ -126,16 +149,23 @@ class WareHouse_Catalog:
                         if cmd == 'assigned_product_type':
                             product_type, flag = self.RoomManager.findRoomType(
                                 self.catalog, roomID)
-                            if flag == 0:
-                                result = dict(product_type=product_type)
-                                jsonOut = json.dumps(result)
-                                return jsonOut
-                            elif flag == 3:
-                                raise cherrypy.HTTPError(506, "Room not found")
+                            result = dict(product_type=product_type)
+                        elif cmd == 'measure_type':
+                            # E' una lista l'output
+                            measureType = uri[3]
+                            data, flag = self.RoomManager.findSameMeasureID(
+                                self.catalog, roomID,measureType)
+                            result = dict(foundIDs=data)
 
                         else:
                             raise cherrypy.HTTPError(
                                 401, "Unexpected command - Wrong Command ")
+
+                        if flag == 0:
+                            jsonOut = json.dumps(result)
+                            return jsonOut
+                        elif flag == 3:
+                            raise cherrypy.HTTPError(506, "Room not found")
 
                 else:
                     raise cherrypy.HTTPError(
@@ -344,6 +374,24 @@ class WareHouse_Catalog:
                             newTopic = jsonBody
                             self.catalog, flag = self.DeviceManager.changeTopic(
                                 self.catalog, newTopic, roomID, deviceID)
+                        elif cmd == 'TS_channel':
+                            # il body del messaggio avrà la forma
+                            # {"channelID":..... }
+                            newChannel = jsonBody
+                            self.catalog, flag = self.DeviceManager.updateChannelID(
+                                self.catalog, newChannel, roomID, deviceID)
+                        elif cmd == 'TS_get':
+                            # il body del messaggio avrà la forma
+                            # [{"API_key":"ZVBAO2QDON8B19X0", "URL":"https://api.thingspeak.com/..."},...]
+                            newTSget = jsonBody
+                            self.catalog, flag = self.DeviceManager.updateTSGetInfos(
+                                self.catalog, newTSget, roomID, deviceID)
+                        elif cmd == 'TS_post':
+                            # il body del messaggio avrà la forma
+                            # [{"API_key":"S6ULMDXZPCVFBR0H ", "URL":"https://api.thingspeak.com/..."},...]
+                            newTSpost = jsonBody
+                            self.catalog, flag = self.DeviceManager.updateTSPostInfos(
+                                self.catalog, newTSpost, roomID, deviceID)
                         else:
                             raise cherrypy.HTTPError(
                                 401, "Unexpected command - Wrong Command ")
