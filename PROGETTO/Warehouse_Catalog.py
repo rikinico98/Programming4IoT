@@ -137,6 +137,16 @@ class WareHouse_Catalog:
                             elif flag == 3:
                                 raise cherrypy.HTTPError(
                                     506, "Room not found")
+                        elif uri[2] == 'measure_type':
+                                # E' una lista l'output
+                                measureType = uri[3]
+                                data, flag = self.RoomManager.findSameMeasureID(self.catalog, roomID, measureType)
+                                result = dict(foundIDs=data)
+                                if flag == 0:
+                                    jsonOut = json.dumps(result)
+                                    return jsonOut
+                                elif flag == 3:
+                                    raise cherrypy.HTTPError(506, "Room not found")
                         else:
                             raise cherrypy.HTTPError(
                                 400, "Unexpected command - ID NOT CLASSIFIED ")
@@ -150,12 +160,6 @@ class WareHouse_Catalog:
                             product_type, flag = self.RoomManager.findRoomType(
                                 self.catalog, roomID)
                             result = dict(product_type=product_type)
-                        elif cmd == 'measure_type':
-                            # E' una lista l'output
-                            measureType = uri[3]
-                            data, flag = self.RoomManager.findSameMeasureID(
-                                self.catalog, roomID, measureType)
-                            result = dict(foundIDs=data)
                         elif cmd == 'TS_utilities':
                             # Output che da:
                             # { ThingSpeak: {“channelID”: 134252, “api_key_read”: ZVBAO2QDON8B19X0,
