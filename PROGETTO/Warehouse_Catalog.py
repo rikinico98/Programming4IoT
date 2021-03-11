@@ -544,13 +544,13 @@ class WareHouse_Catalog:
 
 if __name__ == "__main__":
     # Standard configuration to serve the url "localhost:8080"
-    port = 8070
-    msgBroker = 'ciao'
+    port = 1883
+    msgBroker = "test.mosquitto.org"
     conf = {
         '/': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
             'tool.session.on': True
         }
     }
-    cherrypy.config.update({'server.socket_port': port})
+    cherrypy.config.update({'server.socket_port': 8070})
     cherrypy.quickstart(WareHouse_Catalog(port, msgBroker), '/', conf)

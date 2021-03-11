@@ -33,9 +33,9 @@ class DeviceManager:
     def addNewDevice(self, catalog, newDevice, roomID, deviceID):
         ###############################
         # Returned flags#
-        # 2 ---> if room is found device IS NOT FOUND
+        # 0 ---> if room is found device IS NOT FOUND
         # 3 ---> room IS NOT FOUND
-        # 0 ---> if room is found device is found
+        # 2 ---> if room is found device is found
         ###############################
         roomFound = 1
         deviceFound = 1
@@ -48,10 +48,10 @@ class DeviceManager:
             flag = 3
             return catalog, flag
         elif deviceFound == 0 and roomFound == 0:
-            flag = 0
+            flag = 2
             return catalog, flag
         elif deviceFound == 1 and roomFound == 0:
-            flag = 2
+            flag = 0
             device_new = {
                 'deviceName': newDevice['deviceName'],
                 'deviceID': newDevice['deviceID'],

@@ -39,11 +39,10 @@ class smokeReceiver():
         d_broker = json.loads(j_broker)
         self.broker = d_broker["msgBroker"]
         # Request port from catalog
-	    #r_port = requests.get(f'http://127.0.0.1:8070/catalog/port')
-	    #j_port = json.dumps(r_port.json(),indent=4)
-	    #d_port = json.loads(j_port)
-	    #self.port = d_port["port"]
-        self.port = 1883
+        r_port = requests.get(f'http://127.0.0.1:8070/catalog/port')
+        j_port = json.dumps(r_port.json(),indent=4)
+        d_port = json.loads(j_port)
+        self.port = d_port["port"]
         # Create the device
         self.device = MyMQTT(self.deviceID, self.broker, self.port, self)
         # Request topic from catalog
