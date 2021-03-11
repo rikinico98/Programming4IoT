@@ -1,116 +1,109 @@
-# Receives messages from blackout sensor
-# Rise telegram alarms if blackout occurs
+#Smoke sensor simulator
 
 
 from MyMQTT import *
 import threading
 import json
 import time
+import random
 import requests
-import telepot
-from telepot.loop import MessageLoop
-
-
-class MyBot():
-
-    def __init__(self, token):
-        self.tokenBot = token
-        self.bot = telepot.Bot(self.tokenBot)
-        MessageLoop(self.bot, {"chat": self.on_chat_message}).run_as_thread()
-    
-    def on_chat_message(self,msg):
-        # Get chat ID
-        content_type, chat_type, chat_ID = telepot.glance(msg)
-        self.chat_ID = chat_ID
-
-    def SendAlarm(self, room, device_id):
-        # Publish alarm message when blackout is detected
-        self.bot.sendMessage(self.chat_ID, text = f"ALARM: blackout in room {room}. Check device {device_id}")
+import math
 
 
 class MyThread(threading.Thread):
 
-    def __init__(self, threadID, device, botTelegram):
+    def __init__(self, threadID, device, failure):
         threading.Thread.__init__(self)
         #Setup thread
         self.threadID = threadID
         self.device = device
-        self.botTelegram = botTelegram
         self.iterate = True
+        self.failure = failure
 
     def run(self):
         while self.iterate:
-            # If you have not received a message for more than a minute 
-            currentTime = time.time()
-            lastReceivedTime = json.loads(self.device.getLastReceivedTime())
-            if lastReceivedTime["timestamp"] != None:
-                if currentTime - float(lastReceivedTime["timestamp"]) > 8:
-                    # Send periodically a Telegram alarm to the users
-                    roomID = json.loads(self.device.getRoom())
-                    deviceID = json.loads(self.device.getDeviceID())
-                    self.botTelegram.SendAlarm(roomID["roomID"], deviceID["deviceID"])
-                    time.sleep(5)
+			# Concentration scope: from 200ppm to 10000ppm
+            # When the gas concentration is high enough, the sensor usually outputs value greater than 300.
+            p = random.uniform(0,1)
+            if p > self.failure:
+            	u = random.uniform(0,300)
+            else:
+            	u = random.uniform(300,10000)
+            if u < 300:
+                # Everything works!
+                self.device.publish(u)
+                time.sleep(5)
+            else:
+                # Simulation of failure (failure holds for some time untill resolution of the problem)
+                # Keep sending the wrong result to simulate the time needed to solve the problem
+                time_to_solve = math.ceil(random.uniform(5,15))
+                for it in range(time_to_solve):
+                	self.device.publish(u)
+                	time.sleep(5)
 	
     def stop(self):
     	self.iterate = False
 
 
-class blackoutReceiver():
+class smokeSensor():
 
-    def __init__(self, deviceID, roomID, botTelegram):
-        self.deviceID = deviceID
-        self.roomID = roomID
-        self.botTelegram = botTelegram
-        # Request broker from catalog
-        r_broker = requests.get(f'http://127.0.0.1:8070/catalog/msg_broker')
-        j_broker = json.dumps(r_broker.json(),indent=4)
-        d_broker = json.loads(j_broker)
-        self.broker = d_broker["msgBroker"]
-        # Request port from catalog
-        r_port = requests.get(f'http://127.0.0.1:8070/catalog/port')
-        j_port = json.dumps(r_port.json(),indent=4)
-        d_port = json.loads(j_port)
-        self.port = d_port["port"]
-        # Create the device
-        self.device = MyMQTT(self.deviceID, self.broker, self.port, self)
-        # Request topic from catalog
-        r_topic = requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/{self.deviceID}/topic')
-        j_topic = json.dumps(r_topic.json(),indent=4)
-        d_topic = json.loads(j_topic)
-        self.topic = d_topic["topic"] #Note: topic is a list
-        # Define the last received timestamp
-        self.lastReceivedTime = {"timestamp": None}
-    
-    def start(self):
-        self.device.start()
-        for topic in self.topic:
-            self.device.mySubscribe(topic)
-        self.device_thread = MyThread(self.deviceID, self, self.botTelegram)
-        self.device_thread.start()
+	def __init__(self, ID, deviceID, roomID, failure):
+	    self.ID = ID
+	    self.deviceID = deviceID
+	    self.roomID = roomID
+	    self.failure = failure
+		# Request broker from catalog
+	    r_broker = requests.get(f'http://127.0.0.1:8070/catalog/msg_broker')
+	    j_broker = json.dumps(r_broker.json(),indent=4)
+	    d_broker = json.loads(j_broker)
+	    self.broker = d_broker["msgBroker"]
+		# Request port from catalog
+	    r_port = requests.get(f'http://127.0.0.1:8070/catalog/port')
+	    j_port = json.dumps(r_port.json(),indent=4)
+	    d_port = json.loads(j_port)
+	    self.port = d_port["port"]
+		# Create the device
+	    self.device = MyMQTT(self.ID, self.broker, self.port, None)
+		# Request topic from catalog
+	    r_topic = requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/{self.deviceID}/topic')
+	    j_topic = json.dumps(r_topic.json(),indent=4)
+	    d_topic = json.loads(j_topic)
+	    self.topic = d_topic["topic"] #Note: topic is a list
+		# Define standard message to send
+	    self.__message = {"bn": self.deviceID, "e": [{"n": "smoke detector", "u": "ppm", "t": None, "v": None}]}
+	
+	def start(self):
+		self.device.start()
+		self.device_thread = MyThread(self.ID, self, self.failure)
+		self.device_thread.start()
 
-    def stop(self):
-        self.device_thread.stop()
-        self.device.stop()
+	def stop(self):
+		self.device_thread.stop()
+		self.device.stop()
 
-    def notify(self, topic, msg, qos):
-        payload = json.loads(msg)
-        print(f"Message received! Everything works correctly! Topic: {topic}, Measure: {payload['e'][0]['n']}, Value: {payload['e'][0]['v']}, Timestamp: {payload['e'][0]['t']} with Qos: {qos}")
-        self.lastReceivedTime = {"timestamp": payload['e'][0]['t']}
-    
-    def getLastReceivedTime(self):
-        return json.dumps(self.lastReceivedTime)
+	def publish(self, value):
+	    message=self.__message
+		# Add timestamp
+	    message["e"][0]["t"] = str(time.time())
+	    # Add value
+	    message["e"][0]["v"] = value
+		# Publish to all the topics
+	    for topic in self.topic:
+	        self.device.myPublish(topic, message)
 
-    def getRoom(self):
-        return json.dumps({"roomID": self.roomID})
-
-    def getDeviceID(self):
-        return json.dumps({"deviceID": self.deviceID})
-
+	def getRoom(self):
+		return json.dumps({"roomID": self.roomID})
+	
+	def getDeviceID(self):
+		return json.dumps({"deviceID": self.deviceID})
 
 
 if __name__ == "__main__":
 
-	botTelegram = MyBot("1669000654:AAFKE-wI5v4Lm--42edkv9T8PS6ruMneybE")
+	# To simulate failure of the real sensor
+	failure_probability = -1
+	while failure_probability < 0 or failure_probability > 1:
+		failure_probability = float(input("Insert the failure probability to simulate\nNote: it must be a number in [0,1]\n"))
 
 	myDevicesList = []
 	current_rooms = []
@@ -122,17 +115,17 @@ if __name__ == "__main__":
 		current_rooms_list = d_rooms["roomList"] #Note: rooms is a list
 		for room in current_rooms_list:
 			current_rooms.append(room["roomID"])
-		
-		# For all the rooms take all the blackout devices
+	
+		# For all the rooms take all the smoke devices
 		for room in current_rooms:
-			r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/blackout')
+			r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/smoke')
 			if r_devices.status_code == 200:
 				j_devices = json.dumps(r_devices.json(),indent=4)
 				d_devices = json.loads(j_devices)
 				devices = d_devices["foundIDs"] #Note: devices is a list
 				# Create a thread for each device
 				for device in devices:
-					myDevicesList.append(blackoutReceiver(device, room, botTelegram))
+					myDevicesList.append(smokeSensor(device+"_pub", device, room, failure_probability))
 					print(f"New device added: {device}")
 
 		for device in myDevicesList:
@@ -171,7 +164,7 @@ if __name__ == "__main__":
 
 			# Check for changes in the remaining rooms
 			for room in current_rooms:
-				r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/blackout')
+				r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/smoke')
 				if r_devices.status_code == 200:
 					j_devices = json.dumps(r_devices.json(),indent=4)
 					d_devices = json.loads(j_devices)
@@ -198,7 +191,7 @@ if __name__ == "__main__":
 					# Add new devices
 					missing_devices = list(set(devices) - set(device_in_room))
 					for device in missing_devices:
-						myDevicesList.append(blackoutReceiver(device, room, botTelegram))
+						myDevicesList.append(smokeSensor(device+"_pub", device, room, failure_probability))
 						myDevicesList[-1].start()
 						print(f"New device added: {device}")
 
@@ -209,13 +202,13 @@ if __name__ == "__main__":
 			current_rooms = current_rooms + rooms_to_add
 			# Add all the devices within the rooms to add
 			for room in rooms_to_add:
-				r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/blackout')
+				r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/smoke')
 				if r_devices.status_code == 200:
 					j_devices = json.dumps(r_devices.json(),indent=4)
 					d_devices = json.loads(j_devices)
 					devices = d_devices["foundIDs"] #Note: devices is a list
 					# Create a thread for each device
 					for device in devices:
-						myDevicesList.append(blackoutReceiver(device, room, botTelegram))
+						myDevicesList.append(smokeSensor(device+"_pub", device, room, failure_probability))
 						myDevicesList[-1].start()
 						print(f"New device added: {device}")

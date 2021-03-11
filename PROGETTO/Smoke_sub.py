@@ -1,5 +1,5 @@
-# Receives messages from blackout sensor
-# Rise telegram alarms if blackout occurs
+# Receives messages from smoke sensor
+# Rise telegram alarms if smoke detected is too high
 
 
 from MyMQTT import *
@@ -24,43 +24,15 @@ class MyBot():
         self.chat_ID = chat_ID
 
     def SendAlarm(self, room, device_id):
-        # Publish alarm message when blackout is detected
-        self.bot.sendMessage(self.chat_ID, text = f"ALARM: blackout in room {room}. Check device {device_id}")
+        # Publish alarm message when smoke is detected
+        self.bot.sendMessage(self.chat_ID, text = f"ALARM: smoke in room {room}. Check device {device_id}")
 
 
-class MyThread(threading.Thread):
-
-    def __init__(self, threadID, device, botTelegram):
-        threading.Thread.__init__(self)
-        #Setup thread
-        self.threadID = threadID
-        self.device = device
-        self.botTelegram = botTelegram
-        self.iterate = True
-
-    def run(self):
-        while self.iterate:
-            # If you have not received a message for more than a minute 
-            currentTime = time.time()
-            lastReceivedTime = json.loads(self.device.getLastReceivedTime())
-            if lastReceivedTime["timestamp"] != None:
-                if currentTime - float(lastReceivedTime["timestamp"]) > 8:
-                    # Send periodically a Telegram alarm to the users
-                    roomID = json.loads(self.device.getRoom())
-                    deviceID = json.loads(self.device.getDeviceID())
-                    self.botTelegram.SendAlarm(roomID["roomID"], deviceID["deviceID"])
-                    time.sleep(5)
-	
-    def stop(self):
-    	self.iterate = False
-
-
-class blackoutReceiver():
+class smokeReceiver():
 
     def __init__(self, deviceID, roomID, botTelegram):
         self.deviceID = deviceID
         self.roomID = roomID
-        self.botTelegram = botTelegram
         # Request broker from catalog
         r_broker = requests.get(f'http://127.0.0.1:8070/catalog/msg_broker')
         j_broker = json.dumps(r_broker.json(),indent=4)
@@ -78,33 +50,31 @@ class blackoutReceiver():
         j_topic = json.dumps(r_topic.json(),indent=4)
         d_topic = json.loads(j_topic)
         self.topic = d_topic["topic"] #Note: topic is a list
-        # Define the last received timestamp
-        self.lastReceivedTime = {"timestamp": None}
+        self.botTelegram = botTelegram
     
     def start(self):
         self.device.start()
         for topic in self.topic:
             self.device.mySubscribe(topic)
-        self.device_thread = MyThread(self.deviceID, self, self.botTelegram)
-        self.device_thread.start()
 
     def stop(self):
-        self.device_thread.stop()
         self.device.stop()
 
-    def notify(self, topic, msg, qos):
+    def notify(self,topic,msg, qos):
         payload = json.loads(msg)
-        print(f"Message received! Everything works correctly! Topic: {topic}, Measure: {payload['e'][0]['n']}, Value: {payload['e'][0]['v']}, Timestamp: {payload['e'][0]['t']} with Qos: {qos}")
-        self.lastReceivedTime = {"timestamp": payload['e'][0]['t']}
-    
-    def getLastReceivedTime(self):
-        return json.dumps(self.lastReceivedTime)
+        print(f"Message received! Everything works correctly! Topic: {topic}, Measure: {payload['e'][0]['n']}, Value: {payload['e'][0]['v']}, Timestamp: {payload['e'][0]['t']} with QoS: {qos}")
+        smoke_value = payload['e'][0]['v']
+        # If the value of the message received is out of the normal range
+        # When the gas concentration is high enough, the sensor usually outputs value greater than 300.
+        if smoke_value >= 300:
+            # Send a Telegram alarm to the users
+            self.botTelegram.SendAlarm(self.roomID, self.deviceID)
 
     def getRoom(self):
-        return json.dumps({"roomID": self.roomID})
-
+    	return json.dumps({"roomID": self.roomID})
+	
     def getDeviceID(self):
-        return json.dumps({"deviceID": self.deviceID})
+    	return json.dumps({"deviceID": self.deviceID})
 
 
 
@@ -122,17 +92,17 @@ if __name__ == "__main__":
 		current_rooms_list = d_rooms["roomList"] #Note: rooms is a list
 		for room in current_rooms_list:
 			current_rooms.append(room["roomID"])
-		
-		# For all the rooms take all the blackout devices
+	
+		# For all the rooms take all the smoke devices
 		for room in current_rooms:
-			r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/blackout')
+			r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/smoke')
 			if r_devices.status_code == 200:
 				j_devices = json.dumps(r_devices.json(),indent=4)
 				d_devices = json.loads(j_devices)
 				devices = d_devices["foundIDs"] #Note: devices is a list
 				# Create a thread for each device
 				for device in devices:
-					myDevicesList.append(blackoutReceiver(device, room, botTelegram))
+					myDevicesList.append(smokeReceiver(device,room,botTelegram))
 					print(f"New device added: {device}")
 
 		for device in myDevicesList:
@@ -171,7 +141,7 @@ if __name__ == "__main__":
 
 			# Check for changes in the remaining rooms
 			for room in current_rooms:
-				r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/blackout')
+				r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/smoke')
 				if r_devices.status_code == 200:
 					j_devices = json.dumps(r_devices.json(),indent=4)
 					d_devices = json.loads(j_devices)
@@ -198,7 +168,7 @@ if __name__ == "__main__":
 					# Add new devices
 					missing_devices = list(set(devices) - set(device_in_room))
 					for device in missing_devices:
-						myDevicesList.append(blackoutReceiver(device, room, botTelegram))
+						myDevicesList.append(smokeReceiver(device,room,botTelegram))
 						myDevicesList[-1].start()
 						print(f"New device added: {device}")
 
@@ -209,13 +179,13 @@ if __name__ == "__main__":
 			current_rooms = current_rooms + rooms_to_add
 			# Add all the devices within the rooms to add
 			for room in rooms_to_add:
-				r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/blackout')
+				r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/smoke')
 				if r_devices.status_code == 200:
 					j_devices = json.dumps(r_devices.json(),indent=4)
 					d_devices = json.loads(j_devices)
 					devices = d_devices["foundIDs"] #Note: devices is a list
 					# Create a thread for each device
 					for device in devices:
-						myDevicesList.append(blackoutReceiver(device, room, botTelegram))
+						myDevicesList.append(smokeReceiver(device,room,botTelegram))
 						myDevicesList[-1].start()
 						print(f"New device added: {device}")
