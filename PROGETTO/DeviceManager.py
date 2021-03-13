@@ -58,7 +58,7 @@ class DeviceManager:
                 'measureType': newDevice['measureType'],
                 'availableServices': newDevice['availableServices'],
                 'servicesDetails': [],
-                'field': None}
+                'field': newDevice['field']}
             for service in newDevice['servicesDetails']:
                 if 'topic' in service.keys():
                     device_new['servicesDetails'].append(
@@ -209,7 +209,7 @@ class DeviceManager:
         return catalog, flag
 
 
-    def changeServiceDetails(self, catalog, newServiceDetails, roomID, deviceID):
+    def addServiceDetails(self, catalog, newServiceDetails, roomID, deviceID):
         ###############################
         # Returned flags#
         # 2 ---> if room is found device IS NOT FOUND
@@ -225,22 +225,9 @@ class DeviceManager:
         #       {  "serviceType": "REST",
         #         "serviceIP": "dht11.org:8080",
         #         "topic": [] }
-        #         ] , "allServices" : True/False, "deleteAddAction": 1 }
-        # ----------------------------------------------
-        # "deleteAddAction":
-        # 0 --> Delete service
-        # 1 --> Update existing Service
-        # ----------------------------------------------
-        # "allServices":
-        # True  --> Change all services
-        # False --> Change not all services
-        # ----------------------------------------------
-        # {"servicesDetails":[{"serviceType": "MQTT" }],
-        #   "allServices" : False, "deleteAddAction": 0 }
+        #         ] }
 
-        allServices = newServiceDetails['allServices']
-        deleteAddAction = newServiceDetails['deleteAddAction']
-
+        newServiceType=[]
         for room in catalog['roomList']:
             if room['roomID'] == roomID:
                 device, deviceFound = self.__searchByID(room, deviceID)
@@ -250,30 +237,12 @@ class DeviceManager:
                     flag = 2
                     return catalog, flag
                 else:
-                    if allServices and deleteAddAction == 1:
-                        device['servicesDetails'] = newServiceDetails['servicesDetails']
-                        newServiceType = []
-                        for service in device['servicesDetails']:
-                            newServiceType.append(service['serviceType'])
-                        not_contained_elements = [
-                            elem for elem in newServiceType if elem not in device['availableServices']]
-                        device['availableServices'].extend(not_contained_elements)
-                    elif not allServices and deleteAddAction == 1:
-                        device['servicesDetails'].append(
-                            newServiceDetails['servicesDetails'])
-                        newServiceType = []
-                        for service in device['servicesDetails']:
-                            newServiceType.append(service['serviceType'])
-                        not_contained_elements = [
-                            elem for elem in newServiceType if elem not in device['availableServices']]
-                        device['availableServices'].extend(not_contained_elements)
-
-                    elif not allServices and deleteAddAction == 0:
-                        for service in device['servicesDetails']:
-                            if service['serviceType'] == newServiceDetails['serviceType']:
-                                device['servicesDetails'].remove(service)
-                                device['availableServices'].remove(
-                                    newServiceDetails['serviceType'])
+                    device['servicesDetails'] = newServiceDetails['servicesDetails']
+                    for service in device['servicesDetails']:
+                        newServiceType.append(service['serviceType'])
+                    not_contained_elements = [
+                        elem for elem in newServiceType if elem not in device['availableServices']]
+                    device['availableServices'].extend(not_contained_elements)
 
                     dateTimeObj = datetime.now()
                     currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
@@ -336,3 +305,22 @@ class DeviceManager:
         return data, flag
 
 
+    def deleteService(self, catalog, roomID, deviceID,serviceType):
+        for room in catalog['roomList']:
+            if room['roomID'] == roomID:
+                device, deviceFound = self.__searchByID(room, deviceID)
+                if deviceFound == 1:
+                    # intero che viene usato nella classe a livello
+                    # superiore per identificare l'errore
+                    flag = 2
+                    return catalog, flag
+                else:
+                    for service in device['servicesDetails']:
+                        if service['serviceType'] == serviceType:
+                            device['servicesDetails'].remove(service)
+                            device['availableServices'].remove(serviceType)
+                    dateTimeObj = datetime.now()
+                    currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
+                    room['lastUpdate'] = currentTime
+                    catalog['lastUpdate'] = currentTime
+                    device['lastUpdate'] = currentTime

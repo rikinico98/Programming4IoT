@@ -21,7 +21,7 @@ class UserManager:
             assignedRoomIDs = user['roomIDs']
             flag = 0
             return assignedRoomIDs, flag
-    def findRole(self, catalog, userID):
+    def findChatID(self, catalog, userID):
 
         ###############################
         # Returned flags#
@@ -30,13 +30,13 @@ class UserManager:
         ###############################
         user, userFound = self.__searchByID(catalog['userList'], userID)
         if userFound == 1:
-            role = ""
+            chatID = ""
             flag = 1
-            return role, flag
+            return chatID, flag
         else:
-            role = user['role']
+            chatID = user['chatID']
             flag = 0
-            return role, flag
+            return chatID, flag
 
     def addNewUser(self, catalog, newUser, userID):
         ###############################
@@ -54,7 +54,7 @@ class UserManager:
             catalog['userList'].append(
                 dict(
                     userID=userID,
-                    role=newUser["role"],
+                    chatID=None,
                     roomIDs=newUser["roomIDs"]))
             return catalog, userFound
 
@@ -76,16 +76,16 @@ class UserManager:
             catalog['lastUpdate'] = currentTime
             return catalog, flag
 
-    def updateRole(self, catalog, newUser, userID):
+    def updateChatID(self, catalog, updateChatID, userID):
         ###############################
         # Returned flags#
         # 1 ---> user IS NOT FOUND
         # 0 ---> user FOUND
         ###############################
-        # {"role": "nuovo_ruolo"}
+        # {"chatID": "nuovo_chatID"}
         user, userFound = self.__searchByID(catalog['userList'], userID)
         if userFound == 0:
-            user['role'] = newUser['role']
+            user['chatID'] = newUser['chatID']
             dateTimeObj = datetime.now()
             currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
             catalog['lastUpdate'] = currentTime

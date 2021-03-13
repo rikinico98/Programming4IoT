@@ -39,15 +39,20 @@ class RoomManager:
             catalog['lastUpdate'] = currentTime
             for device in newRoom["devicesList"]:
                 device['lastUpdate'] = currentTime
+            ranges = dict(Temperature=newRoom['Temperature'],
+                          Humidity=newRoom['Humidity'],
+                          Smoke=newRoom['Smoke'])
+            ThingSpeak = newRoom['ThingSpeak']
             catalog['roomList'].append(
                 dict(
                     roomID=roomID,
                     devicesList=newRoom["devicesList"],
                     product_type=newRoom["product_type"],
                     ThingSpeak={
-                        "channelID": None,
-                        "api_key_read": None,
-                        "api_key_write": None},
+                        "channelID": ThingSpeak['channelID'],
+                        "api_key_read": ThingSpeak['api_key_read'],
+                        "api_key_write": ThingSpeak['api_key_read']},
+                    ranges=ranges,
                     lastUpdate=currentTime))
             return catalog, flag
 
@@ -205,4 +210,34 @@ class RoomManager:
             flag = 0
             return catalog, flag
 
+    def updateRanges(self, catalog, newRanges, roomID):
 
+        ###############################
+        # Returned flags#
+        # 3 ---> room IS NOT FOUND
+        # 0 ---> TUTTO E' ANDATO BENE
+        ###############################
+        # {"ranges":{"Temperature":[0,0],"Humidity":[0,0],"Smoke":[0,0]}}
+        # NON PER FORZA DEVO AGGIORNARE TUTTI I RANGE IL CAMBIAMENTO PARZIALE
+        # E' PREVISTO
+        room, roomFound = self.__searchByID(catalog['roomList'], roomID)
+        if roomFound == 1:
+            flag = 3
+            return catalog, flag
+        else:
+            rangesDict=newRanges['ranges']
+            ranges=room['ranges']
+            keyList=list(rangesDict.keys())
+            if ("Temperature" in keyList):
+                ranges['Temperature']=rangesDict['Temperature']
+            if ("Humidity" in keyList):
+                ranges['Humidity'] = rangesDict['Humidity']
+            if ("Smoke" in keyList):
+                ranges['Smoke'] = rangesDict['Smoke']
+            dateTimeObj = datetime.now()
+            currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
+            room['lastUpdate'] = currentTime
+            catalog['lastUpdate'] = currentTime
+            flag = 0
+            return catalog, flag
+        pass

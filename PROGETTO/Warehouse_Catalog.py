@@ -35,15 +35,12 @@ class WareHouse_Catalog:
         # GET
         # catalog/msg_broker
         # catalog/port
-        # catalog/rooms
-        # catalog/users
         # catalog/ID_stanza/ID_Device/topic
         # catalog/ID_utente/assigned_rooms
         # catalog/ID_stanza/assigned_product_type
-        # catalog/ID_utente/role
+        # catalog/ID_utente/chatID
         # catalog/ID_stanza/measure_type/TIPO_DI_MISURA
-        # catalog/ID_stanza/ID_Device/get_field
-        # catalog/ID_stanza/TS_utilities
+        # catalog/ID_stanza/ID_Device/TS_utilities
         # POST
         # catalog/ID_stanza/ID_device/new
         # catalog/ID_utente/new
@@ -51,20 +48,20 @@ class WareHouse_Catalog:
         # PUT
         # catalog/ID_stanza/ID_device/update_name
         # catalog/ID_stanza/ID_device/change_meas_type
-        # catalog/ID_stanza/ID_device/change_service_details
+        # catalog/ID_stanza/ID_device/add_service_details
         # catalog/ID_stanza/ID_device/change_topic
-        # catalog/ID_utente/change_role
+        # catalog/ID_utente/change_chatID
         # catalog/ID_utente/change_assigned_rooms
         # catalog/ID_stanza/change_product_type
-        # catalog/ID_stanza/ID_Device/change_field
-        # catalog/ID_stanza/TS_channel
-        # catalog/ID_stanza/TS_get
-        # catalog/ID_stanza/TS_post
-
+        # catalog/ID_stanza/change_ranges
+        # catalog/ID_stanza/ID_Device/TS_channel
+        # catalog/ID_stanza/ID_Device/TS_get
+        # catalog/ID_stanza/ID_Device/TS_post
         # DELETE
         # catalog/ID_stanza/ID_device/delete
         # catalog/ID_utente/delete
         # catalog/ID_stanza/delete
+        # catalog/ID_stanza/ID_device/delete_service_details/TIPO_DI_SERVIZIO
 
 ##########################################################################
     def GET(self, *uri):
@@ -79,7 +76,7 @@ class WareHouse_Catalog:
                 # controllare il prefisso per capire a quale sotto sezione si
                 # riferisce
                 ID_type = IDReference[0:2]
-                if ID_type.upper() == 'U_':
+                if ID_type.upper() == 'U_' or ID_type.upper() == 'M_':
                     # controllare a quale azione riguardo gli utenti si
                     # riferisce
                     userID = IDReference
@@ -93,11 +90,11 @@ class WareHouse_Catalog:
                             return jsonOut
                         elif flag == 1:
                             raise cherrypy.HTTPError(507, "User not found")
-                    if cmd == 'role':
-                        role, flag = self.UserManager.findRole(
+                    if cmd == 'chatID':
+                        chatID, flag = self.UserManager.findChatID(
                             self.catalog, userID)
                         if flag == 0:
-                            result = dict(role=role)
+                            result = dict(chatID=chatID)
                             jsonOut = json.dumps(result)
                             return jsonOut
                         elif flag == 1:
@@ -138,15 +135,16 @@ class WareHouse_Catalog:
                                 raise cherrypy.HTTPError(
                                     506, "Room not found")
                         elif uri[2] == 'measure_type':
-                                # E' una lista l'output
-                                measureType = uri[3]
-                                data, flag = self.RoomManager.findSameMeasureID(self.catalog, roomID, measureType)
-                                result = dict(foundIDs=data)
-                                if flag == 0:
-                                    jsonOut = json.dumps(result)
-                                    return jsonOut
-                                elif flag == 3:
-                                    raise cherrypy.HTTPError(506, "Room not found")
+                            # E' una lista l'output
+                            measureType = uri[3]
+                            data, flag = self.RoomManager.findSameMeasureID(
+                                self.catalog, roomID, measureType)
+                            result = dict(foundIDs=data)
+                            if flag == 0:
+                                jsonOut = json.dumps(result)
+                                return jsonOut
+                            elif flag == 3:
+                                raise cherrypy.HTTPError(506, "Room not found")
                         else:
                             raise cherrypy.HTTPError(
                                 400, "Unexpected command - ID NOT CLASSIFIED ")
@@ -232,7 +230,7 @@ class WareHouse_Catalog:
             # controllare il prefisso per capire a quale sotto sezione si
             # riferisce
             ID_type = IDReference[0:2]
-            if ID_type.upper() == 'U_':
+            if ID_type.upper() == 'U_' or ID_type.upper() == 'M_':
                 # controllare a quale azione riguardo gli utenti si riferisce
                 userID = IDReference
                 cmd = uri[2]
@@ -311,16 +309,16 @@ class WareHouse_Catalog:
             # controllare il prefisso per capire a quale sotto sezione si
             # riferisce
             ID_type = IDReference[0:2]
-            if ID_type.upper() == 'U_':
+            if ID_type.upper() == 'U_' or ID_type.upper() == 'M_':
                 # controllare a quale azione riguardo gli utenti si riferisce
                 userID = IDReference
                 cmd = uri[2]
-                if cmd == 'change_role':
+                if cmd == 'change_chatID':
                     # Il messaggio passato nel body contiene solo la key-value pair
-                    # {"role": "nuovo_ruolo"}
-                    newRole = jsonBody
-                    self.catalog, flag = self.UserManager.updateRole(
-                        self.catalog, newRole, userID)
+                    # {"chatID": "nuovo_chatID"}
+                    newChatID = jsonBody
+                    self.catalog, flag = self.UserManager.updateChatID(
+                        self.catalog, newChatID, userID)
                     if flag == 0:
                         contents = json.dumps(self.catalog)
                         return contents
@@ -367,7 +365,7 @@ class WareHouse_Catalog:
                             newType = jsonBody
                             self.catalog, flag = self.DeviceManager.changeMeasureType(
                                 self.catalog, newType, roomID, deviceID)
-                        elif cmd == 'change_service_details':
+                        elif cmd == 'add_service_details':
                             # il body del messaggio avrà la forma
                             # {"servicesDetails": [
                             #     {   "serviceType": "MQTT",
@@ -378,20 +376,10 @@ class WareHouse_Catalog:
                             #       {  "serviceType": "REST",
                             #         "serviceIP": "dht11.org:8080",
                             #         "topic": [] }
-                            #         ] , "allServices" : True/False, "deleteAddAction": 1 }
-                            # ----------------------------------------------
-                            # "deleteAddAction":
-                            # 0 --> Delete service
-                            # 1 --> Update existing Service or add new one
-                            # ----------------------------------------------
-                            # "allServices":
-                            # True  --> Change all services
-                            # False --> Change not all services
-                            # ----------------------------------------------
-                            # {"servicesDetails":[{"serviceType": "MQTT" }],
-                            #   "allServices" : False, "deleteAddAction": 0 }
+                            #         ] }
+
                             newServiceDetails = jsonBody
-                            self.catalog, flag = self.DeviceManager.changeServiceDetails(
+                            self.catalog, flag = self.DeviceManager.addServiceDetails(
                                 self.catalog, newServiceDetails, roomID, deviceID)
 
                         elif cmd == 'change_topic':
@@ -435,19 +423,25 @@ class WareHouse_Catalog:
                         newProductType = jsonBody
                         self.catalog, flag = self.RoomManager.changeProductType(
                             self.catalog, newProductType, roomID)
-                        contents = json.dumps(self.catalog)
                     elif cmd == 'TS_channel':
                         # {“channelID”: 134252}
                         newChannel = jsonBody
                         self.catalog, flag = self.RoomManager.updateChannelID(
                             self.catalog, newChannel, roomID)
+                    elif cmd == 'change_ranges':
+                        # {"ranges":{"Temperature":[0,0],"Humidity":[0,0],"Smoke":[0,0]}}
+                        # NON PER FORZA DEVO AGGIORNARE TUTTI I RANGE IL CAMBIAMENTO PARZIALE
+                        # E' PREVISTO
+                        newRanges = jsonBody
+                        self.catalog, flag = self.RoomManager.updateRanges(
+                            self.catalog, newRanges, roomID)
                     elif cmd == 'TS_post':
-                        #{“api_key_write”: S6ULMDXZPCVFBR0H}
+                        # {“api_key_write”: S6ULMDXZPCVFBR0H}
                         newApi = jsonBody
                         self.catalog, flag = self.RoomManager.updateTSPostInfos(
                             self.catalog, newApi, roomID)
                     elif cmd == 'TS_get':
-                        #{“api_key_read”: ZVBAO2QDON8B19X0}
+                        # {“api_key_read”: ZVBAO2QDON8B19X0}
                         newApi = jsonBody
                         self.catalog, flag = self.RoomManager.updateTSGetInfos(
                             self.catalog, newApi, roomID)
@@ -455,6 +449,7 @@ class WareHouse_Catalog:
                         raise cherrypy.HTTPError(
                             401, "Unexpected command - Wrong Command ")
                     if flag == 0:
+                        contents = json.dumps(self.catalog)
                         return contents
                     elif flag == 3:
                         raise cherrypy.HTTPError(506, "Room not found")
@@ -474,7 +469,7 @@ class WareHouse_Catalog:
                 # controllare il prefisso per capire a quale sotto sezione si
                 # riferisce
                 ID_type = IDReference[0:2]
-                if ID_type.upper() == 'U_':
+                if ID_type.upper() == 'U_' or ID_type.upper() == 'M_':
                     # controllare a quale azione riguardo gli utenti si
                     # riferisce
                     userID = IDReference
@@ -502,19 +497,22 @@ class WareHouse_Catalog:
                             if cmd == 'delete':
                                 self.catalog, flag = self.DeviceManager.deleteDevice(
                                     self.catalog, roomID, deviceID)
-                                if flag == 2:
-                                    raise cherrypy.HTTPError(
-                                        505, "Device not found")
-                                elif flag == 3:
-                                    raise cherrypy.HTTPError(
-                                        506, "Room not found")
-                                else:
-                                    contents = json.dumps(self.catalog)
-                                    return contents
-
+                            elif cmd == "delete_service_details":
+                                serviceType = uri[4]
+                                self.catalog, flag = self.DeviceManager.deleteService(
+                                    self.catalog, roomID, deviceID, serviceType)
                             else:
                                 raise cherrypy.HTTPError(
                                     401, "Unexpected command - Wrong Command ")
+                            if flag == 2:
+                                raise cherrypy.HTTPError(
+                                    505, "Device not found")
+                            elif flag == 3:
+                                raise cherrypy.HTTPError(
+                                    506, "Room not found")
+                            else:
+                                contents = json.dumps(self.catalog)
+                                return contents
                         else:
                             raise cherrypy.HTTPError(
                                 400, "Unexpected command - ID NOT CLASSIFIED ")
