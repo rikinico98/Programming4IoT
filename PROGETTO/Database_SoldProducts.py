@@ -71,7 +71,7 @@ class Database_SoldProducts():
                     for room in current_rooms_list:
                         if room["roomID"] == room_ID:
                             if room["product_type"] != product_type:
-                                raise cherrypy.HTTPError(405, "Product type different from the room one")
+                                raise cherrypy.HTTPError(400, "Product type different from the room one")
                     # Check if there are already products in the room
                     flag_room = 1
                     for room in self.database["roomList"]:
