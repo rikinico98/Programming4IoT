@@ -4,6 +4,7 @@ import cherrypy
 import json
 import requests
 from datetime import datetime
+import ProductManager as pm
 
 class Database_StoredProducts():
     exposed = True
@@ -15,9 +16,17 @@ class Database_StoredProducts():
             "lastUpdate": currentTime,
             "roomList": [],
         }
+        self.ProductManager = pm.ProductManager()
 
 #########################################################################################################
 # impostare la richiesta REST in modo tale da avere
+
+        # GET
+        # db/all
+        # db/ID_stanza/all
+        # db/ID_stanza/ID_prodotto/all
+        # db/quantity/num/all
+        # db/ID_stanza/quantity/num/all
 
         # PUT
         # db/ID_stanza/ID_prodotto/new
@@ -33,6 +42,66 @@ class Database_StoredProducts():
         # NOTA!!!! : il body passato al DELETE deve essere una sola riga!!!!
 
 #########################################################################################################
+
+    def GET(self, *uri):
+        uri = list(uri)
+        contents = {
+            "products" : []
+        }
+        if len(uri) == 2:
+            if uri[1] != "all":
+                raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
+            else:
+                # db/all
+                contents, flag = self.ProductManager.returnAllProducts(self.database["roomList"])
+                return json.dumps(contents)
+        elif len(uri) > 2:
+            if uri[1] == "quantity":
+                if uri[3] != "all":
+                    raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
+                else:
+                    # db/quantity/num/all
+                    quantity = uri[2]
+                    contents, flag = self.ProductManager.thresholdAllProducts(self.database["roomList"], quantity)
+                    return json.dumps(contents)
+            else:
+                room_ID = uri[1]
+                if uri[2] == "all":
+                    # db/ID_stanza/all
+                    room, flag = self.ProductManager.searchRoom(self.database["roomList"], room_ID)
+                    if flag == 1:
+                        raise cherrypy.HTTPError(506, "Room not found")
+                    else:
+                        contents, flag = self.ProductManager.returnAllRoomProducts(room)
+                        return json.dumps(contents)
+                elif uri[2] == "quantity":
+                    if uri[4] != "all":
+                        raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
+                    else:
+                        # db/ID_stanza/quantity/num/all
+                        quantity = uri[3]
+                        room, flag = self.ProductManager.searchRoom(self.database["roomList"], room_ID)
+                        if flag == 1:
+                            raise cherrypy.HTTPError(506, "Room not found")
+                        else:
+                            contents, flag = self.ProductManager.thresholdAllRoomProducts(room, quantity)
+                            return json.dumps(contents)
+                elif uri[3] != "all":
+                    raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
+                else:
+                    # db/ID_stanza/ID_prodotto/all
+                    product_ID = uri[2]
+                    room, flag = self.ProductManager.searchRoom(self.database["roomList"], room_ID)
+                    if flag == 1:
+                        raise cherrypy.HTTPError(506, "Room not found")
+                    else:
+                        contents, flag = self.ProductManager.returnProducts(room, product_ID)
+                        if flag == 1:
+                            raise cherrypy.HTTPError(506, "Product not found")
+                        else:
+                            return json.dumps(contents)
+        else:
+            raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
 
     def PUT(self, *uri):
         body = cherrypy.request.body.read()
