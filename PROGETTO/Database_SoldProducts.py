@@ -4,6 +4,7 @@ import cherrypy
 import json
 import requests
 from datetime import datetime
+import ProductManager as pm
 
 class Database_SoldProducts():
     exposed = True
@@ -15,9 +16,25 @@ class Database_SoldProducts():
             "lastUpdate": currentTime,
             "roomList": [],
         }
+        self.ProductManager = pm.ProductManager()
 
 ###########################################################
 # impostare la richiesta REST in modo tale da avere
+
+        # GET
+        # db/all
+        # db/most/all
+        # db/least/all
+        # db/ID_stanza/most/all
+        # db/ID_stanza/least/all
+        # db/most/month/all
+        # db/least/month/all
+        # db/ID_stanza/most/month/all
+        # db/ID_stanza/least/month/all
+        # db/most/year/all
+        # db/least/year/all
+        # db/ID_stanza/most/year/all
+        # db/ID_stanza/least/year/all
 
         # PUT
         # db/ID_stanza/ID_prodotto/new
@@ -29,6 +46,153 @@ class Database_SoldProducts():
         #   "product_type": codice_prodotto}
 
 ###########################################################
+
+    def GET(self, *uri):
+        uri = list(uri)
+        contents = {
+            "products" : []
+        }
+        if len(uri) == 2:
+            if uri[1] != "all":
+                raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
+            else:
+                # db/all
+                contents, flag = self.ProductManager.returnAllProducts(self.database["roomList"])
+                return json.dumps(contents)
+        elif len(uri) > 2:
+            if uri[1] == "most":
+                if uri[2] != "all":
+                    if uri[3] != "all":
+                        raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
+                    else:
+                        date = int(uri[2])
+                        if date > 0 and date < 13:
+                            # db/most/month/all
+                            contents, flag = self.ProductManager.mostSoldMonthProduct(self.database["roomList"], date)
+                            if flag == 1:
+                                raise cherrypy.HTTPError(506, "Month not found")
+                            else:
+                                return json.dumps(contents)
+                        elif date > 2000:
+                            # db/most/year/all
+                            contents, flag = self.ProductManager.mostSoldYearProduct(self.database["roomList"], date)
+                            if flag == 1:
+                                raise cherrypy.HTTPError(506, "Year not found")
+                            else:
+                                return json.dumps(contents)
+                        else:
+                             raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
+                else:
+                    # db/most/all
+                    contents, flag = self.ProductManager.mostSoldProduct(self.database["roomList"])
+                    return json.dumps(contents)
+            elif uri[1] == "least":
+                if uri[2] != "all":
+                    if uri[3] != "all":
+                        raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
+                    else:
+                        date = int(uri[2])
+                        if date > 0 and date < 13:
+                            # db/least/month/all
+                            contents, flag = self.ProductManager.leastSoldMonthProduct(self.database["roomList"], date)
+                            if flag == 1:
+                                raise cherrypy.HTTPError(506, "Month not found")
+                            else:
+                                return json.dumps(contents)
+                        elif date > 2000:
+                            # db/least/year/all
+                            contents, flag = self.ProductManager.leastSoldYearProduct(self.database["roomList"], date)
+                            if flag == 1:
+                                raise cherrypy.HTTPError(506, "Year not found")
+                            else:
+                                return json.dumps(contents)
+                        else:
+                             raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
+                else:
+                    # db/least/all
+                    contents, flag = self.ProductManager.leastSoldProduct(self.database["roomList"])
+                    return json.dumps(contents)
+            else:
+                room_ID = uri[1]
+                if uri[2] =="most":
+                    if uri[3] == "all":
+                        # db/ID_stanza/most/all
+                        room, flag = self.ProductManager.searchRoom(self.database["roomList"], room_ID)
+                        if flag == 1:
+                            raise cherrypy.HTTPError(506, "Room not found")
+                        else:
+                            quantity_max = self.ProductManager.findMaximum(room)
+                            contents, flag = self.ProductManager.quantityProduct(room, quantity_max)
+                            if flag == 1:
+                                raise cherrypy.HTTPError(506, "Product not found")
+                            else:
+                                return json.dumps(contents)
+                    else:
+                        date = int(uri[3])
+                        if date > 0 and date < 13:
+                            # db/ID_stanza/most/month/all
+                            room, flag = self.ProductManager.searchRoom(self.database["roomList"], room_ID)
+                            if flag == 1:
+                                raise cherrypy.HTTPError(506, "Room not found")
+                            else:
+                                contents, flag = self.ProductManager.mostSoldMonthProduct([room], date)
+                                if flag == 1:
+                                    raise cherrypy.HTTPError(506, "Month not found")
+                                else:
+                                    return json.dumps(contents)
+                        elif date > 2000:
+                            # db/ID_stanza/most/year/all
+                            room, flag = self.ProductManager.searchRoom(self.database["roomList"], room_ID)
+                            if flag == 1:
+                                raise cherrypy.HTTPError(506, "Room not found")
+                            else:
+                                contents, flag = self.ProductManager.mostSoldYearProduct([room], date)
+                                if flag == 1:
+                                    raise cherrypy.HTTPError(506, "Year not found")
+                                else:
+                                    return json.dumps(contents)
+                        else:
+                            raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
+                elif uri[2] == "least":
+                    if uri[3] == "all":
+                        # db/ID_stanza/least/all
+                        room, flag = self.ProductManager.searchRoom(self.database["roomList"], room_ID)
+                        if flag == 1:
+                            raise cherrypy.HTTPError(506, "Room not found")
+                        else:
+                            quantity_min = self.ProductManager.findMinimum(room)
+                            contents, flag = self.ProductManager.quantityProduct(room, quantity_min)
+                            return json.dumps(contents)
+                    else:
+                        date = int(uri[3])
+                        if date > 0 and date < 13:
+                            # db/ID_stanza/least/month/all
+                            room, flag = self.ProductManager.searchRoom(self.database["roomList"], room_ID)
+                            if flag == 1:
+                                raise cherrypy.HTTPError(506, "Room not found")
+                            else:
+                                contents, flag = self.ProductManager.leastSoldMonthProduct([room], date)
+                                if flag == 1:
+                                    raise cherrypy.HTTPError(506, "Month not found")
+                                else:
+                                    return json.dumps(contents)
+                        elif date > 2000:
+                            # db/ID_stanza/least/year/all
+                            room, flag = self.ProductManager.searchRoom(self.database["roomList"], room_ID)
+                            if flag == 1:
+                                raise cherrypy.HTTPError(506, "Room not found")
+                            else:
+                                contents, flag = self.ProductManager.leastSoldYearProduct([room], date)
+                                if flag == 1:
+                                    raise cherrypy.HTTPError(506, "Year not found")
+                                else:
+                                    return json.dumps(contents)
+                        else:
+                            raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
+                else:
+                    raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
+        else:
+            raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
 
     def PUT(self, *uri):
         body = cherrypy.request.body.read()
