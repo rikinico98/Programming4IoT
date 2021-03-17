@@ -39,9 +39,9 @@ class RoomManager:
             catalog['lastUpdate'] = currentTime
             for device in newRoom["devicesList"]:
                 device['lastUpdate'] = currentTime
-            ranges = dict(Temperature=newRoom['Temperature'],
-                          Humidity=newRoom['Humidity'],
-                          Smoke=newRoom['Smoke'])
+            ranges = dict(Temperature=newRoom['ranges']['Temperature'],
+                          Humidity=newRoom['ranges']['Humidity'],
+                          Smoke=newRoom['ranges']['Smoke'])
             ThingSpeak = newRoom['ThingSpeak']
             catalog['roomList'].append(
                 dict(
@@ -51,7 +51,7 @@ class RoomManager:
                     ThingSpeak={
                         "channelID": ThingSpeak['channelID'],
                         "api_key_read": ThingSpeak['api_key_read'],
-                        "api_key_write": ThingSpeak['api_key_read']},
+                        "api_key_write": ThingSpeak['api_key_write']},
                     ranges=ranges,
                     lastUpdate=currentTime))
             return catalog, flag

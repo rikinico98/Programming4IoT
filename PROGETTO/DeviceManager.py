@@ -57,21 +57,22 @@ class DeviceManager:
                 'deviceID': newDevice['deviceID'],
                 'measureType': newDevice['measureType'],
                 'availableServices': newDevice['availableServices'],
-                'servicesDetails': [],
+                #'servicesDetails': [],
+                'servicesDetails': newDevice['servicesDetails'],
                 'field': newDevice['field']}
-            for service in newDevice['servicesDetails']:
-                if 'topic' in service.keys():
-                    device_new['servicesDetails'].append(
-                        dict(
-                            serviceType=service['serviceType'],
-                            serviceIP=service['serviceIP'],
-                            topic=service['topic']))
-                else:
-                    device_new['servicesDetails'].append(
-                        dict(
-                            serviceType=service['serviceType'],
-                            serviceIP=service['serviceIP'],
-                            topic=[]))
+            # for service in newDevice['servicesDetails']:
+            #     if 'topic' in service.keys():
+            #         device_new['servicesDetails'].append(
+            #             dict(
+            #                 serviceType=service['serviceType'],
+            #                 serviceIP=service['serviceIP'],
+            #                 topic=service['topic']))
+            #     else:
+            #         device_new['servicesDetails'].append(
+            #             dict(
+            #                 serviceType=service['serviceType'],
+            #                 serviceIP=service['serviceIP'],
+            #                 topic=[]))
             dateTimeObj = datetime.now()
             currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
             device_new['lastUpdate'] = currentTime
