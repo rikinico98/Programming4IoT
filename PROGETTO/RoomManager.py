@@ -142,7 +142,22 @@ class RoomManager:
             data = room['ThingSpeak']
             flag = 0
             return data, flag
-
+    def getranges(self, catalog, roomID):
+        ###############################
+        # Returned flags#
+        # 3 ---> room IS NOT FOUND
+        # 0 ---> TUTTO E' ANDATO BENE
+        ###############################
+        data = {}
+        room, roomFound = self.__searchByID(catalog['roomList'], roomID)
+        if roomFound == 1:
+            data = {}
+            flag = 3
+            return data, flag
+        else:
+            data = room['ranges']
+            flag = 0
+            return data, flag
     def updateChannelID(self, catalog, newChannel, roomID):
 
         ###############################
