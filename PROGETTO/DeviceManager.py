@@ -44,6 +44,7 @@ class DeviceManager:
             if room['roomID'] == roomID:
                 roomFound = 0
                 device, deviceFound = self.__searchByID(room, deviceID)
+                break
         if deviceFound == 1 and roomFound == 1:
             flag = 3
             return catalog, flag
