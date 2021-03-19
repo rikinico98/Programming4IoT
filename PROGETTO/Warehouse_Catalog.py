@@ -165,7 +165,10 @@ class WareHouse_Catalog:
                             data, flag = self.RoomManager.getTS_utilities(
                                 self.catalog, roomID)
                             result = dict(ThingSpeak=data)
-
+                        elif cmd=='ranges':
+                            data, flag = self.RoomManager.getranges(
+                                self.catalog, roomID)
+                            result = dict(ranges=data)
                         else:
                             raise cherrypy.HTTPError(
                                 401, "Unexpected command - Wrong Command ")
