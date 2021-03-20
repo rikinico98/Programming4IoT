@@ -71,6 +71,7 @@ class TEMHUMSensor():
         self.device = MyMQTT(self.ID, self.broker, self.port, None)
         # Request topic from catalog
         r_topic = requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/{self.deviceID}/topic')
+        
         j_topic = json.dumps(r_topic.json(),indent=4)
         d_topic = json.loads(j_topic)
         self.topic = d_topic["topic"] #Note: topic is a list
