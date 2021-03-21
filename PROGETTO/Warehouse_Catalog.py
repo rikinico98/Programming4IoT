@@ -41,6 +41,8 @@ class WareHouse_Catalog:
         # catalog/ID_utente/chatID
         # catalog/ID_stanza/measure_type/TIPO_DI_MISURA
         # catalog/ID_stanza/ID_Device/TS_utilities
+        # catalog/ID_stanza/ranges
+
         # POST
         # catalog/ID_stanza/ID_device/new
         # catalog/ID_utente/new
@@ -51,7 +53,8 @@ class WareHouse_Catalog:
         # catalog/ID_stanza/ID_device/add_service_details
         # catalog/ID_stanza/ID_device/change_topic
         # catalog/ID_utente/change_chatID
-        # catalog/ID_utente/change_assigned_rooms
+        # catalog/ID_utente/change_role
+        # catalog/ID_utente/add_assigned_rooms
         # catalog/ID_stanza/change_product_type
         # catalog/ID_stanza/change_ranges
         # catalog/ID_stanza/ID_Device/TS_channel
@@ -62,6 +65,7 @@ class WareHouse_Catalog:
         # catalog/ID_utente/delete
         # catalog/ID_stanza/delete
         # catalog/ID_stanza/ID_device/delete_service_details/TIPO_DI_SERVIZIO
+        # catalog/ID_utente/delete_assigned_rooms
 
 ##########################################################################
     def GET(self, *uri):
@@ -166,7 +170,7 @@ class WareHouse_Catalog:
                                 self.catalog, roomID)
                             result = dict(ThingSpeak=data)
                         elif cmd=='ranges':
-                            data, flag = self.RoomManager.getranges(
+                            data, flag = self.RoomManager.getRanges(
                                 self.catalog, roomID)
                             result = dict(ranges=data)
                         else:
@@ -322,30 +326,32 @@ class WareHouse_Catalog:
                     newChatID = jsonBody
                     self.catalog, flag = self.UserManager.updateChatID(
                         self.catalog, newChatID, userID)
-                    if flag == 0:
-                        contents = json.dumps(self.catalog)
-                        return contents
-                    elif flag == 1:
-                        raise cherrypy.HTTPError(507, "User not found")
-
-                elif cmd == 'change_assigned_rooms':
-                    # Il messaggio passato nel body contiene solo la lista di stanze con
-                    # annesso flag ('action') che assume i valori:
-                    # 0 --> Camera da eliminare
-                    # 1 --> Nuova camera da inserire
-                    # [{"roomID":"R_001","action":0},{"roomID":"R_011","action":1}]
+                if cmd == 'change_role':
+                    # Il messaggio passato nel body contiene solo la key-value pair
+                    # {"userID": "nuovo_userID"}
+                    newUserID = jsonBody
+                    self.catalog, flag = self.UserManager.updateRole(
+                        self.catalog, newUserID, userID)
+                elif cmd == 'add_assigned_rooms':
+                    # Il messaggio passato nel body contiene solo la lista di stanze:
+                    # {"roomIDs":["R_001,"R_011"]}
                     newRooms = jsonBody
-                    self.catalog, flag = self.UserManager.updateAssignedRooms(
+                    self.catalog, flag = self.UserManager.addAssignedRooms(
                         self.catalog, newRooms, userID)
-                    if flag == 0:
-                        contents = json.dumps(self.catalog)
-                        return contents
-                    elif flag == 1:
-                        raise cherrypy.HTTPError(507, "User not found")
-
+                elif cmd == 'delete_assigned_rooms':
+                    # Il messaggio passato nel body contiene solo la lista di stanze:
+                    # {"roomIDs":["R_001,"R_011"]}
+                    newRooms = jsonBody
+                    self.catalog, flag = self.UserManager.deleteAssignedRooms(
+                        self.catalog, newRooms, userID)
                 else:
                     raise cherrypy.HTTPError(
                         401, "Unexpected command - Wrong Command ")
+                if flag == 0:
+                    contents = json.dumps(self.catalog)
+                    return contents
+                elif flag == 1:
+                    raise cherrypy.HTTPError(507, "User not found")
 
             elif ID_type.upper() == 'R_':
                 # controllare se è un'azione riferita alle camere o a un device
@@ -480,11 +486,21 @@ class WareHouse_Catalog:
                     if cmd == 'delete':
                         self.catalog, flag = self.UserManager.deleteUser(
                             self.catalog, userID)
-                        if flag == 1:
+
+                        if flag == 0:
+                            contents = json.dumps(self.catalog)
+                            return contents
+                        elif flag == 1:
                             raise cherrypy.HTTPError(507, "User not found")
+                    else:
+                        raise cherrypy.HTTPError(
+                            401, "Unexpected command - Wrong Command ")
+                    if flag == 1:
+                        raise cherrypy.HTTPError(507, "User not found")
                     else:
                         contents = json.dumps(self.catalog)
                         return contents
+
 
                 elif ID_type.upper() == 'R_':
                     # controllare se è un'azione riferita alle camere o a un

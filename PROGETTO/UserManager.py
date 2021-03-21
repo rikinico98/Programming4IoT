@@ -93,30 +93,42 @@ class UserManager:
         else:
             return catalog, userFound
 
-    def updateAssignedRooms(self, catalog, newRooms, userID):
+    def addAssignedRooms(self, catalog, newRooms, userID):
         ###############################
         # Returned flags#
         # 1 ---> user IS NOT FOUND
         # 0 ---> user FOUND
         ###############################
-        # newRooms = [{"roomID":"R_001","action":0},{"roomID":"R_011","action":1}]
+        # {"roomIDs":["R_001,"R_011"]}
+        user, userFound = self.__searchByID(catalog['userList'], userID)
+        if userFound == 0:
+            for newID in newRooms['roomIDs']:
+                if newID not in user["roomIDs"]:
+                    user["roomIDs"].append(newID)
+            dateTimeObj = datetime.now()
+            currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
+            catalog['lastUpdate'] = currentTime
+
+            return catalog, userFound
+        else:
+            return catalog, userFound
+    def deleteAssignedRooms(self, catalog, newRooms, userID):
+        ###############################
+        # Returned flags#
+        # 1 ---> user IS NOT FOUND
+        # 0 ---> user FOUND
+        ###############################
+        # {"roomIDs":["R_001,"R_011"]}
         user, userFound = self.__searchByID(catalog['userList'], userID)
         if userFound == 0:
             for roomID in user["roomIDs"]:
-                for newID in newRooms:
-                    # controllo se il flag è uguale a 0 e se il nuovo id che sto analizzando
+                for newID in newRooms['roomIDs']:
+                    # controllo  se il nuovo id che sto analizzando
                     # è contenuto nella lista di id vecchi
-                    if roomID == newID['roomID'] and newID['action'] == 0:
+                    if roomID == newID:
                         # se lo trovo rimuovo l'ID dai vecchi ID
-                        user["roomIDs"].remove(newID['roomID'])
-                        # se l'azione va a buon fine metto il flag=2 per ignorare questo
-                        # ID nelle prossime iterazioni
-                        newID['action'] = 2
-                    elif newID['action'] != 2:
-                        # se non lo trovo e il nuovo ID non è ancora stato analizzato
-                        # aggiungo il nuov id alla lista
-                        user["roomIDs"].append(newID['roomID'])
-                        newID['action'] = 2
+                        user["roomIDs"].remove(newID)
+
             dateTimeObj = datetime.now()
             currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
             catalog['lastUpdate'] = currentTime
@@ -134,3 +146,19 @@ class UserManager:
 
         user = []
         return user, userFound
+    def updateRole(self, catalog, newChatID, userID):
+        ###############################
+        # Returned flags#
+        # 1 ---> user IS NOT FOUND
+        # 0 ---> user FOUND
+        ###############################
+        # {"userID": "nuovo_userID"}
+        user, userFound = self.__searchByID(catalog['userList'], userID)
+        if userFound == 0:
+            user['userID'] = newUser['userID']
+            dateTimeObj = datetime.now()
+            currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
+            catalog['lastUpdate'] = currentTime
+            return catalog, userFound
+        else:
+            return catalog, userFound

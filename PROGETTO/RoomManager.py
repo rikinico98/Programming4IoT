@@ -142,7 +142,7 @@ class RoomManager:
             data = room['ThingSpeak']
             flag = 0
             return data, flag
-    def getranges(self, catalog, roomID):
+    def getRanges(self, catalog, roomID):
         ###############################
         # Returned flags#
         # 3 ---> room IS NOT FOUND
