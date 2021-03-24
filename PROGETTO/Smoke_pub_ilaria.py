@@ -31,7 +31,7 @@ class MyThread(threading.Thread):
                 u = random.uniform(300,10000)
             if u < 300:
                 # Everything works!
-                time.sleep(10)
+                time.sleep(60)
                 self.device.publish(u)
                
             else:
@@ -39,7 +39,7 @@ class MyThread(threading.Thread):
                 # Keep sending the wrong result to simulate the time needed to solve the problem
                 time_to_solve = math.ceil(random.uniform(5,15))
                 for it in range(time_to_solve):
-                    time.sleep(10)
+                    time.sleep(60)
                     self.device.publish(u)
                     
     
@@ -92,7 +92,6 @@ class smokeSensor():
         # Publish to all the topics
         for topic in self.topic:
             print(topic)
-            time.sleep(10)
             self.device.myPublish(topic, message)
            
         
@@ -138,6 +137,7 @@ if __name__ == "__main__":
                     print(f"New device added: {device}")
 
         for device in myDevicesList:
+            time.sleep(10)
             device.start()
 
     # Keep updating the previous devices

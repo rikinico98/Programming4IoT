@@ -66,7 +66,7 @@ class TEMPHUMReceiver():
     def notify(self,topic,msg,qos):
         payload = json.loads(msg)
         print(f"Message received! Everything works correctly! Topic: {topic}, Measure: {payload['e'][0]['n']}, Value: {payload['e'][0]['v']},  Measure: {payload['e'][1]['n']}, Value: {payload['e'][1]['v']}, Timestamp: {payload['e'][0]['t']} with QoS: {qos}")
-        
+        print(self.roomID)
         temval = payload['e'][0]['v']
         humval = payload['e'][1]['v']
         r_TS = requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/TS_utilities')
@@ -89,7 +89,6 @@ class TEMPHUMReceiver():
         ranges_dict1=requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/ranges') 
         ranges_dict2= json.dumps(ranges_dict1.json(),indent=4)
         ranges_dict = json.loads(ranges_dict2)
-        print(ranges_dict)
         alert_val_temp=ranges_dict["ranges"]["Temperature"]
         alert_val_hum=ranges_dict["ranges"]["Humidity"]
             # r = requests.get(self.baseURL+f'&field2={smoke_value}') 

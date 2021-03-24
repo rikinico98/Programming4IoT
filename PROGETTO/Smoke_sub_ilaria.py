@@ -48,7 +48,6 @@ class smokeReceiver():
         self.device = MyMQTT(self.deviceID, self.broker, self.port, self)
         # Request topic from catalog
         r_topic = requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/{self.deviceID}/topic')
-        
         j_topic = json.dumps(r_topic.json(),indent=4)
         d_topic = json.loads(j_topic)
         self.topic = d_topic["topic"] #Note: topic is a list

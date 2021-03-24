@@ -1,6 +1,5 @@
 #TEMP HUM sensor simulator
 
-
 from MyMQTT import *
 import threading
 import json
@@ -8,11 +7,24 @@ import time
 import random
 import requests
 import math
-
+import numpy as np
 
 class MyThread(threading.Thread):
 
-    def __init__(self, threadID, device, failure):
+    def __init__(self,roomID, threadID, device, failure):
+        ranges_dict1=requests.get(f'http://127.0.0.1:8070/catalog/{roomID}/ranges') 
+        ranges_dict2= json.dumps(ranges_dict1.json(),indent=4)
+        ranges_dict = json.loads(ranges_dict2)
+        
+        self.alert_val_temp=ranges_dict["ranges"]["Temperature"]
+        self.alert_val_hum=ranges_dict["ranges"]["Humidity"]
+        
+        self.loc1=np.mean(self.alert_val_temp)
+        self.loc2=np.mean(self.alert_val_hum)
+        
+        self.failuretemprange=list(range(0,self.alert_val_temp[0]-1))+list(range(self.alert_val_temp[1]-1,100))+list(range(self.alert_val_temp[0],self.alert_val_temp[1]))
+        self.failurehumrange=list(range(0,self.alert_val_hum[0]-1))+list(range(self.alert_val_hum[1]-1,100))+list(range(self.alert_val_hum[1],self.alert_val_hum[1]))
+        
         threading.Thread.__init__(self)
         #Setup thread
         self.threadID = threadID
@@ -26,23 +38,33 @@ class MyThread(threading.Thread):
             # When the gas concentration is high enough, the sensor usually outputs value greater than 300.
             p = random.uniform(0,1)
             if p > self.failure:
-                u = random.uniform(0,30)
-                v = random.uniform(30,90)
-                
-
+                print("fallimento")
+                a=random.randint(0,len(self.failuretemprange)-1)
+                u = self.failuretemprange[a]
+                b=random.randint(0,len(self.failurehumrange)-1)
+                v= self.failurehumrange[b]
+                print(u,v)
             else:
-                u = random.uniform(30,500)
-                v = random.uniform(0,10)
-            if u < 300:
+                loc, scale = self.loc1, 0.1
+                a= np.random.logistic(loc, scale, 10000)
+                u = random.choice(a)
+                loc, scale = self.loc2, 0.1
+                b= np.random.logistic(loc, scale, 10000)
+                v = random.choice(b)
+
+            if (u >=self.alert_val_temp[0] and u<= self.alert_val_temp[1] ) and (v>= self.alert_val_hum[0] and v<= self.alert_val_hum[1]):
                 # Everything works!
-                time.sleep(10)
+                print('Everything works!')
+                time.sleep(60)
                 self.device.publish(u,v)
                
             else:
-                # Simulation of failure (failure holds for some time untill resolution of the problem)
+                # Simulation of failure (failure holds for some time until resolution of the problem)
                 # Keep sending the wrong result to simulate the time needed to solve the problem
                 time_to_solve = math.ceil(random.uniform(5,15))
+                print(f'tempo in cui si ripete il problema: {time_to_solve}')
                 for it in range(time_to_solve):
+                    time.sleep(60)
                     self.device.publish(u,v)
                     
     
@@ -71,7 +93,7 @@ class TEMHUMSensor():
         self.device = MyMQTT(self.ID, self.broker, self.port, None)
         # Request topic from catalog
         r_topic = requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/{self.deviceID}/topic')
-        
+
         j_topic = json.dumps(r_topic.json(),indent=4)
         d_topic = json.loads(j_topic)
         self.topic = d_topic["topic"] #Note: topic is a list
@@ -80,7 +102,7 @@ class TEMHUMSensor():
     
     def start(self):
         self.device.start()
-        self.device_thread = MyThread(self.ID, self, self.failure)
+        self.device_thread = MyThread(self.roomID,self.ID, self, self.failure)
         self.device_thread.start()
 
     def stop(self):
@@ -95,12 +117,11 @@ class TEMHUMSensor():
         message["e"][0]["v"] = valueT
         # Add value
         message["e"][1]["v"] = valueH
+        message["e"][1]["t"] =str(time.time())
         # Publish to all the topics
         for topic in self.topic:
             print(topic)
             self.device.myPublish(topic, message)
-           
-        
 
     def getRoom(self):
         return json.dumps({"roomID": self.roomID})
@@ -143,6 +164,7 @@ if __name__ == "__main__":
                     print(f"New device added: {device}")
 
         for device in myDevicesList:
+            time.sleep(10)
             device.start()
 
     # Keep updating the previous devices
