@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<header>
+    <link rel="stylesheet" href="/css/form2.css">
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/myform.js"></script>
+</heaer>
+<head>
+<title>Device/User/Room Update and Registration</title>
+
+<style>
+.container {
+position: relative;
+font-family: Arial;
+}
+
+.text-block {
+position: absolute;
+bottom: 50%;
+right: 50%;
+background-color: black;
+color: white;
+padding-left: 20px;
+padding-right: 20px;
+}</style>
+</head>
+<body>
+
+<ul>
+  <li class="dropdown">
+    <a href="javascript:void(0)" class="dropbtn">Registration</a>
+    <div class="dropdown-content">
+        <a href="#" onclick="openRooms(event, 'Rooms')">Rooms</a>        
+        <a href="#" onclick="openUsers(event, 'Users')">Users</a>
+        <a href="#" onclick="openDevices(event, 'Devices')">Devices</a>
+    </div>
+  </li>
+  <li class="dropdown">
+    <a href="javascript:void(0)" class="dropbtn">Update</a>
+    <div class="dropdown-content">
+        <a href="#" onclick="openRooms(event, 'Update_selection')">Update Room fields</a>        
+        <a href="#" onclick="openUsers(event, 'Users')">Update User fields</a>
+        <a href="#" onclick="openDevices(event, 'Devices')">Update Device fields</a>
+    </div>
+  </li>
+  <li><a href="#">Delete</a></li>
+</ul>
+
+<div class="container">
+    <div id = "Menu" style="padding-left:16px" style="display:block;">
+        <img src="https://cdn.pixabay.com/photo/2016/11/22/19/24/archive-1850170_1280.jpg" alt="Nature" style="width:100%;">
+        <div class="text-block">
+        <h4>Welcome to the WareHouse Manager!</h4>
+        <p>From this page you can register, update and delete elements from the Device and Service Catalog</p>
+        </div>
+    </div>
+</div>
+
+<ul id="Devices" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform1'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="roomID">Room ID:   </label><br>
+                        Instructions: typical Room ID is "R_001"<br>
+                        <input type="text" class="form-control" id="roomID"><br>
+                        <label for="deviceID">Device ID:   </label><br>
+                        Instructions: typical Device ID is "D_001"<br>
+                        <input type="text" class="form-control" id="deviceID"><br>
+                        <label for="deviceName">Device name:   </label><br><input type="text" class="form-control" id="deviceName"><br>
+                        <label for="measureType">Measure type:   </label><br><input type="text" class="form-control" id="measureType"><br>
+                        <label for="field">Thingspeak field:   </label><br>
+                        <select id="field" name="field">
+                            <option value="field1">field1</option>
+                            <option value="field2">field2</option>
+                            <option value="field3">field3</option>
+                            <option value="field4">field4</option>
+                            <option value="field5">field5</option>
+                            <option value="field6">field6</option>
+                            <option value="field7">field7</option>
+                            <option value="field8">field8</option>
+                        </select><br><br>
+                    <!-- First available service -->
+                    ***********************************************************************************************************
+                    <br><label for="service1">Service 1 - Type:</label><br>
+                        <select id="service1" name="service1">
+                            <option value="mqtt">MQTT</option>
+                            <option value="rest">REST</option>
+                        </select><br>
+                        <label for="serviceIP">Service 1 - Service IP:   </label><br>
+                        <input type="text" id ="serviceIP" name="serviceIP"><br>
+                        <label for="topic1">Service 1 - topic 1:   </label><br>
+                        <input type="text" id ="topic1" name="topic1"><br><br>
+                        <label for="topic2">Service 1 - topic 2:   </label><br>
+                        <input type="text" id ="topic2" name="topic2"><br>
+                        <label for="topic3">Service 1 - topic 3:   </label><br>
+                        <input type="text" id ="topic3" name="topic3"><br><br>
+
+                    <!-- Second available service -->
+                    **********************************************************************************************************
+                    <br><label for="service2">Service 2 - Type:</label><br>
+                        <select id="service2" name="service2">
+                            <option value="none">NONE</option>
+                            <option value="mqtt">MQTT</option>
+                            <option value="rest">REST</option>
+                        </select><br>
+                        <label for="serviceIP2">Service 2 - Service IP:</label><br>
+                        <input type="text" id ="serviceIP2" name="serviceIP2"><br>
+                        <label for="topic11">Service 2 - topic 1:   </label><br>
+                        <input type="text" id ="topic11" name="topic11"><br>
+                        <label for="topic22">Service 2 - topic 2:   </label><br>
+                        <input type="text" id ="topic22" name="topic22"><br>
+                        <label for="topic33">Service 2 - topic 3:   </label><br>
+                        <input type="text" id ="topic33" name="topic33"><br>
+                    </div>                                      
+
+                    <button type="submit" onclick="sendDevicesPOSTrequest()" class="btn btn-primary">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+
+<ul id="Users" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform2'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="roomIDs">Room ID/IDs:   </label><br>
+                        Instructions: if there is a single room please insert "R_001"<br>
+                                    if there are more rooms, please insert "R_001-R_002-R_003..."
+                        <br><input type="text" class="form-control" id="roomIDs"> <br>
+                    </div>
+                    <div class="form-inline">
+                        <label for="userID">User ID:   </label><br>
+                        Instructions: typical User ID are "U_001": for workers and "M_001": for owners
+                        <br><input type="text" class="form-control" id="userID"><br>
+                    </div>                  
+                    <!-- il chat ID può essere inserito vuoto -->
+                    <button type="submit" onclick="sendUsersPOSTrequest()" class="btn btn-primary">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+
+<ul id="Rooms" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform3'>
+
+                    <div class="form-inline">
+                        <br>
+                        <label for="room_ID">Room ID:   </label><br>
+                        Instructions: typical Room ID is "R_001"
+                        <input type="text" class="form-control" id="room_ID"><br>
+                        <label for="product_type">Product type:   </label><br>
+                        <input type="text" class="form-control" id="product_type"><br>
+                    </div>  
+
+                    <div class="form-inline">
+                        ***********************************************************************************************************<br>
+                        Temperature range<br> 
+                        <label for="temp_min">Min [Celsius]: </label><br>
+                        <input type="text" class="form-control" id="temp_min"><br>
+                        <label for="temp_max">Max [Celsius]: </label><br>
+                        <input type="text" class="form-control" id="temp_max"><br>
+                    </div> 
+                    
+                    <div class="form-inline">
+                        ***********************************************************************************************************<br>
+                        Humidity range<br>
+                        <label for="hum_min">Min [ppm]: </label><br>
+                        <input type="text" class="form-control" id="hum_min"><br>
+                        <label for="hum_max">Max [ppm]: </label><br>
+                        <input type="text" class="form-control" id="hum_max"><br>
+                    </div>
+
+                    <div class="form-inline">
+                        ***********************************************************************************************************<br>
+                        Smoke range<br>
+                        <label for="smoke_min">Min [ppm]: </label><br>
+                        <input type="text" class="form-control" id="smoke_min"><br>
+                        <label for="smoke_max">Max [ppm]: </label><br>
+                        <input type="text" class="form-control" id="smoke_max"><br>
+                    </div>
+
+                    <button type="submit" onclick="sendRoomsPOSTrequest()" class="btn btn-primary">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+
+</body>
+
+<script> 
+    // da modificare i nomi delle funzioni solamente
+    function openDevices(evt, cityName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(cityName).style.display = "block";
+            document.getElementById("Menu").style.display = "none";
+            evt.currentTarget.className += " active";
+        }
+
+        function openUsers(evt, cityName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(cityName).style.display = "block";
+            document.getElementById("Menu").style.display = "none";
+            evt.currentTarget.className += " active";
+        }
+
+        function openRooms(evt, cityName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(cityName).style.display = "block";
+            document.getElementById("Menu").style.display = "none";
+            evt.currentTarget.className += " active";
+        }
+        
+        // Get the element with id="defaultOpen" and click on it
+        document.getElementById("defaultOpen").click();
+
+</script>
+</html>
