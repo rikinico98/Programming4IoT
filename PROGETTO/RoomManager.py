@@ -194,7 +194,7 @@ class RoomManager:
             return catalog, flag
         else:
             ThingSpeak = room['ThingSpeak']
-            ThingSpeak['channelID'] = newApi['api_key_write']
+            ThingSpeak['api_key_write'] = newApi['api_key_write']
             dateTimeObj = datetime.now()
             currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
             room['lastUpdate'] = currentTime
@@ -217,7 +217,7 @@ class RoomManager:
             return catalog, flag
         else:
             ThingSpeak = room['ThingSpeak']
-            ThingSpeak['channelID'] = newApi['api_key_read']
+            ThingSpeak['api_key_read'] = newApi['api_key_read']
             dateTimeObj = datetime.now()
             currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
             room['lastUpdate'] = currentTime

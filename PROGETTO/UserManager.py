@@ -103,6 +103,7 @@ class UserManager:
         user, userFound = self.__searchByID(catalog['userList'], userID)
         if userFound == 0:
             for newID in newRooms['roomIDs']:
+                print(user["roomIDs"])
                 if newID not in user["roomIDs"]:
                     user["roomIDs"].append(newID)
             dateTimeObj = datetime.now()
@@ -121,13 +122,16 @@ class UserManager:
         # {"roomIDs":["R_001,"R_011"]}
         user, userFound = self.__searchByID(catalog['userList'], userID)
         if userFound == 0:
-            for roomID in user["roomIDs"]:
-                for newID in newRooms['roomIDs']:
-                    # controllo  se il nuovo id che sto analizzando
-                    # è contenuto nella lista di id vecchi
-                    if roomID == newID:
-                        # se lo trovo rimuovo l'ID dai vecchi ID
-                        user["roomIDs"].remove(newID)
+            for newID in newRooms['roomIDs']:
+                if newID in user["roomIDs"]:
+                    user["roomIDs"].remove(newID)
+            # for roomID in user["roomIDs"]:
+            #     for newID in newRooms['roomIDs']:
+            #         # controllo  se il nuovo id che sto analizzando
+            #         # è contenuto nella lista di id vecchi
+            #         if roomID == newID:
+            #             # se lo trovo rimuovo l'ID dai vecchi ID
+            #             user["roomIDs"].remove(newID)
 
             dateTimeObj = datetime.now()
             currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
@@ -146,7 +150,7 @@ class UserManager:
 
         user = []
         return user, userFound
-    def updateRole(self, catalog, newChatID, userID):
+    def updateRole(self, catalog, newUser, userID):
         ###############################
         # Returned flags#
         # 1 ---> user IS NOT FOUND

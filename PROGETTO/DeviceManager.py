@@ -1,6 +1,5 @@
 from datetime import datetime
 
-
 class DeviceManager:
     def __init__(self):
         pass
@@ -104,6 +103,7 @@ class DeviceManager:
             flag = 2
             return catalog, flag
         elif deviceFound == 0 and roomFound == 0:
+            print(device)
             room['devicesList'].remove(device)
             dateTimeObj = datetime.now()
             currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
@@ -140,7 +140,7 @@ class DeviceManager:
                     return catalog, flag
                 else:
                     for service in device['servicesDetails']:
-                        if service["serviceType"] == "MQTT":
+                        if service['serviceType'] == "mqtt":
                             service['topic'] = newTopic['topic']
                             dateTimeObj = datetime.now()
                             currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
@@ -240,11 +240,12 @@ class DeviceManager:
                     return catalog, flag
                 else:
                     device['servicesDetails'] = newServiceDetails['servicesDetails']
-                    for service in device['servicesDetails']:
-                        newServiceType.append(service['serviceType'])
-                    not_contained_elements = [
-                        elem for elem in newServiceType if elem not in device['availableServices']]
-                    device['availableServices'].extend(not_contained_elements)
+                    # for service in device['servicesDetails']:
+                    #     newServiceType.append(service['serviceType'])
+                    #not_contained_elements = [
+                        #elem for elem in newServiceType if elem not in device['availableServices']]
+                    #device['availableServices'].extend(not_contained_elements)
+                    device['availableServices'] = newServiceDetails['availableServices']
 
                     dateTimeObj = datetime.now()
                     currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
@@ -272,6 +273,7 @@ class DeviceManager:
                     flag = 2
                     return catalog, flag
                 else:
+                    print(newField)
                     device['field'] = newField['field']
                     dateTimeObj = datetime.now()
                     currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
