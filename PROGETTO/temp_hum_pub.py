@@ -55,7 +55,7 @@ class MyThread(threading.Thread):
             if (u >=self.alert_val_temp[0] and u<= self.alert_val_temp[1] ) and (v>= self.alert_val_hum[0] and v<= self.alert_val_hum[1]):
                 # Everything works!
                 print('Everything works!')
-                time.sleep(60)
+                time.sleep(30)
                 self.device.publish(u,v)
                
             else:
@@ -64,7 +64,7 @@ class MyThread(threading.Thread):
                 time_to_solve = math.ceil(random.uniform(5,15))
                 print(f'tempo in cui si ripete il problema: {time_to_solve}')
                 for it in range(time_to_solve):
-                    time.sleep(60)
+                    time.sleep(30)
                     self.device.publish(u,v)
                     
     
@@ -169,7 +169,7 @@ if __name__ == "__main__":
 
     # Keep updating the previous devices
     while True:
-        time.sleep(5)
+        time.sleep(30)
         # Get all the updated rooms
         update_rooms = []
         r_rooms = requests.get(f'http://127.0.0.1:8070/catalog/rooms')
