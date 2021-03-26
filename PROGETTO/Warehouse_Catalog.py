@@ -39,6 +39,7 @@ class WareHouse_Catalog:
         # catalog/ID_utente/assigned_rooms
         # catalog/ID_stanza/assigned_product_type
         # catalog/ID_utente/chatID
+        # catalog/ID_stanza/ID_utente
         # catalog/ID_stanza/measure_type/TIPO_DI_MISURA
         # catalog/ID_stanza/ID_Device/TS_utilities
         # catalog/ID_stanza/ranges
@@ -149,15 +150,17 @@ class WareHouse_Catalog:
                                 return jsonOut
                             elif flag == 3:
                                 raise cherrypy.HTTPError(506, "Room not found")
+
                         else:
                             raise cherrypy.HTTPError(
                                 400, "Unexpected command - ID NOT CLASSIFIED ")
-
+                        
                     else:
                         # controllare a quale azione riguardo le stanze si
                         # riferisce
                         roomID = IDReference
                         cmd = uri[2]
+                        
                         if cmd == 'assigned_product_type':
                             product_type, flag = self.RoomManager.findRoomType(
                                 self.catalog, roomID)
@@ -173,6 +176,11 @@ class WareHouse_Catalog:
                             data, flag = self.RoomManager.getRanges(
                                 self.catalog, roomID)
                             result = dict(ranges=data)
+                        elif cmd=='users':
+                            data, flag = self.RoomManager.getUsers(
+                                self.catalog, roomID)
+                            result = dict(user=data)
+                            
                         else:
                             raise cherrypy.HTTPError(
                                 401, "Unexpected command - Wrong Command ")
@@ -182,6 +190,8 @@ class WareHouse_Catalog:
                             return jsonOut
                         elif flag == 3:
                             raise cherrypy.HTTPError(506, "Room not found")
+                        elif flag==4: 
+                            raise cherrypy.HTTPError(506, "User not found")
 
                 else:
                     raise cherrypy.HTTPError(

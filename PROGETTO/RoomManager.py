@@ -158,6 +158,28 @@ class RoomManager:
             data = room['ranges']
             flag = 0
             return data, flag
+    def getUsers(self,catalog,roomID):
+        ###############################
+        # Returned flags#
+        # 4 ---> user IS NOT FOUND
+        # 0 ---> TUTTO E' ANDATO BENE
+        ###############################
+        users=catalog['userList']
+        userID=[]
+        for user in users:
+            print(roomID,user['roomIDs'])
+            if roomID in user['roomIDs']:
+                userID.append(user['userID'])
+        if len(userID)>0:
+            flag=0
+            data=(userID)
+            return data,flag
+        else:
+            flag=4
+            data={}
+            return data, flag
+            
+        
     def updateChannelID(self, catalog, newChannel, roomID):
 
         ###############################
@@ -194,7 +216,7 @@ class RoomManager:
             return catalog, flag
         else:
             ThingSpeak = room['ThingSpeak']
-            ThingSpeak['api_key_write'] = newApi['api_key_write']
+            ThingSpeak['channelID'] = newApi['api_key_write']
             dateTimeObj = datetime.now()
             currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
             room['lastUpdate'] = currentTime
@@ -217,7 +239,7 @@ class RoomManager:
             return catalog, flag
         else:
             ThingSpeak = room['ThingSpeak']
-            ThingSpeak['api_key_read'] = newApi['api_key_read']
+            ThingSpeak['channelID'] = newApi['api_key_read']
             dateTimeObj = datetime.now()
             currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
             room['lastUpdate'] = currentTime
