@@ -85,7 +85,7 @@ class UserManager:
         # {"chatID": "nuovo_chatID"}
         user, userFound = self.__searchByID(catalog['userList'], userID)
         if userFound == 0:
-            user['chatID'] = newUser['chatID']
+            user['chatID'] = updateChatID['chatID']
             dateTimeObj = datetime.now()
             currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
             catalog['lastUpdate'] = currentTime
