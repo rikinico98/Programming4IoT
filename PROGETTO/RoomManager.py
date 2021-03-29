@@ -167,7 +167,6 @@ class RoomManager:
         users=catalog['userList']
         userID=[]
         for user in users:
-            print(roomID,user['roomIDs'])
             if roomID in user['roomIDs']:
                 userID.append(user['userID'])
         if len(userID)>0:

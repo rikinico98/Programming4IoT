@@ -7,18 +7,23 @@ LISTA DI TUTTE LE POSSIBILI RICHIESTE REST DA CONSIDERARE:
 
 CATALOG:
 
-        ### GET
-        # catalog/msg_broker
-        # catalog/port
+	### GET
+	# catalog/msg_broker
+	# catalog/port
 	# catalog/rooms
 	# catalog/users
-        # catalog/ID_stanza/ID_Device/topic
-        # catalog/ID_utente/assigned_rooms
-        # catalog/ID_stanza/assigned_product_type
+	# catalog/ID_stanza/ID_Device/topic
+	# catalog/ID_utente/assigned_rooms
+	# catalog/ID_stanza/assigned_product_type
 	# catalog/ID_utente/role
 	# catalog/ID_stanza/measure_type/TIPO_DI_MISURA
 	# catalog/ID_stanza/ID_Device/get_field
 	# catalog/ID_stanza/TS_utilities
+	# catalog/ID_utente/chatID
+	# catalog/ID_stanza/users
+	# catalog/ID_stanza/ranges
+
+
 
 ******************************************************************************************
         ### POST

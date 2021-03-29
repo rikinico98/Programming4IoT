@@ -39,9 +39,9 @@ class WareHouse_Catalog:
         # catalog/ID_utente/assigned_rooms
         # catalog/ID_stanza/assigned_product_type
         # catalog/ID_utente/chatID
-        # catalog/ID_stanza/ID_utente
+        # catalog/ID_stanza/users
         # catalog/ID_stanza/measure_type/TIPO_DI_MISURA
-        # catalog/ID_stanza/ID_Device/TS_utilities
+        # catalog/ID_stanza/TS_utilities
         # catalog/ID_stanza/ranges
 
         # POST
@@ -58,9 +58,9 @@ class WareHouse_Catalog:
         # catalog/ID_utente/add_assigned_rooms
         # catalog/ID_stanza/change_product_type
         # catalog/ID_stanza/change_ranges
-        # catalog/ID_stanza/ID_Device/TS_channel
-        # catalog/ID_stanza/ID_Device/TS_get
-        # catalog/ID_stanza/ID_Device/TS_post
+        # catalog/ID_stanza/TS_channel
+        # catalog/ID_stanza/TS_get
+        # catalog/ID_stanza/TS_post
         # DELETE
         # catalog/ID_stanza/ID_device/delete
         # catalog/ID_utente/delete

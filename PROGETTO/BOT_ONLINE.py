@@ -7,6 +7,7 @@ from MyMQTT import *
 import requests
 import time
 import cherrypy
+import DailyMonitor
 
 class WareBot:
 
@@ -266,7 +267,40 @@ class WareBot:
             self.roomRoutine(chat_ID, userID,0)
 
         elif query_data == 'Overview_owner':
-            pass
+            for status in self.sessionStatus:
+                if status['chatID'] == chat_ID:
+                    userID=status['userID']
+                    break
+            r = requests.get('http://127.0.0.1:8070/catalog/rooms')
+            body = json.dumps(r.json(), indent=4)
+            roomDict = json.loads(body)
+            r = requests.get(f'http://127.0.0.1:8070/catalog/{userID}/assigned_rooms')
+            body = json.dumps(r.json(), indent=4)
+            assignedDict = json.loads(body)
+            rooms= roomDict['roomList']
+            assignedRooms=assignedDict['assignedRoomIds']
+            user_device_of_interest=[]
+            message=""
+            for room in rooms:
+                if room['roomID'] in assignedRooms:
+                    r = requests.get(f"http://127.0.0.1:8070/catalog/{room['roomID']}/users")
+                    body = json.dumps(r.json(), indent=4)
+                    userDict = json.loads(body)
+                    users=userDict['user']
+                    userToOutput=[]
+                    devicesToOutput=[]
+                    for user in users:
+                        if user != userID:
+                            userToOutput.append(user)
+                    for device in room['devicesList']:
+                        devicesToOutput.append(device['deviceID'])
+
+                    dictTostore=dict(roomID=room['roomID'],users=userToOutput,devices=devicesToOutput)
+                    user_device_of_interest.append(dictTostore)
+            for item in user_device_of_interest:
+                message=message+f"Room_ID:{item['roomID']}\nUser assigned to this room:\n{item['users']}\nDevices contained:\n{item['devices']}\n"
+            self.bot.sendMessage(chat_ID, text=message)
+
         elif query_data == 'Products_owner':
             pass
         elif query_data == 'Product_av':
@@ -303,8 +337,13 @@ class WareBot:
                     break
             self.deviceRoutine(chat_ID, userID, query_data)
 
-        elif query_data[0:1] == 'D_':
-            pass
+        elif query_data[0:2] == 'D_':
+            query_data_splitted=query_data.split('+')
+            roomID=query_data_splitted[1]
+            dm=DailyMonitor(roomID)
+            msg=dm.data_retrieve()
+            self.bot.sendMessage(chat_ID, text=msg)
+
 
     def ManagerRoutine(self, userID, chat_ID, flag):
         buttons = [[InlineKeyboardButton(text=f'Statistics📊',
