@@ -7,25 +7,6 @@ import threading
 import json
 import time
 import requests
-# import telepot
-# from telepot.loop import MessageLoop
-
-
-# class MyBot():
-
-#     def __init__(self, token):
-#         self.tokenBot = token
-#         self.bot = telepot.Bot(self.tokenBot)
-#         MessageLoop(self.bot, {"chat": self.on_chat_message}).run_as_thread()
-    
-#     def on_chat_message(self,msg):
-#         # Get chat ID
-#         content_type, chat_type, chat_ID = telepot.glance(msg)
-#         self.chat_ID = chat_ID
-
-#     def SendAlarm(self, room, device_id):
-#         # Publish alarm message when smoke is detected
-        # self.bot.sendMessage(self.chat_ID, text = f"ALARM: smoke in room {room}. Check device {device_id}")
 
 class smokeReceiver():
 
@@ -54,6 +35,15 @@ class smokeReceiver():
         # self.botTelegram = botTelegram
         print(self.topic)
         self.__message1={"TS_api":"","ThingSpeak_field": "", "v": None}
+        self.__msg_bot1={"measure_type":"","ranges":[],"value":None,"Room":"","chatID":""}
+
+    def __FindChatID(self,userID):
+        chat_dict1=requests.get(f'http://127.0.0.1:8070/catalog/{userID}/chatID')
+        chat_dict2= json.dumps(chat_dict1.json(),indent=4)
+        chat_dict = json.loads(chat_dict2)
+        print(chat_dict)
+        chatID=chat_dict["chatID"]
+        return chatID
     
     def start(self):
         self.device.start()
@@ -83,16 +73,22 @@ class smokeReceiver():
         ranges_dict = json.loads(ranges_dict2)
         print(ranges_dict)
         alert_val=ranges_dict["ranges"]["Smoke"]
-        # print(alert_val)
-            # r = requests.get(self.baseURL+f'&field2={smoke_value}') 
-        # If the value of the message received is out of the normal range
-        # When the gas concentration is high enough, the sensor usually outputs value greater than 300.
-        if ((int(smoke_value)>= int(alert_val[1])) or (int(smoke_value) <= int(alert_val[0]))):
-            print("SCAPPPAAAAAA")
-            # capire con riccardo come inviare a telegram
-        # if smoke_value >= 300:
-        #     # Send a Telegram alarm to the users
-        #     self.botTelegram.SendAlarm(self.roomID, self.deviceID)
+        
+        if int(smoke_value)>= int(alert_val[1]):
+            msg_bot=self.__msg_bot1
+            users_dict1=requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/users')
+            users_dict2= json.dumps(users_dict1.json(),indent=4)
+            users_dict = json.loads(users_dict2)
+            print(users_dict)
+            for user in users_dict["user"]:
+                chatID=self.__FindChatID(user)
+                msg_bot["measure_type"]='smoke'
+                msg_bot["ranges"] = alert_val
+                msg_bot["value"] = smoke_value
+                msg_bot["Room"] = self.roomID
+                msg_bot["chatID"] = chatID
+                self.device.myPublish(f"WareHouse/team5/alarm/{self.roomID}",msg_bot)
+        
 
     def getRoom(self):
         return json.dumps({"roomID": self.roomID})

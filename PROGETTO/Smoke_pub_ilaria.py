@@ -25,13 +25,13 @@ class MyThread(threading.Thread):
             # Concentration scope: from 200ppm to 10000ppm
             # When the gas concentration is high enough, the sensor usually outputs value greater than 300.
             p = random.uniform(0,1)
+            time.sleep(60)
             if p > self.failure:
-                u = random.uniform(0,300)
+                u = random.uniform(200,400)
             else:
-                u = random.uniform(300,10000)
-            if u < 300:
+                u = random.uniform(400,10000)
+            if u < 400:
                 # Everything works!
-                time.sleep(60)
                 self.device.publish(u)
                
             else:
