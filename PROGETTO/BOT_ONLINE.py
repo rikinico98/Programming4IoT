@@ -2,11 +2,8 @@ import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 import BarcodeScanner
-import json
 from MyMQTT import *
 import requests
-import time
-import cherrypy
 import DailyMonitor
 
 class WareBot:
@@ -46,6 +43,7 @@ class WareBot:
 
         # }
         self.productRequestStatus = []
+        self.queueAlarms=[]
 
 #####################################################################################
 #-------------MQTT------------------------------------------------------------------#
@@ -58,12 +56,24 @@ class WareBot:
     def end(self):
         self.client.stop()
         print('{} has stopped'.format(self.clientID))
-    def notify(self,topic,msg):
+    def notify(self,topic,msg,qos=2):
         payload=json.loads(msg)
-
+        topic_splitted=topic.split('/')
+        to_store_dict={}
+        rangedDevice=['temperature','humidity','smoke']
+        if payload['measure_type'] in rangedDevice:
+            message = f"ALARM!!! Value out of range\nRoom: {payload['Room']}\nDevice: {topic_splitted[4]}\nSensor type: {payload['measure_type']}\nCRITICAL VALUE: {payload['value']}"
+            to_store_dict=dict(chatID={payload['chatID']},msg=message)
+            self.queueAlarms.append(to_store_dict)
+        else:
+            message = f"ALARM, BLACKOUT!!!\nRoom: {payload['Room']}\nDevice: {topic_splitted[4]}"
+            to_store_dict=dict(chatID={payload['chatID']},msg=message)
+            self.queueAlarms.append(to_store_dict)
 
 #####################################################################################
 #####################################################################################
+    def sendCriticalMessage(self,chatID,msg):
+        self.bot.sendMessage(chatID, text=msg)
 
     def on_chat_message(self, msg):
         #Flag per capire se il messaggio è una foto o del testo
@@ -298,7 +308,7 @@ class WareBot:
                     dictTostore=dict(roomID=room['roomID'],users=userToOutput,devices=devicesToOutput)
                     user_device_of_interest.append(dictTostore)
             for item in user_device_of_interest:
-                message=message+f"Room_ID:{item['roomID']}\nUser assigned to this room:\n{item['users']}\nDevices contained:\n{item['devices']}\n"
+                message=message+f"Room_ID:{item['roomID']}\nUsers assigned to this room:\n{item['users']}\nDevices contained:\n{item['devices']}\n"
             self.bot.sendMessage(chat_ID, text=message)
 
         elif query_data == 'Products_owner':
@@ -335,14 +345,14 @@ class WareBot:
                 if status['chatID'] == chat_ID:
                     userID = status['userID']
                     break
-            self.deviceRoutine(chat_ID, userID, query_data)
-
-        elif query_data[0:2] == 'D_':
-            query_data_splitted=query_data.split('+')
-            roomID=query_data_splitted[1]
-            dm=DailyMonitor(roomID)
-            msg=dm.data_retrieve()
+            roomID = query_data
+            dm = DailyMonitor(roomID)
+            msg = dm.data_retrieve()
             self.bot.sendMessage(chat_ID, text=msg)
+
+        # elif query_data[0:2] == 'D_':
+        #     pass
+
 
 
     def ManagerRoutine(self, userID, chat_ID, flag):
@@ -464,41 +474,41 @@ class WareBot:
 
 
 
-    def deviceRoutine(self, chat_ID, userID, roomID):
-        r = requests.get('http://127.0.0.1:8070/catalog/rooms')
-        body = json.dumps(r.json(), indent=4)
-        roomDict= json.loads(body)
-        r = requests.get(f'http://127.0.0.1:8070/catalog/{userID}/assigned_rooms')
-        body = json.dumps(r.json(), indent=4)
-        assignedDict = json.loads(body)
-        roomsList = roomDict['roomList']
-        assignedRooms = assignedDict['assignedRoomIds']
-        inline = []
-        buttons = []
-        cnt = 0
-        for room in roomsList:
-            if room['roomID'] == roomID:
-                for device in room['devicesList']:
-                    cnt = cnt + 1
-                    ID_room = room['roomID']
-                    ID_device = device['deviceID']
-                    text = f'{ID_device}'
-                    ID = f'{ID_device}+{ID_room}'
-                    inline.append(
-                        InlineKeyboardButton(
-                            text=text, callback_data=ID))
-                    if cnt == 4:
-                        buttons.append(inline)
-                        inline = []
-                        cnt = 0
-                if cnt < 4:
-                    buttons.append(inline)
-            break
-        buttons.append([InlineKeyboardButton(text='BACK⏪', callback_data='Statistics')])
-
-        keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
-        self.bot.sendMessage(chat_ID, text='Choose a  device',
-                             reply_markup=keyboard)
+    # def deviceRoutine(self, chat_ID, userID, roomID):
+    #     r = requests.get('http://127.0.0.1:8070/catalog/rooms')
+    #     body = json.dumps(r.json(), indent=4)
+    #     roomDict= json.loads(body)
+    #     r = requests.get(f'http://127.0.0.1:8070/catalog/{userID}/assigned_rooms')
+    #     body = json.dumps(r.json(), indent=4)
+    #     assignedDict = json.loads(body)
+    #     roomsList = roomDict['roomList']
+    #     assignedRooms = assignedDict['assignedRoomIds']
+    #     inline = []
+    #     buttons = []
+    #     cnt = 0
+    #     for room in roomsList:
+    #         if room['roomID'] == roomID:
+    #             for device in room['devicesList']:
+    #                 cnt = cnt + 1
+    #                 ID_room = room['roomID']
+    #                 ID_device = device['deviceID']
+    #                 text = f'{ID_device}'
+    #                 ID = f'{ID_device}+{ID_room}'
+    #                 inline.append(
+    #                     InlineKeyboardButton(
+    #                         text=text, callback_data=ID))
+    #                 if cnt == 4:
+    #                     buttons.append(inline)
+    #                     inline = []
+    #                     cnt = 0
+    #             if cnt < 4:
+    #                 buttons.append(inline)
+    #         break
+    #     buttons.append([InlineKeyboardButton(text='BACK⏪', callback_data='Statistics')])
+    #
+    #     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    #     self.bot.sendMessage(chat_ID, text='Choose a  device',
+    #                          reply_markup=keyboard)
 
 
 if __name__ == "__main__":
@@ -511,5 +521,8 @@ if __name__ == "__main__":
     bot.run()
     bot.follow()
     while True:
-        pass
+        if len(bot.queueAlarms) > 0:
+            retrivedDict=bot.queueAlarms.pop(0)
+            bot.sendCriticalMessage(retrivedDict['chatID'],retrivedDict['msg'])
+
     bot.end()
