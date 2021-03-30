@@ -81,13 +81,14 @@ class smokeReceiver():
             users_dict = json.loads(users_dict2)
             print(users_dict)
             for user in users_dict["user"]:
-                chatID=self.__FindChatID(user)
-                msg_bot["measure_type"]='smoke'
-                msg_bot["ranges"] = alert_val
-                msg_bot["value"] = smoke_value
-                msg_bot["Room"] = self.roomID
-                msg_bot["chatID"] = chatID
-                self.device.myPublish(f"WareHouse/team5/alarm/{self.roomID}",msg_bot)
+                if 'M_' not in user:
+                    chatID=self.__FindChatID(user)
+                    msg_bot["measure_type"]='smoke'
+                    msg_bot["ranges"] = alert_val
+                    msg_bot["value"] = smoke_value
+                    msg_bot["Room"] = self.roomID
+                    msg_bot["chatID"] = chatID
+                    self.device.myPublish(f"WareHouse/team5/alarm/{self.roomID}/{self.deviceID}",msg_bot)
         
 
     def getRoom(self):

@@ -105,13 +105,16 @@ class TEMPHUMReceiver():
             users_dict = json.loads(users_dict2)
             print(users_dict)
             for user in users_dict["user"]:
-                chatID=self.__FindChatID(user)
-                msg_bot["measure_type"]='temperature'
-                msg_bot["ranges"] = alert_val_temp
-                msg_bot["value"] = temval
-                msg_bot["Room"] = self.roomID
-                msg_bot["chatID"] = chatID
-                self.device.myPublish(f"WareHouse/team5/alarm/{self.roomID}",msg_bot)
+                if 'M_' not in user:
+                    chatID=self.__FindChatID(user)
+                    msg_bot["measure_type"]='temperature'
+                    msg_bot["ranges"] = alert_val_temp
+                    msg_bot["value"] = temval
+                    msg_bot["Room"] = self.roomID
+                    msg_bot["chatID"] = chatID
+                    self.device.myPublish(f"WareHouse/team5/alarm/{self.roomID}/{self.deviceID}",msg_bot)
+                else: 
+                    print('manager')
 
 
         if ((int(humval)>= int(alert_val_hum[1])) or (int(humval) <= int(alert_val_hum[0]))):
@@ -121,22 +124,20 @@ class TEMPHUMReceiver():
             users_dict2= json.dumps(users_dict1.json(),indent=4)
             users_dict = json.loads(users_dict2)
             print(users_dict)
+            
             for user in users_dict['user']:
-                chatID=self.__FindChatID(user)
-                msg_bot["measure_type"]='humidity'
-                msg_bot["ranges"] = alert_val_hum
-                msg_bot["value"] = temval
-                msg_bot["Room"] = self.roomID
-                msg_bot["chatID"] = chatID
-                self.device.myPublish(f"WareHouse/team5/alarm/{self.roomID}",msg_bot)
-        # self.device.myPublish("ThingSpeak/channel/allsensor",message2)
-            # r = requests.get(self.baseURL+f'&field2={smoke_value}') 
-        # If the value of the message received is out of the normal range
-        # When the gas concentration is high enough, the sensor usually outputs value greater than 300.
-        # if smoke_value >= 300:
-        #     # Send a Telegram alarm to the users
-        #     self.botTelegram.SendAlarm(self.roomID, self.deviceID)
-
+                if 'M_' not in user:
+                    chatID=self.__FindChatID(user)
+                    msg_bot["measure_type"]='humidity'
+                    msg_bot["ranges"] = alert_val_hum
+                    msg_bot["value"] = humval
+                    msg_bot["Room"] = self.roomID
+                    msg_bot["chatID"] = chatID
+                    time.sleep(6)
+                    self.device.myPublish(f"WareHouse/team5/alarm/{self.roomID}/{self.deviceID}",msg_bot)
+                else:
+                    print('manager')
+        
     def getRoom(self):
         return json.dumps({"roomID": self.roomID})
     
