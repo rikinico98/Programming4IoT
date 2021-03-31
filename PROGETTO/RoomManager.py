@@ -177,6 +177,22 @@ class RoomManager:
             flag=4
             data={}
             return data, flag
+    def getDevices(self,catalog,roomID):
+        data = {}
+        room, roomFound = self.__searchByID(catalog['roomList'], roomID)
+        print(room)
+        if roomFound == 1:
+            data = {}
+            flag = 3
+            return data, flag
+        else:
+            dev =[]
+            for r in room['devicesList']:
+                print(r)
+                dev.append({r["deviceID"]:r["deviceName"]})
+            data=dev
+            flag = 0
+            return data, flag
             
         
     def updateChannelID(self, catalog, newChannel, roomID):

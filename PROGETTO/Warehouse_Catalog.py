@@ -188,6 +188,11 @@ class WareHouse_Catalog:
                             data, flag = self.RoomManager.getUsers(
                                 self.catalog, roomID)
                             result = dict(user=data)
+                        elif cmd=='devices':
+                            print('ciao')
+                            data, flag = self.RoomManager.getDevices(
+                                self.catalog, roomID)
+                            result = dict(devices=data)
                             
                         else:
                             raise cherrypy.HTTPError(
