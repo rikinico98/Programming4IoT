@@ -60,6 +60,7 @@ class WareHouse_Catalog:
         # catalog/ID_stanza/ID_device/change_meas_type
         # catalog/ID_stanza/ID_device/add_service_details
         # catalog/ID_stanza/ID_device/change_topic
+        # ctalog/ID_stanza/ID_device/update_timestamp
         # catalog/ID_utente/change_chatID
         # catalog/ID_utente/change_role
         # catalog/ID_utente/add_assigned_rooms
@@ -425,6 +426,12 @@ class WareHouse_Catalog:
                             newField = jsonBody
                             self.catalog, flag = self.DeviceManager.changeField(
                                 self.catalog, newField, roomID, deviceID)
+                        elif cmd == 'update_timestamp':
+                            # il body del messaggio avrà la forma
+                            # {"timestamp": new_timestamp_value}
+                            newTimestamp = jsonBody["timestamp"]
+                            self.catalog, flag = self.DeviceManager.changeTimestamp(
+                                self.catalog, newTimestamp, roomID, deviceID)
 
                         else:
                             raise cherrypy.HTTPError(

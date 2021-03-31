@@ -65,6 +65,8 @@ class UpdateDevices():
                     flag_ID = 0
                     # If so, update its timestamp
                     device["timestamp"] = timestamp
+                    # Send a request to update it in the catalog
+                    requests.put(f'http://127.0.0.1:8070/catalog/{device["roomID"]}/{device["deviceID"]}/update_timestamp', data = json.dumps({"timestamp": timestamp}))
             if flag_ID == 1:
                 # Else insert a new device in memory
                 myDict = {

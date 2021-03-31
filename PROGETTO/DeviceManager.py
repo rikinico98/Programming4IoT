@@ -285,6 +285,32 @@ class DeviceManager:
         flag = 3
         return catalog, flag
 
+    def changeTimestamp(self, catalog, newTimestamp, roomID, deviceID):
+        ###############################
+        # Returned flags#
+        # 2 ---> if room is found device IS NOT FOUND
+        # 3 ---> room IS NOT FOUND
+        # 0 ---> if room is found device is found
+        ###############################
+        for room in catalog['roomList']:
+            if room['roomID'] == roomID:
+                device, deviceFound = self.__searchByID(room, deviceID)
+                if deviceFound == 1:
+                    # intero che viene usato nella classe a livello
+                    # superiore per identificare l'errore
+                    flag = 2
+                    return catalog, flag
+                else:
+                    dateTimeObj = datetime.fromtimestamp(float(newTimestamp))
+                    currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
+                    room['lastUpdate'] = currentTime
+                    catalog['lastUpdate'] = currentTime
+                    device['lastUpdate'] = currentTime
+                    flag = 0
+                    return catalog, flag
+        flag = 3
+        return catalog, flag
+
     def get_field(self, catalog, roomID, deviceID):
         ###############################
         # Returned flags#
