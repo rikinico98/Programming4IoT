@@ -22,7 +22,14 @@ class WareHouse_Catalog:
             "roomList": [],
             "userList": [],
             "msgBroker": msg_broker,
-            "port": client_port
+            "port": client_port,
+            "Telegram_utilities":{
+                        "telegramToken": "1434648914:AAGBPw3mi9AumKqF4n0fOroitaPqDkwgrzU",
+                        "brokerIP": msg_broker,
+                        "brokerPort": 1883,
+                        "mqttTopic":"WareHouse/team5/alarm/#"
+}
+
         }
         self.DeviceManager = dm.DeviceManager()
         self.UserManager = um.UserManager()
@@ -218,6 +225,11 @@ class WareHouse_Catalog:
                     result = dict(port=self.catalog['port'])
                     jsonOut = json.dumps(result)
                     return jsonOut
+                elif cmd== 'Telegram':
+                    result = dict(Telegram=self.catalog['Telegram_utilities'])
+                    jsonOut = json.dumps(result)
+                    return jsonOut
+
                 elif cmd == 'users':
                     # controllare se la porta è stata definita in maniera
                     # corretta
