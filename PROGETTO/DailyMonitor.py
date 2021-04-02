@@ -25,14 +25,14 @@ class Daily_monitor():
         dev = requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/devices')
         self.dev_diz1 = json.dumps(dev.json(), indent = 4)
         self.dev_diz = json.loads(self.dev_diz1)
-        print(self.dev_diz)
+        #print(self.dev_diz)
         for d in self.dev_diz['devices']:
             
             d_ID.append(list(d.keys()))
             d_devName.append(list(d.values()))
             #print(d_ID,d_devName)
         dev=self.dev_diz["devices"]
-        print(dev)
+        #print(dev)
         for n in range(len(d_ID)):
             chiavi=d_ID[n]
             print(chiavi[0])
@@ -60,6 +60,7 @@ class Daily_monitor():
         # {'created_at': '2021-03-07T13:37:10Z', 'entry_id': 9, 'field1': '-4'}]}
         
         channel_setting=self.diz['channel']
+        channel_ID=channel_setting['id']
         misure = self.diz["feeds"]
         k=list(field_tot)
         k_campi=k
@@ -80,6 +81,7 @@ class Daily_monitor():
         minimo=[]
         last_up=[]
         measure_type=[]
+        n_field=[]
         message=''
         for k in k_campi:
             
@@ -103,17 +105,21 @@ class Daily_monitor():
                 massimo.append(massimo1)
                 minimo.append(minimo1)
                 last_up.append(last_update1)
+                n_field.append(k[-1])
             else:
                 measure_type.append(channel_setting[k])
                 medie.append(None)
                 massimo.append(None)
                 minimo.append(None)
                 last_up.append(None)
+                n_field.append(k[-1])
         
         for i in range(len(measure_type)):
             
             if medie[i] != None:
-                message =message+(f'\nSTATISTICHE: DEVICE-->{str(d_devName[i])}\n{measure_type[i]}\nMEDIA: {medie[i] :.2f}\nVALORE MASSIMO: {massimo[i] :.2f}\nVALORE MINIMO: {minimo[i] :.2f}\nULTIMO AGGIORNAMENTO: {last_up[i]}')
+                ThingSpeak_link=f'https://thingspeak.com/channels/{channel_ID}/charts/{n_field[i]}'
+                message =message+(f'\nSTATISTICHE: DEVICE-->{str(d_devName[i])}\n{measure_type[i]}\nMEDIA: {medie[i] :.2f}\nVALORE MASSIMO: {massimo[i] :.2f}\nVALORE MINIMO: {minimo[i] :.2f}\nULTIMO AGGIORNAMENTO: {last_up[i]}\nGeneral trend available at:{ThingSpeak_link}')
+        
         if len(message)==0:
                 message='No measure this day'
         return(message)
