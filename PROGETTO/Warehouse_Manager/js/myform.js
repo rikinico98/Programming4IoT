@@ -29,7 +29,7 @@ function sendDevicesPOSTrequest() {
     }
   }
   
-  service2 = $("#service2").val();
+  service2 = $("#service2_http").val();
   serviceip2 = $("#serviceIP2").val();
   service2_topic1 = $("#topic11").val();
   service2_topic2 = $("#topic22").val();
@@ -55,12 +55,39 @@ function sendDevicesPOSTrequest() {
 
   if (services_array[1] == 'none'){
     services = services_array[0];
-    services_details = {
+    services_details = [{
       serviceType: service1,
       serviceIP: serviceip1,
       topic: topics1_array
-    }
-  }else{
+    }]
+  };
+
+  if (services_array[1] == 'REST' && services_array[0] == 'MQTT'){
+    services = services_array;
+    services_details = [{
+      serviceType: service1,
+      serviceIP: serviceip1,
+      topic: topics1_array 
+    },
+    {
+      serviceType: service2,
+      serviceIP: serviceip2
+    }]
+  };
+
+  if (services_array[1] == 'MQTT' && services_array[0] == 'REST'){
+    services = services_array;
+    services_details = [{
+      serviceType: service1,
+      serviceIP: serviceip1
+    }, {
+      serviceType: service2,
+      serviceIP: serviceip2,
+      topic: topics2_array 
+    }]
+  };
+
+  if (services_array[1] == 'MQTT' && services_array[0] == 'MQTT') {
     services = services_array;
     services_details = [{
       serviceType: service1,
@@ -72,7 +99,7 @@ function sendDevicesPOSTrequest() {
       serviceIP: serviceip2,
       topic: topics2_array
     }]
-  }
+  };
   
   // il body è quello che verrà poi inviato nel catalog, mentre il command andrà a definire l'ulr
   body = {
@@ -374,12 +401,39 @@ function sendDeviceServicePUTrequest(){
   
     if (services_array[1] == 'none'){
       services = services_array[0];
-      services_details = {
+      services_details = [{
         serviceType: service1,
         serviceIP: serviceip1,
         topic: topics1_array
-      }
-    }else{
+      }]
+    };
+  
+    if (services_array[1] == 'REST' && services_array[0] == 'MQTT'){
+      services = services_array;
+      services_details = [{
+        serviceType: service1,
+        serviceIP: serviceip1,
+        topic: topics1_array 
+      },
+      {
+        serviceType: service2,
+        serviceIP: serviceip2
+      }]
+    };
+
+    if (services_array[1] == 'MQTT' && services_array[0] == 'REST'){
+      services = services_array;
+      services_details = [{
+        serviceType: service1,
+        serviceIP: serviceip1
+      }, {
+        serviceType: service2,
+        serviceIP: serviceip2,
+        topic: topics2_array 
+      }]
+    };
+  
+    if (services_array[1] == 'MQTT' && services_array[0] == 'MQTT') {
       services = services_array;
       services_details = [{
         serviceType: service1,
@@ -391,7 +445,7 @@ function sendDeviceServicePUTrequest(){
         serviceIP: serviceip2,
         topic: topics2_array
       }]
-    }
+    };
     
     // il body è quello che verrà poi inviato nel catalog, mentre il command andrà a definire l'ulr
     body = {
