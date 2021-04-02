@@ -140,7 +140,7 @@ class DeviceManager:
                     return catalog, flag
                 else:
                     for service in device['servicesDetails']:
-                        if service['serviceType'] == "mqtt":
+                        if service['serviceType'] == "MQTT":
                             service['topic'] = newTopic['topic']
                             dateTimeObj = datetime.now()
                             currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second}"
