@@ -1,0 +1,8 @@
+{
+	"port":1883,
+	"msgBroker": "test.mosquitto.org",
+	"storedProductsIP": "http://storedProducts_IP",
+	"telegramToken":"1434648914:AAGBPw3mi9AumKqF4n0fOroitaPqDkwgrzU"
+}
+
+

@@ -9,9 +9,13 @@ import DailyMonitor
 class WareBot:
 
 
-    def __init__(self, token,baseTopic,broker,port):
+    def __init__(self, token,baseTopic,broker,port,APIs):
+        #############--IP per le richieste--#################
+        self.catalog_IP=APIs['catalogIP']
+        self.database_stats_IP = APIs['databaseStatsIP']
+        self.stored_products_IP = APIs['storedProductsIP']
         #Definisco il nome del client, topic, e MyMqtt object per la registrazione MQTT
-        self.clientID = 'Bot_Telegram_Sub'
+        self.clientID = APIs['clientID_MQTT']
         self.topic = baseTopic
         self.client = MyMQTT(self.clientID, broker, port, self)
         # Local token
@@ -30,16 +34,17 @@ class WareBot:
         #                      1 ----> Se l'utente è connesso
         #     'chatID': Valore controllato al primo accesso dopo una registrazione/disconnessione
         #     'userID': Dato dall'utente
+        #     'logOutBackup' : " "
         # }
         self.sessionStatus = []
         #  Struct util per gestire l'inserimento dei prodotti
         #  Normalmente la lista è vuota per aiutare la gestione degli errori
         # {
         #     'chatID':  ,
-        #     'action': 'new'/'delete'
-        #     'barcode':
+        #     'action': 'new'/'delete'/'stats'
         #     'product_type':
         #     'quantity':
+        #     'roomID':
 
         # }
         self.productRequestStatus = []
@@ -136,7 +141,7 @@ class WareBot:
                     found = False
                     registered = False
                     # prendo dal catalog la lista di Username abilitati
-                    r=requests.get('http://127.0.0.1:8070/catalog/users')
+                    r=requests.get(f'{self.catalog_IP}/catalog/users')
                     body = json.dumps(r.json(), indent=4)
                     userDict = json.loads(body)
                     userList = userDict['userList']
@@ -153,7 +158,7 @@ class WareBot:
                                     status['userID'] = message
                                     status['isRegister'] = True
                                     body=json.dumps({'chatID':chat_ID})
-                                    requests.put(url=f'http://127.0.0.1:8070/catalog/{message}/change_chatID',
+                                    requests.put(url=f'{self.catalog_IP}/catalog/{message}/change_chatID',
                                                   data=body)
                     if found and not registered:
                         found = False
@@ -171,11 +176,12 @@ class WareBot:
                     if len(self.productRequestStatus) > 0:
                         for productReq in self.productRequestStatus:
                             if productReq['chatID'] == chat_ID:
-                                productReq['quantity'] = int(message)
+                                quantity=int(message)
+                                productReq['quantity'] = quantity
                                 for status in self.sessionStatus:
                                     if status['chatID'] == chat_ID:
                                         userID = status['userID']
-                                        self.roomRoutine(chat_ID, userID,1)
+                                        self.roomRoutine(chat_ID, userID, 1)
 
                     else:
                         text = f'WRONG COMMAND!!!!'
@@ -195,22 +201,60 @@ class WareBot:
                     self.bot.sendMessage(chat_ID, text=text)
 
                 else:
+                    #trasformo il barcode in stringa per evitare errori nella request successiva
+                    barcode = str(barcode)
                     # vedo se l'utente in questione avevo fatto una
                     # richiesta di inserimento/rimozione del prodotto
+                    found= False
                     for productReq in self.productRequestStatus:
                         if productReq['chatID'] == chat_ID:
+                            found=True
                             if 'quantity' in productReq.keys():
-                                productReq['barcode'] = barcode
-                                print(productReq)
-                                self.productRequestStatus.remove(productReq)
-                                text = f"Successfull scan please click /start to go back to dashboard\nOverview transaction:\n>Quantity -->{productReq['quantity']}\n>Barcode -->{barcode}"
+                                action = productReq['action']
+                                roomID = productReq['roomID']
+                                product_type= productReq['product_type']
+                                if action == "delete":
+                                    quantityRequested = productReq['quantity']
+                                    r = requests.get(f"{self.database_stats_IP}/db/stored/{roomID}/{barcode}/all")
+                                    body = json.dumps(r.json(), indent=4)
+                                    productsDict = json.loads(body)
+                                    productsList = productsDict['products']
+                                    if len(productsList) > 0:
+                                        quantityDB = 0
+                                        for product in productsList:
+                                            quantityDB += product['quantity']
+                                        if quantityRequested > quantityDB:
+                                            self.productRequestStatus.remove(productReq)
+                                            text = f"Resource of this product in warehouse is not enough please click /start to go back to dashboard\n>Quantity MAX-->{quantityDB}\n>Barcode -->{barcode}"
+                                            self.bot.sendMessage(chat_ID, text=text)
+                                    else:
+                                        self.productRequestStatus.remove(productReq)
+                                        text = "PRODUCT NOT FOUND!!!"
+                                        self.bot.sendMessage(chat_ID, text=text)
+
+
+
+                                body = json.dumps({"product_ID": barcode, "quantity": quantityRequested,
+                                                   "product_type": product_type})
+                                if action=='delete':
+                                    word='sold'
+                                    r = requests.delete(url=f"{self.stored_products_IP}/db/{roomID}/{barcode}/{action}",
+                                                     data=body)
+                                    self.productRequestStatus.remove(productReq)
+                                else:
+
+                                    r = requests.put(url=f"{self.stored_products_IP}/db/{roomID}/{barcode}/{action}",
+                                                     data=body)
+                                    self.productRequestStatus.remove(productReq)
+                                    word='added'
+                                text = f"Successfull scan please click /start to go back to dashboard\nOverview transaction:\n>Quantity {word} -->{productReq['quantity']}\n>Barcode -->{barcode}"
                                 self.bot.sendMessage(chat_ID, text=text)
                             else:
                                 text = f"You jumped a passage,please insert quantity!!!"
                                 self.bot.sendMessage(chat_ID, text=text)
-
-
-
+                        else:
+                            text = f'CONTENT NOT SUPPORTED IN THIS SECTION!!!!'
+                            self.bot.sendMessage(chat_ID, text=text)
             else:
                 text = f'CONTENT NOT SUPPORTED IN THIS SECTION!!!!'
                 self.bot.sendMessage(chat_ID, text=text)
@@ -281,10 +325,10 @@ class WareBot:
                 if status['chatID'] == chat_ID:
                     userID=status['userID']
                     break
-            r = requests.get('http://127.0.0.1:8070/catalog/rooms')
+            r = requests.get(f'{self.catalog_IP}/catalog/rooms')
             body = json.dumps(r.json(), indent=4)
             roomDict = json.loads(body)
-            r = requests.get(f'http://127.0.0.1:8070/catalog/{userID}/assigned_rooms')
+            r = requests.get(f'{self.catalog_IP}/catalog/{userID}/assigned_rooms')
             body = json.dumps(r.json(), indent=4)
             assignedDict = json.loads(body)
             rooms= roomDict['roomList']
@@ -293,7 +337,7 @@ class WareBot:
             message=""
             for room in rooms:
                 if room['roomID'] in assignedRooms:
-                    r = requests.get(f"http://127.0.0.1:8070/catalog/{room['roomID']}/users")
+                    r = requests.get(f"{self.catalog_IP}/catalog/{room['roomID']}/users")
                     body = json.dumps(r.json(), indent=4)
                     userDict = json.loads(body)
                     users=userDict['user']
@@ -314,7 +358,28 @@ class WareBot:
         elif query_data == 'Products_owner':
             pass
         elif query_data == 'Product_av':
-            pass
+            productRequest = dict(chatID=chat_ID, action='stats')
+            self.productRequestStatus.append(productRequest)
+            for status in self.sessionStatus:
+                if status['chatID'] == chat_ID:
+                    userID = status['userID']
+                    self.roomRoutine(chat_ID, userID, 1)
+
+        elif query_data == 'Product_stored':
+            for productRequest in self.productRequestStatus:
+                if productRequest['chatID']== chat_ID:
+                    roomID = productRequest['roomID']
+                    r = requests.get(f"{self.database_stats_IP}/db/stored/{roomID}/all")
+                    body = json.dumps(r.json(), indent=4)
+                    productsDict = json.loads(body)
+                    productsList = productsDict['products_stored']
+                    text=""
+                    for product in productsList:
+                        text+=f"Product ID : {product['product_ID']}\nQuantity : {product['quantity']}\n"
+                    text+="\n\n Press \start to return to the dashboard"
+                    self.bot.sendMessage(chat_ID, text=text, reply_markup=keyboard)
+
+
         elif query_data == 'Manage_product':
             buttons = [[InlineKeyboardButton(text=f'Insert new products🟩',
                                              callback_data=f'Insert_product'),
@@ -324,6 +389,7 @@ class WareBot:
             keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
             text= "Select the action to apply:"
             self.bot.sendMessage(chat_ID, text=text, reply_markup=keyboard)
+
         elif query_data == 'Product_scan':
             text = "Please scan product :"
             self.bot.sendMessage(chat_ID, text=text)
@@ -346,13 +412,9 @@ class WareBot:
                     userID = status['userID']
                     break
             roomID = query_data
-            dm = DailyMonitor(roomID)
+            dm = DailyMonitor(roomID,self.catalog_IP)
             msg = dm.data_retrieve()
             self.bot.sendMessage(chat_ID, text=msg)
-
-        # elif query_data[0:2] == 'D_':
-        #     pass
-
 
 
     def ManagerRoutine(self, userID, chat_ID, flag):
@@ -403,13 +465,13 @@ class WareBot:
 
     def roomRoutine(self, chat_ID, userID, routineContext):
 
-        # If routine context: --->0 Allora si riferisce alla routine delle statistiche dei device
-        #                     --->1 Allora si riferisce alla routine dellinserimento dei prodotti
+        # Se routine context: --->0 Allora si riferisce alla routine delle statistiche dei device
+        #                     --->1 Allora si riferisce a routine di gestione dei prodotti
 
-        r = requests.get('http://127.0.0.1:8070/catalog/rooms')
+        r = requests.get(f'{self.catalog_IP}/catalog/rooms')
         body = json.dumps(r.json(), indent=4)
         roomDict= json.loads(body)
-        r = requests.get(f'http://127.0.0.1:8070/catalog/{userID}/assigned_rooms')
+        r = requests.get(f'{self.catalog_IP}/catalog/{userID}/assigned_rooms')
         body = json.dumps(r.json(), indent=4)
         assignedDict = json.loads(body)
         roomsList = roomDict['roomList']
@@ -458,7 +520,12 @@ class WareBot:
                     for productReq in self.productRequestStatus:
                         if productReq['chatID'] == chat_ID:
                             productReq['product_type'] = room['product_type']
-                    inline.append(InlineKeyboardButton(text=text, callback_data='Product_scan'))
+                            productReq['roomID'] = room['roomID']
+                        if productReq['action'] == 'stats':
+                            inline.append(InlineKeyboardButton(text=text, callback_data='Product_stored'))
+                        else:
+                            inline.append(InlineKeyboardButton(text=text, callback_data='Product_scan'))
+
                     if cnt == 4:
                         buttons.append(inline)
                         inline = []
@@ -473,56 +540,37 @@ class WareBot:
                                  reply_markup=keyboard)
 
 
-
-    # def deviceRoutine(self, chat_ID, userID, roomID):
-    #     r = requests.get('http://127.0.0.1:8070/catalog/rooms')
-    #     body = json.dumps(r.json(), indent=4)
-    #     roomDict= json.loads(body)
-    #     r = requests.get(f'http://127.0.0.1:8070/catalog/{userID}/assigned_rooms')
-    #     body = json.dumps(r.json(), indent=4)
-    #     assignedDict = json.loads(body)
-    #     roomsList = roomDict['roomList']
-    #     assignedRooms = assignedDict['assignedRoomIds']
-    #     inline = []
-    #     buttons = []
-    #     cnt = 0
-    #     for room in roomsList:
-    #         if room['roomID'] == roomID:
-    #             for device in room['devicesList']:
-    #                 cnt = cnt + 1
-    #                 ID_room = room['roomID']
-    #                 ID_device = device['deviceID']
-    #                 text = f'{ID_device}'
-    #                 ID = f'{ID_device}+{ID_room}'
-    #                 inline.append(
-    #                     InlineKeyboardButton(
-    #                         text=text, callback_data=ID))
-    #                 if cnt == 4:
-    #                     buttons.append(inline)
-    #                     inline = []
-    #                     cnt = 0
-    #             if cnt < 4:
-    #                 buttons.append(inline)
-    #         break
-    #     buttons.append([InlineKeyboardButton(text='BACK⏪', callback_data='Statistics')])
-    #
-    #     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
-    #     self.bot.sendMessage(chat_ID, text='Choose a  device',
-    #                          reply_markup=keyboard)
-
-
 if __name__ == "__main__":
-    conf = json.load(open("settings.json"))
+    APIs = json.load(open("Settings.json"))
+    catalogIP=APIs['catalogIP']
+    r = requests.get(f'{catalogIP}/catalog/Telegram')
+    body = json.dumps(r.json(), indent=4)
+    TelegramDict = json.loads(body)
+    conf = TelegramDict['Telegram']
     topic= conf['mqttTopic']
     broker = conf['brokerIP']
     port = conf['brokerPort']
     token = conf["telegramToken"]
-    bot = WareBot(token,topic,broker,port)
+    bot = WareBot(token,topic,broker,port,APIs)
     bot.run()
     bot.follow()
     while True:
         if len(bot.queueAlarms) > 0:
             retrivedDict=bot.queueAlarms.pop(0)
-            bot.sendCriticalMessage(retrivedDict['chatID'],retrivedDict['msg'])
+            for status in bot.sessionStatus:
+                if status['chatID']==retrivedDict['chatID']:
+                    if status['Log_in_status'] == 1:
+                        bot.sendCriticalMessage(retrivedDict['chatID'], retrivedDict['msg'])
+                    else:
+                        if 'logOutBackup' not in status.keys():
+                            status['logOutBackup']="Welcome back!!!\nWhen you are logged out you received this warnings:\n"
+                            status['logOutBackup']+=retrivedDict['msg']
+                        else:
+                            status['logOutBackup'] += retrivedDict['msg']
+
+        for status in bot.sessionStatus:
+            if status['Log_in_status']==1 and ('logOutBackup' in status.keys()):
+                bot.sendCriticalMessage(status['chatID'], status['logOutBackup'])
+                del status['logOutBackup']
 
     bot.end()

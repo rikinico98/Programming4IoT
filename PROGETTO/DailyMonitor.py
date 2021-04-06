@@ -5,8 +5,9 @@ from datetime import datetime, timedelta
 
 # INSERIRE IL TIMEDELTA CORRETTO, ADESSO è A 2 GIORNI PERCHè AVEVO I DATI VECCHI
 class Daily_monitor():
-    def __init__(self, roomID):
-        r_TS = requests.get(f'http://127.0.0.1:8070/catalog/{roomID}/TS_utilities')
+    def __init__(self, roomID,catalogIP):
+        self.catalogIP=catalogIP
+        r_TS = requests.get(f'{self.catalogIP}/catalog/{roomID}/TS_utilities')
         j_TS = json.dumps(r_TS.json(), indent=4)
         d_TS = json.loads(j_TS)
         TS = d_TS["ThingSpeak"]
@@ -22,7 +23,7 @@ class Daily_monitor():
         d_ID=[]
         d_devName=[]
         field_tot=[]
-        dev = requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/devices')
+        dev = requests.get(f'{self.catalogIP}/catalog/{self.roomID}/devices')
         self.dev_diz1 = json.dumps(dev.json(), indent = 4)
         self.dev_diz = json.loads(self.dev_diz1)
         #print(self.dev_diz)
@@ -36,7 +37,7 @@ class Daily_monitor():
         for n in range(len(d_ID)):
             chiavi=d_ID[n]
             print(chiavi[0])
-            field = requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/{chiavi[0]}/get_field')
+            field = requests.get(f'{self.catalogIP}/catalog/{self.roomID}/{chiavi[0]}/get_field')
             self.field_field1 = json.dumps(field.json(), indent = 4)
             self.field_field = json.loads(self.field_field1)
             #print(self.field_field)

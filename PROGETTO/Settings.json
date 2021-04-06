@@ -1,0 +1,6 @@
+{
+	"catalogIP": "http://catalog_IP",
+	"databaseStatsIP": "http://databaseStats_IP",
+	"storedProductsIP": "http://storedProducts_IP",
+	"clientID_MQTT":"Bot_Telegram_Sub"
+}

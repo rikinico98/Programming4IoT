@@ -9,7 +9,7 @@ import json
 class WareHouse_Catalog:
     exposed = True
 
-    def __init__(self, client_port, msg_broker):
+    def __init__(self, Settings):
         dateTimeObj = datetime.now()
         currentTime = f"{dateTimeObj.day}/{dateTimeObj.month}/{dateTimeObj.year}, {dateTimeObj.hour}:{dateTimeObj.minute}:{dateTimeObj.second} "
         self.catalog = {
@@ -21,12 +21,12 @@ class WareHouse_Catalog:
             "lastUpdate": currentTime,
             "roomList": [],
             "userList": [],
-            "msgBroker": msg_broker,
-            "port": client_port,
+            "msgBroker": Settings['msgBroker'],
+            "port": Settings['port'],
             "Telegram_utilities":{
-                        "telegramToken": "1434648914:AAGBPw3mi9AumKqF4n0fOroitaPqDkwgrzU",
-                        "brokerIP": msg_broker,
-                        "brokerPort": 1883,
+                        "telegramToken": Settings['telegramToken'],
+                        "brokerIP": Settings['msgBroker'],
+                        "brokerPort": Settings['port'],
                         "mqttTopic":"WareHouse/team5/alarm/#"
 }
 
@@ -594,9 +594,7 @@ class WareHouse_Catalog:
 
 
 if __name__ == "__main__":
-    # Standard configuration to serve the url "localhost:8080"
-    port = 1883
-    msgBroker = "test.mosquitto.org"
+    Settings = json.load(open("Settings_Catalog.json"))
     conf = {
         '/': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
@@ -604,4 +602,4 @@ if __name__ == "__main__":
         }
     }
     cherrypy.config.update({'server.socket_port': 8070})
-    cherrypy.quickstart(WareHouse_Catalog(port, msgBroker), '/', conf)
+    cherrypy.quickstart(WareHouse_Catalog(Settings), '/', conf)
