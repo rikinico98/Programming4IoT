@@ -21,9 +21,9 @@ class UpdateDevices():
         r_mqtt = requests.get(f'http://127.0.0.1:8070/catalog/MQTT_utilities')
         j_mqtt = json.dumps(r_mqtt.json(),indent=4)
         d_mqtt = json.loads(j_mqtt)
-        self.broker = d_mqtt["msgBroker"]
-        self.port = d_mqtt["port"]
-        self.topic = d_mqtt["mqttTopicGeneral"]+"/#"
+        self.broker = d_mqtt["MQTT_utilities"]["msgBroker"]
+        self.port = d_mqtt["MQTT_utilities"]["port"]
+        self.topic = d_mqtt["MQTT_utilities"]["mqttTopicGeneral"]+"/#"
         # Create the device
         self.up_dev = MyMQTT(self.ID, self.broker, self.port, self)
         # Define the last received timestamp
