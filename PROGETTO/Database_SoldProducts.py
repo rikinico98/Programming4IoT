@@ -212,7 +212,7 @@ class Database_SoldProducts():
             else:
                 current_rooms = []
                 # Get all the rooms currently used
-                r_rooms = requests.get(f'http://127.0.0.1:8070/catalog/rooms')
+                r_rooms = requests.get(f'{URL}/catalog/rooms')
                 if r_rooms.status_code == 200:
                     j_rooms = json.dumps(r_rooms.json(),indent=4)
                     d_rooms = json.loads(j_rooms)
@@ -270,11 +270,21 @@ class Database_SoldProducts():
         return contents
 
 if __name__ == "__main__":
+    # Get catalog URL from settings file
+    f = open('Settings.json',)
+    data = json.load(f)
+    URL = data["catalogURL"]
+    # Request port to catalog
+    r_port = requests.get(f'{URL}/catalog/service_comm_port')
+    j_port = json.dumps(r_port.json(),indent=4)
+    d_port = json.loads(j_port)
+    port = d_port["service_comm_port"]["port_soldProducts"]
+    # Define conf dict
     conf = {
         '/': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
             'tool.session.on': True
         }
     }
-    cherrypy.config.update({'server.socket_port': 8090})
+    cherrypy.config.update({'server.socket_port': port})
     cherrypy.quickstart(Database_SoldProducts(), '/', conf)
