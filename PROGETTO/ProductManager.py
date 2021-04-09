@@ -13,6 +13,9 @@ class ProductManager():
     # flag = 1 => empty list
     ##########################################
 
+    # Search roomID in roomList
+    # return the correct room and the flag = 0 if present
+    # else return an empty list and the flag = 1
     def searchRoom(self, roomList, roomID):
         roomFound = 1
         for room in roomList:
@@ -22,6 +25,9 @@ class ProductManager():
         room = []
         return room, roomFound
 
+    # Return a list that contains all the products and 
+    # the flag = 0 if some product is present
+    # else return an empty list and the flag = 1
     def returnAllProducts(self, roomList):
         productsFound = 1
         products = []
@@ -32,6 +38,9 @@ class ProductManager():
             productsFound = 0
         return products, productsFound
 
+    # Return a list that contains all the products within a room
+    # and the flag = 0 if some product is present in that room
+    # else return an empty list and the flag = 1
     def returnAllRoomProducts(self, room):
         productsFound = 1
         products = []
@@ -40,6 +49,10 @@ class ProductManager():
             products.append(product)
         return products, productsFound
 
+    # Return a list that contains all the products 
+    # whose quantity is smaller than a givent threshold and 
+    # the flag = 0 if some product is present
+    # else return an empty list and the flag = 1
     def thresholdAllProducts(self, roomList, quantity):
         productsFound = 1
         products = []
@@ -50,6 +63,10 @@ class ProductManager():
             productsFound = 0
         return products, productsFound
 
+    # Return a list that contains all the products within a room
+    # whose quantity is smaller than a givent threshold and 
+    # the flag = 0 if some product is present in that room
+    # else return an empty list and the flag = 1
     def thresholdAllRoomProducts(self, room, quantity):
         productsFound = 1
         products = []
@@ -59,6 +76,9 @@ class ProductManager():
                 products.append(product)
         return products, productsFound
 
+    # Search productID in all the products within a room
+    # return the correct products as a list and the flag = 0 if present
+    # else return an empty list and the flag = 1
     def returnProducts(self, room, productID):
         productsFound = 1
         products = []
@@ -68,6 +88,7 @@ class ProductManager():
                 products.append(product)
         return products, productsFound
 
+    # Return the minimum quantity of the products within a room
     def findMinimum(self, room):
         quantity_min = sys.maxsize
         for product in room["products"]:
@@ -75,6 +96,7 @@ class ProductManager():
                 quantity_min = product["quantity"]
         return quantity_min
 
+    # Return the maximum quantity of the products within a room
     def findMaximum(self, room):
         quantity_max = 0
         for product in room["products"]:
@@ -82,6 +104,8 @@ class ProductManager():
                 quantity_max = product["quantity"]
         return quantity_max
 
+    # Return the overall most sold products and the flag = 0
+    # If no products are present return an empty list and the flag = 1
     def mostSoldProduct(self, roomList):
         productsFound = 1
         products = []
@@ -98,6 +122,8 @@ class ProductManager():
             productsFound = 0
         return products, productsFound
 
+    # Return the overall least sold products and the flag = 0
+    # If no products are present return an empty list and the flag = 1
     def leastSoldProduct(self, roomList):
         productsFound = 1
         products = []
@@ -114,6 +140,10 @@ class ProductManager():
             productsFound = 0
         return products, productsFound
 
+    # Return all the products within a room whose quantity
+    # is equal to some quantity passed as parameter 
+    # and the flag = 0 if some is present
+    # else it return an empty list and the flag = 1 
     def quantityProduct(self, room, quantity):
         productsFound = 1
         products = []
@@ -123,6 +153,8 @@ class ProductManager():
                 products.append(product)
         return products, productsFound
 
+    # Return the most sold products in a given month and the flag = 0
+    # If no products are present return an empty list and the flag = 1
     def mostSoldMonthProduct(self, roomList, month):
         device_to_delete = []
         room_list = deepcopy(roomList)
@@ -138,6 +170,8 @@ class ProductManager():
         products, productsFound = self.mostSoldProduct(room_list)
         return products, productsFound
  
+    # Return the most sold products in a given year and the flag = 0
+    # If no products are present return an empty list and the flag = 1
     def mostSoldYearProduct(self, roomList, year):
         device_to_delete = []
         room_list = deepcopy(roomList)
@@ -153,6 +187,8 @@ class ProductManager():
         products, productsFound = self.mostSoldProduct(room_list)
         return products, productsFound
 
+    # Return the least sold products in a given month and the flag = 0
+    # If no products are present return an empty list and the flag = 1
     def leastSoldMonthProduct(self, roomList, month):
         device_to_delete = []
         room_list = deepcopy(roomList)
@@ -168,6 +204,8 @@ class ProductManager():
         products, productsFound = self.leastSoldProduct(room_list)
         return products, productsFound
 
+    # Return the least sold products in a given year and the flag = 0
+    # If no products are present return an empty list and the flag = 1
     def leastSoldYearProduct(self, roomList, year):
         device_to_delete = []
         room_list = deepcopy(roomList)
