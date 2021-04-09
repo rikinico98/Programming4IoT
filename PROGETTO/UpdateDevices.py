@@ -15,10 +15,14 @@ class UpdateDevices():
 
     def __init__(self, ID):
         self.ID = ID
+        # Get catalog URL from settings file
+        f = open('Settings.json',)
+        data = json.load(f)
+        URL = data["catalogURL"]
         # Request broker from catalog
         # Request port from catalog
         # Request topic from catalog
-        r_mqtt = requests.get(f'http://127.0.0.1:8070/catalog/MQTT_utilities')
+        r_mqtt = requests.get(f'{URL}/catalog/MQTT_utilities')
         j_mqtt = json.dumps(r_mqtt.json(),indent=4)
         d_mqtt = json.loads(j_mqtt)
         self.broker = d_mqtt["MQTT_utilities"]["msgBroker"]
