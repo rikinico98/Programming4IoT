@@ -16,19 +16,16 @@ class UpdateDevices():
     def __init__(self, ID):
         self.ID = ID
         # Request broker from catalog
-        r_broker = requests.get(f'http://127.0.0.1:8070/catalog/msg_broker')
-        j_broker = json.dumps(r_broker.json(),indent=4)
-        d_broker = json.loads(j_broker)
-        self.broker = d_broker["msgBroker"]
         # Request port from catalog
-        r_port = requests.get(f'http://127.0.0.1:8070/catalog/port')
-        j_port = json.dumps(r_port.json(),indent=4)
-        d_port = json.loads(j_port)
-        self.port = d_port["port"]
+        # Request topic from catalog
+        r_mqtt = requests.get(f'http://127.0.0.1:8070/catalog/MQTT_utilities')
+        j_mqtt = json.dumps(r_mqtt.json(),indent=4)
+        d_mqtt = json.loads(j_mqtt)
+        self.broker = d_mqtt["msgBroker"]
+        self.port = d_mqtt["port"]
+        self.topic = d_mqtt["mqttTopicGeneral"]+"/#"
         # Create the device
         self.up_dev = MyMQTT(self.ID, self.broker, self.port, self)
-        # Request topic from catalog
-        self.topic = "WareHouse/team5/#"
         # Define the last received timestamp
         self.lastReceivedTime = {
             "devices": []
