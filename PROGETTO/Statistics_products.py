@@ -64,7 +64,7 @@ class StatisticsProducts():
                     d_products_stored = json.loads(j_products_stored)
                     return json.dumps({"products_sold": d_products_sold, "products_stored": d_products_stored})
                 else:
-                    return json.dumps({"products_sold": [], "products_stored": []})
+                    return json.dumps({"products_sold": -1, "products_stored": -1})
             elif server == "sold":
                 if len(uri) == 3:
                     if uri[2] != "all":
@@ -77,7 +77,7 @@ class StatisticsProducts():
                             d_products = {"products": json.loads(j_products)}
                             return json.dumps(d_products)
                         else:
-                            return json.dumps({"products": []})
+                            return json.dumps({"products": -1})
                 elif len(uri) > 3:
                     if uri[2] == "most":
                         if uri[3] != "all":
@@ -90,7 +90,7 @@ class StatisticsProducts():
                                 d_products = {"products": json.loads(j_products)}
                                 return json.dumps(d_products)
                             else:
-                                return json.dumps({"products": []})
+                                return json.dumps({"products": -1})
                     elif uri[2] == "least":
                         if uri[3] != "all":
                             raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
@@ -102,7 +102,7 @@ class StatisticsProducts():
                                 d_products = {"products": json.loads(j_products)}
                                 return json.dumps(d_products)
                             else:
-                                return json.dumps({"products": []})
+                                return json.dumps({"products": -1})
                     else:
                         room_ID = uri[2]
                         if uri[3] == "most":
@@ -116,7 +116,7 @@ class StatisticsProducts():
                                     d_products = {"products": json.loads(j_products)}
                                     return json.dumps(d_products)
                                 else:
-                                    return json.dumps({"products": []})
+                                    return json.dumps({"products": -1})
                         elif uri[3] == "least":
                             if uri[4] != "all":
                                 raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
@@ -128,7 +128,7 @@ class StatisticsProducts():
                                     d_products = {"products": json.loads(j_products)}
                                     return json.dumps(d_products)
                                 else:
-                                    return json.dumps({"products": []})
+                                    return json.dumps({"products": -1})
                 else:
                     raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
             elif server == "stored":
@@ -143,7 +143,7 @@ class StatisticsProducts():
                             d_products = {"products": json.loads(j_products)}
                             return json.dumps(d_products)
                         else:
-                            return json.dumps({"products": []})
+                            return json.dumps({"products": -1})
                 elif len(uri) > 3:
                     room_ID = uri[2]
                     if uri[3] == "all":
@@ -154,7 +154,7 @@ class StatisticsProducts():
                             d_products = {"products": json.loads(j_products)}
                             return json.dumps(d_products)
                         else:
-                            return json.dumps({"products": []})
+                            return json.dumps({"products": -1})
                     elif uri[4] == "all":
                         # db/stored/ID_stanza/ID_prodotto/all
                         product_ID = uri[3]
@@ -164,7 +164,7 @@ class StatisticsProducts():
                             d_products = {"products": json.loads(j_products)}
                             return json.dumps(d_products)
                         else:
-                            return json.dumps({"products": []})
+                            return json.dumps({"products": -1})
                     else:
                         raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
                 else:
@@ -183,7 +183,7 @@ class StatisticsProducts():
                                 counter += 1
                             return json.dumps({"count": counter})
                         else:
-                            return json.dumps({"count": []})
+                            return json.dumps({"count": -1})
                     elif uri[4] == "all":
                         # db/statistics/count/ID_stanza/all
                         room_ID = uri[3]
@@ -196,7 +196,7 @@ class StatisticsProducts():
                                 counter += 1
                             return json.dumps({"count": counter})
                         else:
-                            return json.dumps({"count": []})
+                            return json.dumps({"count": -1})
                     else:
                         raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
                 elif statistics == "mean":
@@ -213,7 +213,7 @@ class StatisticsProducts():
                                 accumulator += item["quantity"]
                             return json.dumps({"mean": accumulator/counter})
                         else:
-                            return json.dumps({"mean": []})
+                            return json.dumps({"mean": -1})
                     else:
                         raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
                 elif statistics == "total":
@@ -228,7 +228,7 @@ class StatisticsProducts():
                                 accumulator += item["quantity"]
                             return json.dumps({"total": accumulator})
                         else:
-                            return json.dumps({"total": []})
+                            return json.dumps({"total": -1})
                     else:
                         raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
                 elif statistics == "mode":
@@ -242,13 +242,13 @@ class StatisticsProducts():
                             for item in d_products["products"]:
                                 if item["quantity"] > quantity:
                                     quantity = item["quantity"]
-                            list_items = []
+                            list_items = -1
                             for item in d_products["products"]:
                                 if item["quantity"] == quantity:
                                     list_items.append(item)
                             return json.dumps({"mode": list_items})
                         else:
-                            return json.dumps({"mode": []})
+                            return json.dumps({"mode": -1})
                     elif uri[4] == "all":
                         # db/statistics/mode/ID_stanza/all
                         room_ID = uri[3]
@@ -261,13 +261,13 @@ class StatisticsProducts():
                             for item in d_products["products"]:
                                 if item["quantity"] > quantity:
                                     quantity = item["quantity"]
-                            list_items = []
+                            list_items = -1
                             for item in d_products["products"]:
                                 if item["quantity"] == quantity:
                                     list_items.append(item)
                             return json.dumps({"mode": list_items})
                         else:
-                            return json.dumps({"mode": []})
+                            return json.dumps({"mode": -1})
                     else:
                         raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
                 else:
@@ -289,7 +289,7 @@ class StatisticsProducts():
                                 d_products = {"products": json.loads(j_products)}
                                 return json.dumps(d_products)
                             else:
-                                return json.dumps({"products": []})
+                                return json.dumps({"products": -1})
                         elif uri[3] == "year":
                             # db/sold/most/year/all?year=num_year
                             year = params["year"]
@@ -299,7 +299,7 @@ class StatisticsProducts():
                                 d_products = {"products": json.loads(j_products)}
                                 return json.dumps(d_products)
                             else:
-                                return json.dumps({"products": []})
+                                return json.dumps({"products": -1})
                         else:
                             raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
                 elif uri[2] == "least":
@@ -315,7 +315,7 @@ class StatisticsProducts():
                                 d_products = {"products": json.loads(j_products)}
                                 return json.dumps(d_products)
                             else:
-                                return json.dumps({"products": []})
+                                return json.dumps({"products": -1})
                         elif uri[3] == "year":
                             # db/sold/least/year/all?year=num_year
                             year = params["year"]
@@ -325,7 +325,7 @@ class StatisticsProducts():
                                 d_products = {"products": json.loads(j_products)}
                                 return json.dumps(d_products)
                             else:
-                                return json.dumps({"products": []})
+                                return json.dumps({"products": -1})
                         else:
                             raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
                 else:
@@ -343,7 +343,7 @@ class StatisticsProducts():
                                     d_products = {"products": json.loads(j_products)}
                                     return json.dumps(d_products)
                                 else:
-                                    return json.dumps({"products": []})
+                                    return json.dumps({"products": -1})
                             elif uri[4] == "year":
                                 # db/sold/ID_stanza/most/year/all?year=num_year
                                 year = params["year"]
@@ -353,7 +353,7 @@ class StatisticsProducts():
                                     d_products = {"products": json.loads(j_products)}
                                     return json.dumps(d_products)
                                 else:
-                                    return json.dumps({"products": []})
+                                    return json.dumps({"products": -1})
                             else:
                                 raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
                     elif uri[3] == "least":
@@ -369,7 +369,7 @@ class StatisticsProducts():
                                     d_products = {"products": json.loads(j_products)}
                                     return json.dumps(d_products)
                                 else:
-                                    return json.dumps({"products": []})
+                                    return json.dumps({"products": -1})
                             elif uri[4] == "year":
                                 # db/sold/ID_stanza/least/year/all?year=num_year
                                 year = params["year"]
@@ -379,7 +379,7 @@ class StatisticsProducts():
                                     d_products = {"products": json.loads(j_products)}
                                     return json.dumps(d_products)
                                 else:
-                                    return json.dumps({"products": []})
+                                    return json.dumps({"products": -1})
                             else:
                                 raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
             elif server == "stored":
@@ -395,7 +395,7 @@ class StatisticsProducts():
                             d_products = {"products": json.loads(j_products)}
                             return json.dumps(d_products)
                         else:
-                            return json.dumps({"products": []})
+                            return json.dumps({"products": -1})
                 elif uri[3] == "threshold":
                     if uri[4] != "all":
                         raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
@@ -409,7 +409,7 @@ class StatisticsProducts():
                             d_products = {"products": json.loads(j_products)}
                             return json.dumps(d_products)
                         else:
-                            return json.dumps({"products": []})
+                            return json.dumps({"products": -1})
                 else:
                     raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
             else:
