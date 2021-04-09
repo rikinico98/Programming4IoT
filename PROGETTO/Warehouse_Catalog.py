@@ -21,14 +21,40 @@ class WareHouse_Catalog:
             "lastUpdate": currentTime,
             "roomList": [],
             "userList": [],
-            "msgBroker": Settings['msgBroker'],
-            "port": Settings['port'],
+            "MQTT_utilities":{
+                "msgBroker": Settings['msgBroker'],
+                "port": Settings['port_MQTT'],
+                "mqttTopicGeneral": Settings['mqttTopicGeneral']
+            },
+            "Thingspeak_API": {
+                "api_key_thingspeak": Settings['api_key_thingspeak'],
+                "clientID_Thingspeak_MQTT": Settings['clientID_Thingspeak_MQTT'],
+                "mqttTopicThingspeak": Settings['mqttTopicThingspeak']
+
+            },
             "Telegram_utilities":{
                         "telegramToken": Settings['telegramToken'],
                         "brokerIP": Settings['msgBroker'],
-                        "brokerPort": Settings['port'],
-                        "mqttTopic":"WareHouse/team5/alarm/#"
-}
+                        "brokerPort": Settings['port_MQTT'],
+                        "clientID_MQTT":Settings['clientID_Telegram_MQTT'],
+                        "mqttTopic":Settings['mqttTopicTelegram']
+            },
+            "service_comm_port":{
+                "port_catalog": Settings['port_catalog'],
+                "port_form": Settings['port_form'],
+                "port_storedProducts": Settings['port_storedProducts'],
+                "port_databaseStats": Settings['port_databaseStats'],
+                "port_soldProducts": Settings['port_soldProducts']
+
+            },
+            "URL":{
+                "catalogURL": Settings['catalogURL'],
+                "databaseStatsURL": Settings['databaseStatsURL'],
+                "storedProductsURL": Settings['storedProductsURL'],
+                "soldProductsURL": Settings['soldProductsURL'],
+                "formURL": Settings['formURL']
+
+            }
 
         }
         self.DeviceManager = dm.DeviceManager()
@@ -41,7 +67,8 @@ class WareHouse_Catalog:
         # section/subsection/azione
         # GET
         # catalog/msg_broker
-        # catalog/port
+        # catalog/
+        #
         # catalog/ID_stanza/ID_Device/topic
         # catalog/ID_utente/assigned_rooms
         # catalog/ID_stanza/assigned_product_type
@@ -213,26 +240,68 @@ class WareHouse_Catalog:
             else:
                 # dato richiesto
                 cmd = uri[1]
-                if cmd == 'msg_broker':
+                # "MQTT_utilities": {
+                #     "msgBroker":
+                #     "port":
+                #     "mqttTopicGeneral":
+                # }
+                if cmd == 'MQTT_utilities':
                     # controllare se il msg broker è stato definito
-                    if self.catalog['msgBroker'] == '':
-                        raise cherrypy.HTTPError(500, "Msg Broker not defined")
-                    result = dict(msgBroker=self.catalog['msgBroker'])
-                    jsonOut = json.dumps(result)
-                    return jsonOut
-                elif cmd == 'port':
-                    # controllare se la porta è stata definita in maniera
-                    # corretta
-                    if self.catalog['port'] == '':
+                    MQTT_utilities=self.catalog['MQTT_utilities']
+                    if MQTT_utilities['port'] == '':
                         raise cherrypy.HTTPError(501, "Port not defined")
-                    if not (isinstance(self.catalog['port'], int)):
-                        raise cherrypy.HTTPError(
-                            502, "Port not properly defined")
-                    result = dict(port=self.catalog['port'])
+                    if MQTT_utilities['msgBroker'] == '':
+                        raise cherrypy.HTTPError(500, "Msg Broker not defined")
+                    result = dict(MQTT_utilities=self.catalog['MQTT_utilities'])
                     jsonOut = json.dumps(result)
                     return jsonOut
+
+                # "Telegram_utilities": {
+                #     "telegramToken":
+                #     "brokerIP":
+                #     "brokerPort":
+                #     "clientID_MQTT":
+                #     "mqttTopic":
+                # }
                 elif cmd== 'Telegram':
                     result = dict(Telegram=self.catalog['Telegram_utilities'])
+                    jsonOut = json.dumps(result)
+                    return jsonOut
+
+                # "Thingspeak_API": {
+                #     "api_key_thingspeak":
+                #     "clientID_Thingspeak_MQTT":
+                #     "mqttTopicThingspeak":
+                #
+                # }
+                elif cmd== 'Thingspeak_API':
+                    result = dict(Thingspeak_API=self.catalog['Thingspeak_API'])
+                    jsonOut = json.dumps(result)
+                    return jsonOut
+
+                # "service_comm_port": {
+                #     "port_catalog":
+                #     "port_form":
+                #     "port_storedProducts":
+                #     "port_databaseStats":
+                #     "port_soldProducts":
+                #
+                # }
+                elif cmd== 'service_comm_port':
+                    result = dict(service_comm_port=self.catalog['service_comm_port'])
+                    jsonOut = json.dumps(result)
+                    return jsonOut
+
+                # "URL": {
+                #     "catalogURL":
+                #     "databaseStatsURL":
+                #     "storedProductsURL":
+                #     "soldProductsURL":
+                #     "formURL":
+                #
+                # }
+                elif cmd== 'URL':
+                    result = dict(URL=self.catalog['URL'])
                     jsonOut = json.dumps(result)
                     return jsonOut
 
@@ -594,7 +663,7 @@ class WareHouse_Catalog:
 
 
 if __name__ == "__main__":
-    Settings = json.load(open("Settings_Catalog.json"))
+    Settings = json.load(open("Settings.json"))
     conf = {
         '/': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
