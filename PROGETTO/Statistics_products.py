@@ -40,7 +40,12 @@ class StatisticsProducts():
     exposed = True
 
     def __init__(self):
-        pass
+        # Request URL to catalog
+        r_url = requests.get(f'{URL}/catalog/URL')
+        j_url = json.dumps(r_url.json(),indent=4)
+        d_url = json.loads(j_url)
+        url_sold = d_url["URL"]["soldProductsURL"]
+        url_stored = d_url["URL"]["storedProductsURL"]
 
     def GET(self, *uri, **params):
         uri = list(uri)
@@ -50,8 +55,8 @@ class StatisticsProducts():
         if params == {}:
             if server == "all":
                 # db/all
-                r_products_sold = requests.get(f'http://127.0.0.1:8090/db/all')
-                r_products_stored = requests.get(f'http://127.0.0.1:8080/db/all')
+                r_products_sold = requests.get(f'{url_sold}/db/all')
+                r_products_stored = requests.get(f'{url_stored}/db/all')
                 if r_products_sold.status_code == 200 and r_products_stored.status_code == 200:
                     j_products_sold = json.dumps(r_products_sold.json(),indent=4)
                     d_products_sold = json.loads(j_products_sold)
@@ -66,7 +71,7 @@ class StatisticsProducts():
                         raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
                     else:
                         # db/sold/all
-                        r_products = requests.get(f'http://127.0.0.1:8090/db/all')
+                        r_products = requests.get(f'{url_sold}/db/all')
                         if r_products.status_code == 200:
                             j_products = json.dumps(r_products.json(),indent=4)
                             d_products = {"products": json.loads(j_products)}
@@ -79,7 +84,7 @@ class StatisticsProducts():
                             raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
                         else:
                             # db/sold/most/all
-                            r_products = requests.get(f'http://127.0.0.1:8090/db/most/all')
+                            r_products = requests.get(f'{url_sold}/db/most/all')
                             if r_products.status_code == 200:
                                 j_products = json.dumps(r_products.json(),indent=4)
                                 d_products = {"products": json.loads(j_products)}
@@ -91,7 +96,7 @@ class StatisticsProducts():
                             raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
                         else:
                             # db/sold/least/all
-                            r_products = requests.get(f'http://127.0.0.1:8090/db/least/all')
+                            r_products = requests.get(f'{url_sold}/db/least/all')
                             if r_products.status_code == 200:
                                 j_products = json.dumps(r_products.json(),indent=4)
                                 d_products = {"products": json.loads(j_products)}
@@ -105,7 +110,7 @@ class StatisticsProducts():
                                 raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
                             else:
                                 # db/sold/ID_stanza/most/all
-                                r_products = requests.get(f'http://127.0.0.1:8090/db/{room_ID}/most/all')
+                                r_products = requests.get(f'{url_sold}/db/{room_ID}/most/all')
                                 if r_products.status_code == 200:
                                     j_products = json.dumps(r_products.json(),indent=4)
                                     d_products = {"products": json.loads(j_products)}
@@ -117,7 +122,7 @@ class StatisticsProducts():
                                 raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
                             else:
                                 # db/sold/ID_stanza/least/all
-                                r_products = requests.get(f'http://127.0.0.1:8090/db/{room_ID}/least/all')
+                                r_products = requests.get(f'{url_sold}/db/{room_ID}/least/all')
                                 if r_products.status_code == 200:
                                     j_products = json.dumps(r_products.json(),indent=4)
                                     d_products = {"products": json.loads(j_products)}
@@ -132,7 +137,7 @@ class StatisticsProducts():
                         raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
                     else:
                         # db/stored/all
-                        r_products = requests.get(f'http://127.0.0.1:8080/db/all')
+                        r_products = requests.get(f'{url_stored}/db/all')
                         if r_products.status_code == 200:
                             j_products = json.dumps(r_products.json(),indent=4)
                             d_products = {"products": json.loads(j_products)}
@@ -143,7 +148,7 @@ class StatisticsProducts():
                     room_ID = uri[2]
                     if uri[3] == "all":
                         # db/stored/ID_stanza/all
-                        r_products = requests.get(f'http://127.0.0.1:8080/db/{room_ID}/all')
+                        r_products = requests.get(f'{url_stored}/db/{room_ID}/all')
                         if r_products.status_code == 200:
                             j_products = json.dumps(r_products.json(),indent=4)
                             d_products = {"products": json.loads(j_products)}
@@ -153,7 +158,7 @@ class StatisticsProducts():
                     elif uri[4] == "all":
                         # db/stored/ID_stanza/ID_prodotto/all
                         product_ID = uri[3]
-                        r_products = requests.get(f'http://127.0.0.1:8080/db/{room_ID}/{product_ID}/all')
+                        r_products = requests.get(f'{url_stored}/db/{room_ID}/{product_ID}/all')
                         if r_products.status_code == 200:
                             j_products = json.dumps(r_products.json(),indent=4)
                             d_products = {"products": json.loads(j_products)}
@@ -169,7 +174,7 @@ class StatisticsProducts():
                 if statistics == "count":
                     if uri[3] == "all":
                         # db/statistics/count/all
-                        r_products = requests.get(f'http://127.0.0.1:8080/db/all')
+                        r_products = requests.get(f'{url_stored}/db/all')
                         if r_products.status_code == 200:
                             j_products = json.dumps(r_products.json(),indent=4)
                             d_products = {"products": json.loads(j_products)}
@@ -182,7 +187,7 @@ class StatisticsProducts():
                     elif uri[4] == "all":
                         # db/statistics/count/ID_stanza/all
                         room_ID = uri[3]
-                        r_products = requests.get(f'http://127.0.0.1:8080/db/{room_ID}/all')
+                        r_products = requests.get(f'{url_stored}/db/{room_ID}/all')
                         if r_products.status_code == 200:
                             j_products = json.dumps(r_products.json(),indent=4)
                             d_products = {"products": json.loads(j_products)}
@@ -197,7 +202,7 @@ class StatisticsProducts():
                 elif statistics == "mean":
                     if uri[3] == "all":
                         # db/statistics/mean/all
-                        r_products = requests.get(f'http://127.0.0.1:8090/db/all')
+                        r_products = requests.get(f'{url_sold}/db/all')
                         if r_products.status_code == 200:
                             j_products = json.dumps(r_products.json(),indent=4)
                             d_products = {"products": json.loads(j_products)}
@@ -214,7 +219,7 @@ class StatisticsProducts():
                 elif statistics == "total":
                     if uri[3] == "all":
                         # db/statistics/total/all
-                        r_products = requests.get(f'http://127.0.0.1:8090/db/all')
+                        r_products = requests.get(f'{url_sold}/db/all')
                         if r_products.status_code == 200:
                             j_products = json.dumps(r_products.json(),indent=4)
                             d_products = {"products": json.loads(j_products)}
@@ -229,7 +234,7 @@ class StatisticsProducts():
                 elif statistics == "mode":
                     if uri[3] == "all":
                         # db/statistics/mode/all
-                        r_products = requests.get(f'http://127.0.0.1:8080/db/all')
+                        r_products = requests.get(f'{url_stored}/db/all')
                         if r_products.status_code == 200:
                             j_products = json.dumps(r_products.json(),indent=4)
                             d_products = {"products": json.loads(j_products)}
@@ -248,7 +253,7 @@ class StatisticsProducts():
                         # db/statistics/mode/ID_stanza/all
                         room_ID = uri[3]
                         room_ID = uri[3]
-                        r_products = requests.get(f'http://127.0.0.1:8080/db/{room_ID}/all')
+                        r_products = requests.get(f'{url_stored}/db/{room_ID}/all')
                         if r_products.status_code == 200:
                             j_products = json.dumps(r_products.json(),indent=4)
                             d_products = {"products": json.loads(j_products)}
@@ -278,7 +283,7 @@ class StatisticsProducts():
                         if uri[3] == "month":
                             # db/sold/most/month/all?month=num_month
                             month = params["month"]
-                            r_products = requests.get(f'http://127.0.0.1:8090/db/most/{month}/all')
+                            r_products = requests.get(f'{url_sold}/db/most/{month}/all')
                             if r_products.status_code == 200:
                                 j_products = json.dumps(r_products.json(),indent=4)
                                 d_products = {"products": json.loads(j_products)}
@@ -288,7 +293,7 @@ class StatisticsProducts():
                         elif uri[3] == "year":
                             # db/sold/most/year/all?year=num_year
                             year = params["year"]
-                            r_products = requests.get(f'http://127.0.0.1:8090/db/most/{year}/all')
+                            r_products = requests.get(f'{url_sold}/db/most/{year}/all')
                             if r_products.status_code == 200:
                                 j_products = json.dumps(r_products.json(),indent=4)
                                 d_products = {"products": json.loads(j_products)}
@@ -304,7 +309,7 @@ class StatisticsProducts():
                         if uri[3] == "month":
                             # db/sold/least/month/all?month=num_month
                             month = params["month"]
-                            r_products = requests.get(f'http://127.0.0.1:8090/db/least/{month}/all')
+                            r_products = requests.get(f'{url_sold}/db/least/{month}/all')
                             if r_products.status_code == 200:
                                 j_products = json.dumps(r_products.json(),indent=4)
                                 d_products = {"products": json.loads(j_products)}
@@ -314,7 +319,7 @@ class StatisticsProducts():
                         elif uri[3] == "year":
                             # db/sold/least/year/all?year=num_year
                             year = params["year"]
-                            r_products = requests.get(f'http://127.0.0.1:8090/db/least/{year}/all')
+                            r_products = requests.get(f'{url_sold}/db/least/{year}/all')
                             if r_products.status_code == 200:
                                 j_products = json.dumps(r_products.json(),indent=4)
                                 d_products = {"products": json.loads(j_products)}
@@ -332,7 +337,7 @@ class StatisticsProducts():
                             if uri[4] == "month":
                                 # db/sold/ID_stanza/most/month/all?month=num_month
                                 month = params["month"]
-                                r_products = requests.get(f'http://127.0.0.1:8090/db/{room_ID}/most/{month}/all')
+                                r_products = requests.get(f'{url_sold}/db/{room_ID}/most/{month}/all')
                                 if r_products.status_code == 200:
                                     j_products = json.dumps(r_products.json(),indent=4)
                                     d_products = {"products": json.loads(j_products)}
@@ -342,7 +347,7 @@ class StatisticsProducts():
                             elif uri[4] == "year":
                                 # db/sold/ID_stanza/most/year/all?year=num_year
                                 year = params["year"]
-                                r_products = requests.get(f'http://127.0.0.1:8090/db/{room_ID}/most/{year}/all')
+                                r_products = requests.get(f'{url_sold}/db/{room_ID}/most/{year}/all')
                                 if r_products.status_code == 200:
                                     j_products = json.dumps(r_products.json(),indent=4)
                                     d_products = {"products": json.loads(j_products)}
@@ -358,7 +363,7 @@ class StatisticsProducts():
                             if uri[4] == "month":
                                 # db/sold/ID_stanza/least/month/all?month=num_month
                                 month = params["month"]
-                                r_products = requests.get(f'http://127.0.0.1:8090/db/{room_ID}/least/{month}/all')
+                                r_products = requests.get(f'{url_sold}/db/{room_ID}/least/{month}/all')
                                 if r_products.status_code == 200:
                                     j_products = json.dumps(r_products.json(),indent=4)
                                     d_products = {"products": json.loads(j_products)}
@@ -368,7 +373,7 @@ class StatisticsProducts():
                             elif uri[4] == "year":
                                 # db/sold/ID_stanza/least/year/all?year=num_year
                                 year = params["year"]
-                                r_products = requests.get(f'http://127.0.0.1:8090/db/{room_ID}/least/{year}/all')
+                                r_products = requests.get(f'{url_sold}/db/{room_ID}/least/{year}/all')
                                 if r_products.status_code == 200:
                                     j_products = json.dumps(r_products.json(),indent=4)
                                     d_products = {"products": json.loads(j_products)}
@@ -384,7 +389,7 @@ class StatisticsProducts():
                     else:
                         # db/stored/threshold/all?th=num
                         num = params["th"]
-                        r_products = requests.get(f'http://127.0.0.1:8080/db/quantity/{num}/all')
+                        r_products = requests.get(f'{url_stored}/db/quantity/{num}/all')
                         if r_products.status_code == 200:
                             j_products = json.dumps(r_products.json(),indent=4)
                             d_products = {"products": json.loads(j_products)}
@@ -398,7 +403,7 @@ class StatisticsProducts():
                         # db/stored/ID_stanza/threshold/all?th=num
                         room_ID = uri[2]
                         num = params["th"]
-                        r_products = requests.get(f'http://127.0.0.1:8080/db/{room_ID}/quantity/{num}/all')
+                        r_products = requests.get(f'{url_stored}/db/{room_ID}/quantity/{num}/all')
                         if r_products.status_code == 200:
                             j_products = json.dumps(r_products.json(),indent=4)
                             d_products = {"products": json.loads(j_products)}
@@ -411,11 +416,21 @@ class StatisticsProducts():
                 raise cherrypy.HTTPError(401, "Unexpected command - Wrong Command")
 
 if __name__ == "__main__":
+    # Get catalog URL from settings file
+    f = open('Settings.json',)
+    data = json.load(f)
+    URL = data["catalogURL"]
+    # Request port to catalog
+    r_port = requests.get(f'{URL}/catalog/service_comm_port')
+    j_port = json.dumps(r_port.json(),indent=4)
+    d_port = json.loads(j_port)
+    port = d_port["service_comm_port"]["port_databaseStats"]
+    # Define conf dict
     conf = {
         '/': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
             'tool.session.on': True
         }
     }
-    cherrypy.config.update({'server.socket_port': 8060})
+    cherrypy.config.update({'server.socket_port': port})
     cherrypy.quickstart(StatisticsProducts(), '/', conf)
