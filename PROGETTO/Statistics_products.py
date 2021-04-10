@@ -242,7 +242,7 @@ class StatisticsProducts():
                             for item in d_products["products"]:
                                 if item["quantity"] > quantity:
                                     quantity = item["quantity"]
-                            list_items = -1
+                            list_items = []
                             for item in d_products["products"]:
                                 if item["quantity"] == quantity:
                                     list_items.append(item)
@@ -261,7 +261,7 @@ class StatisticsProducts():
                             for item in d_products["products"]:
                                 if item["quantity"] > quantity:
                                     quantity = item["quantity"]
-                            list_items = -1
+                            list_items = []
                             for item in d_products["products"]:
                                 if item["quantity"] == quantity:
                                     list_items.append(item)
