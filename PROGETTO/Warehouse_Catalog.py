@@ -34,7 +34,7 @@ class WareHouse_Catalog:
             },
             "Telegram_utilities":{
                         "telegramToken": Settings['telegramToken'],
-                        "brokerIP": Settings['msgBroker'],
+                        "brokerURL": Settings['msgBroker'],
                         "brokerPort": Settings['port_MQTT'],
                         "clientID_MQTT":Settings['clientID_Telegram_MQTT'],
                         "mqttTopic":Settings['mqttTopicTelegram']
