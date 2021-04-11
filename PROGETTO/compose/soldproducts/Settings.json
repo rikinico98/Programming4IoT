@@ -1,0 +1,17 @@
+{
+	
+	
+	"port_catalog":8070,
+	"port_form":8090,
+	"port_storedProducts":8060,
+	"port_soldProducts":8050,
+	"port_databaseStats":8040,
+	
+	"catalogURL": "http://warehousecatalog"
+	
+	
+	
+}
+
+
+

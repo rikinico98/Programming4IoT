@@ -1,0 +1,58 @@
+version: "3"
+services:
+  warehousecatalog:
+    build: ./warehousecatalog
+    image: warehousecatalog:latest
+    ports:
+     - "8070:80"
+     
+  access_form:
+    build: ./warehouseform
+    image: warehouseform:latest
+    ports:
+     - "8090:80"
+    depends_on:
+    - "warehousecatalog"
+    links:
+    - "warehousecatalog"
+    
+  databasestats:
+    build: ./databasestats
+    image: databasestats:latest
+    ports:
+     - "8040:80"
+    depends_on:
+    - "warehousecatalog"
+    links:
+    - "warehousecatalog"
+    
+    
+  storedproducts:
+    build: ./storedproducts
+    image: storedproducts:latest
+    ports:
+     - "8060:80"
+    depends_on:
+    - "warehousecatalog"
+    links:
+    - "warehousecatalog"
+    
+  soldproducts:
+    build: ./soldproducts
+    image: soldproducts:latest
+    ports:
+     - "8050:80"
+    depends_on:
+    - "warehousecatalog"
+    links:
+    - "warehousecatalog"
+    
+  bot:
+    build: ./bot
+    image: bot:latest
+    depends_on:
+    - "warehousecatalog"
+    links:
+    - "warehousecatalog"
+    - "storedproducts"
+    - "databasestats"

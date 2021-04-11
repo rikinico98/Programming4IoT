@@ -1,0 +1,37 @@
+{
+	
+	
+	"mqttTopicGeneral":"WareHouse/team5",
+	"msgBroker": "test.mosquitto.org",
+	"port_MQTT":1883,
+	
+
+	"port_catalog":8070,
+	"port_form":8090,
+	"port_storedProducts":8060,
+	"port_soldProducts":8050,
+	"port_databaseStats":8040,
+	
+	"catalogURL": "http://warehousecatalog",
+	"databaseStatsURL": "http://databaseStats",
+	"storedProductsURL": "http://storedProducts",
+	"soldProductsURL": "http://soldProducts",
+	"formURL": "http://warehouseform",
+	
+	
+	
+	"telegramToken":"1434648914:AAGBPw3mi9AumKqF4n0fOroitaPqDkwgrzU",
+	"mqttTopicTelegram":"WareHouse/team5/alarm/#",
+	"clientID_Telegram_MQTT":"Bot_Telegram_Sub",
+
+	"api_key_thingspeak": "LL8A82J0EWRBDUSQ",
+	"clientID_Thingspeak_MQTT": "allsensor_sub_pub",
+	"mqttTopicThingspeak":"ThingSpeak/channel/allsensor"
+	
+	
+	
+	
+}
+
+
+
