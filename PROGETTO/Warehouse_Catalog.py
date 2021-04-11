@@ -670,5 +670,5 @@ if __name__ == "__main__":
             'tool.session.on': True
         }
     }
-    cherrypy.config.update({'server.socket_port': 8070})
+    cherrypy.config.update({'server.socket_port': Settings['port_catalog']})
     cherrypy.quickstart(WareHouse_Catalog(Settings), '/', conf)
