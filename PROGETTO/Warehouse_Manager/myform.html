@@ -15,7 +15,6 @@
 position: relative;
 font-family: Arial;
 }
-
 .text-block {
 position: absolute;
 bottom: 50%;
@@ -28,7 +27,7 @@ padding-right: 20px;
 </style>
 </head>
 <body>
-
+<!-- DEFINIZIONE DEI MENU  -->
 <ul>
   <li class="dropdown">
     <a href="javascript:void(0)" class="dropbtn">Registration</a>
@@ -55,7 +54,7 @@ padding-right: 20px;
     </div>
   </li>
 </ul>
-
+<!-- LAYOUT PAGINA DI LANDING -->
 <div class="container">
     <div id = "Menu" style="padding-left:16px" style="display:block;">
         <img src="https://cdn.pixabay.com/photo/2016/11/22/19/24/archive-1850170_1280.jpg" alt="Nature" style="width:100%;">
@@ -66,7 +65,7 @@ padding-right: 20px;
     </div>
 </div>
 
-<!-- PER I POST -->
+<!-- PER I POST DEI DEVICES, USERS E ROOMS-->
 <ul id="Devices" class="tabcontent" style="display:none;">
     <div class="container-fluid">
         <div class="row justify-content-center">
@@ -82,8 +81,20 @@ padding-right: 20px;
                         <input type="text" class="form-control" id="deviceID"><br>
                         <label for="deviceName">Device name:   </label><br><input type="text" class="form-control" id="deviceName"><br>
                         <label for="measureType">Measure type:   </label><br><input type="text" class="form-control" id="measureType"><br>
-                        <label for="field">Thingspeak field:   </label><br>
+                        <label for="field">Thingspeak field 1:   </label><br>
                         <select id="field" name="field">
+                            <option value="field1">field1</option>
+                            <option value="field2">field2</option>
+                            <option value="field3">field3</option>
+                            <option value="field4">field4</option>
+                            <option value="field5">field5</option>
+                            <option value="field6">field6</option>
+                            <option value="field7">field7</option>
+                            <option value="field8">field8</option>
+                        </select><br><br>
+                        <label for="field2">Thingspeak field 2:   </label><br>
+                        <select id="field2" name="field2">
+                            <option value="none">none</option>
                             <option value="field1">field1</option>
                             <option value="field2">field2</option>
                             <option value="field3">field3</option>
@@ -184,9 +195,9 @@ padding-right: 20px;
                     <div class="form-inline">
                         ***********************************************************************************************************<br>
                         Humidity range<br>
-                        <label for="hum_min">Min [ppm]: </label><br>
+                        <label for="hum_min">Min [%]: </label><br>
                         <input type="text" class="form-control" id="hum_min"><br>
-                        <label for="hum_max">Max [ppm]: </label><br>
+                        <label for="hum_max">Max [%]: </label><br>
                         <input type="text" class="form-control" id="hum_max"><br>
                     </div>
 
@@ -226,7 +237,7 @@ padding-right: 20px;
         </div>
     </form>
 </ul>
-<!-- Form change Thingspeak api key read  FATTO-->
+<!-- Form change Thingspeak api key read-->
 <ul id="Change_api_key_read" class="tabcontent" style="display:none;">
     <div class="container-fluid">
         <div class="row justify-content-center">
@@ -245,7 +256,7 @@ padding-right: 20px;
         </div>
     </div>
 </ul>
-<!-- Form change Thingspeak channel ID FATTO-->
+<!-- Form change Thingspeak channel ID-->
 <ul id="Change_channel_id" class="tabcontent" style="display:none;">
     <div class="container-fluid">
         <div class="row justify-content-center">
@@ -264,7 +275,7 @@ padding-right: 20px;
         </div>
     </div>
 </ul>
-<!-- Form change product type FATTO -->
+<!-- Form change product type -->
 <ul id="Change_product_type" class="tabcontent" style="display:none;">
     <div class="container-fluid">
         <div class="row justify-content-center">
@@ -283,7 +294,7 @@ padding-right: 20px;
         </div>
     </div>
 </ul>
-<!-- Form change Thingspeak api key write FATTO-->
+<!-- Form change Thingspeak api key write -->
 <ul id="Change_api_key_write" class="tabcontent" style="display:none;">
     <div class="container-fluid">
         <div class="row justify-content-center">
@@ -302,7 +313,7 @@ padding-right: 20px;
         </div>
     </div>
 </ul>
-<!-- Form change Temperature ranges FATTO -->
+<!-- Form change Temperature ranges-->
 <ul id="Change_temperature_ranges" class="tabcontent" style="display:none;">
     <div class="container-fluid">
         <div class="row justify-content-center">
@@ -326,7 +337,7 @@ padding-right: 20px;
         </div>
     </div>
 </ul>
-<!-- Form change Humidity ranges FATTO-->
+<!-- Form change Humidity ranges-->
 <ul id="Change_humidity_ranges" class="tabcontent" style="display:none;">
     <div class="container-fluid">
         <div class="row justify-content-center">
@@ -338,9 +349,9 @@ padding-right: 20px;
                         <br><input type="text" class="form-control" id="roomID6"> <br>
                         ***********************************************************************************************************<br>
                         Humidity range<br>
-                        <label for="hum_min_1">Min [ppm]: </label><br>
+                        <label for="hum_min_1">Min [%]: </label><br>
                         <input type="text" class="form-control" id="hum_min_1"><br>
-                        <label for="hum_max_1">Max [ppm]: </label><br>
+                        <label for="hum_max_1">Max [%]: </label><br>
                         <input type="text" class="form-control" id="hum_max_1"><br>
 
                     </div>
@@ -350,7 +361,7 @@ padding-right: 20px;
         </div>
     </div>
 </ul>
-<!-- Form change Smoke ranges FATTO -->
+<!-- Form change Smoke ranges -->
 <ul id="Change_smoke_ranges" class="tabcontent" style="display:none;">
     <div class="container-fluid">
         <div class="row justify-content-center">
@@ -573,8 +584,20 @@ padding-right: 20px;
                         <br><input type="text" class="form-control" id="roomID10"> <br>
                         <label for="device_id123">Device ID:   </label><br>
                         <br><input type="text" class="form-control" id="device_id123"><br>
-                        <label for="field_123">Thingspeak channel field:   </label><br>
+                        <label for="field_123">Thingspeak channel field 1:   </label><br>
                         <select id="field_123" name="field_123">
+                            <option value="field1">field1</option>
+                            <option value="field2">field2</option>
+                            <option value="field3">field3</option>
+                            <option value="field4">field4</option>
+                            <option value="field5">field5</option>
+                            <option value="field6">field6</option>
+                            <option value="field7">field7</option>
+                            <option value="field8">field8</option>
+                        </select><br><br>
+                        <label for="field_2">Thingspeak channel field 2:   </label><br>
+                        <select id="field_2" name="field_2">
+                            <option value="none">none</option>
                             <option value="field1">field1</option>
                             <option value="field2">field2</option>
                             <option value="field3">field3</option>
@@ -646,8 +669,8 @@ padding-right: 20px;
 </body>
 
 <script>
-    // da modificare i nomi delle funzioni solamente
-    function openDevices(evt, cityName) {
+    // funzioni per aprire le forms corrette relative alla selezione dell'utente
+    function openDevices(evt, device) {
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tabcontent");
             for (i = 0; i < tabcontent.length; i++) {
@@ -657,232 +680,227 @@ padding-right: 20px;
             for (i = 0; i < tablinks.length; i++) {
             tablinks[i].className = tablinks[i].className.replace(" active", "");
             }
-            document.getElementById(cityName).style.display = "block";
+            document.getElementById(device).style.display = "block";
             document.getElementById("Menu").style.display = "none";
             evt.currentTarget.className += " active";
         }
+    function openUsers(evt, device) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(device).style.display = "block";
+        document.getElementById("Menu").style.display = "none";
+        evt.currentTarget.className += " active";
+    }
+    function openRooms(evt, device) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(device).style.display = "block";
+        document.getElementById("Menu").style.display = "none";
+        evt.currentTarget.className += " active";
+    }
+    // è lo script che  permette di selezionare e visualizzare la form corretta per compilare correttamente i campi
+    // per effettuare l'update delle stanze
+    function selectRoomsForm() {
+        var selection = document.getElementById("field_room").value;
 
-        function openUsers(evt, cityName) {
-            var i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tabcontent");
+        if (selection == "field1"){
+            var tabcontent = document.getElementById("Change_product_type")
             for (i = 0; i < tabcontent.length; i++) {
             tabcontent[i].style.display = "none";
             }
-            tablinks = document.getElementsByClassName("tablinks");
-            for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" active", "");
-            }
-            document.getElementById(cityName).style.display = "block";
-            document.getElementById("Menu").style.display = "none";
-            evt.currentTarget.className += " active";
-        }
-
-        function openRooms(evt, cityName) {
-            var i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tabcontent");
+            document.getElementById("Change_channel_id").style.display = "none";
+            document.getElementById("Change_product_type").style.display = "block";
+            document.getElementById("Change_api_key_write").style.display = "none";
+            document.getElementById("Change_api_key_read").style.display = "none";
+            document.getElementById("Change_temperature_ranges").style.display = "none";
+            document.getElementById("Change_humidity_ranges").style.display = "none";
+            document.getElementById("Change_smoke_ranges").style.display = "none";
+        } else if (selection == "field2"){
+            var tabcontent = document.getElementById("Change_channel_id")
             for (i = 0; i < tabcontent.length; i++) {
             tabcontent[i].style.display = "none";
             }
-            tablinks = document.getElementsByClassName("tablinks");
-            for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" active", "");
+            document.getElementById("Change_channel_id").style.display = "block";
+            document.getElementById("Change_product_type").style.display = "none";
+            document.getElementById("Change_api_key_write").style.display = "none";
+            document.getElementById("Change_api_key_read").style.display = "none";
+            document.getElementById("Change_temperature_ranges").style.display = "none";
+            document.getElementById("Change_humidity_ranges").style.display = "none";
+            document.getElementById("Change_smoke_ranges").style.display = "none";
+        } else if (selection == "field3"){
+            var tabcontent = document.getElementById("Change_api_key_read")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
             }
-            document.getElementById(cityName).style.display = "block";
-            document.getElementById("Menu").style.display = "none";
-            evt.currentTarget.className += " active";
-        }
+            document.getElementById("Change_channel_id").style.display = "none";
+            document.getElementById("Change_product_type").style.display = "none";
+            document.getElementById("Change_api_key_write").style.display = "none";
+            document.getElementById("Change_api_key_read").style.display = "block";
+            document.getElementById("Change_temperature_ranges").style.display = "none";
+            document.getElementById("Change_humidity_ranges").style.display = "none";
+            document.getElementById("Change_smoke_ranges").style.display = "none";
 
-        // è lo script che  permette di selezionare e visualizzare la form corretta per compilare correttamente i campi
-        // per effettuare l'update delle
-        function selectRoomsForm() {
-            var selection = document.getElementById("field_room").value;
-
-            if (selection == "field1"){
-                var tabcontent = document.getElementById("Change_product_type")
-                for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-                }
-                document.getElementById("Change_channel_id").style.display = "none";
-                document.getElementById("Change_product_type").style.display = "block";
-                document.getElementById("Change_api_key_write").style.display = "none";
-                document.getElementById("Change_api_key_read").style.display = "none";
-                document.getElementById("Change_temperature_ranges").style.display = "none";
-                document.getElementById("Change_humidity_ranges").style.display = "none";
-                document.getElementById("Change_smoke_ranges").style.display = "none";
-            } else if (selection == "field2"){
-                var tabcontent = document.getElementById("Change_channel_id")
-                for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-                }
-                document.getElementById("Change_channel_id").style.display = "block";
-                document.getElementById("Change_product_type").style.display = "none";
-                document.getElementById("Change_api_key_write").style.display = "none";
-                document.getElementById("Change_api_key_read").style.display = "none";
-                document.getElementById("Change_temperature_ranges").style.display = "none";
-                document.getElementById("Change_humidity_ranges").style.display = "none";
-                document.getElementById("Change_smoke_ranges").style.display = "none";
-            } else if (selection == "field3"){
-                var tabcontent = document.getElementById("Change_api_key_read")
-                for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-                }
-                document.getElementById("Change_channel_id").style.display = "none";
-                document.getElementById("Change_product_type").style.display = "none";
-                document.getElementById("Change_api_key_write").style.display = "none";
-                document.getElementById("Change_api_key_read").style.display = "block";
-                document.getElementById("Change_temperature_ranges").style.display = "none";
-                document.getElementById("Change_humidity_ranges").style.display = "none";
-                document.getElementById("Change_smoke_ranges").style.display = "none";
-
-            }else if (selection == "field4"){
-                var tabcontent = document.getElementById("Change_api_key_write")
-                for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-                }
-                document.getElementById("Change_channel_id").style.display = "none";
-                document.getElementById("Change_product_type").style.display = "none";
-                document.getElementById("Change_api_key_write").style.display = "block";
-                document.getElementById("Change_api_key_read").style.display = "none";
-                document.getElementById("Change_temperature_ranges").style.display = "none";
-                document.getElementById("Change_humidity_ranges").style.display = "none";
-                document.getElementById("Change_smoke_ranges").style.display = "none";
-            }else if (selection == "field5"){
-                var tabcontent = document.getElementById("Change_temperature_ranges")
-                for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-                }
-                document.getElementById("Change_channel_id").style.display = "none";
-                document.getElementById("Change_product_type").style.display = "none";
-                document.getElementById("Change_api_key_write").style.display = "none";
-                document.getElementById("Change_api_key_read").style.display = "none";
-                document.getElementById("Change_temperature_ranges").style.display = "block";
-                document.getElementById("Change_humidity_ranges").style.display = "none";
-                document.getElementById("Change_smoke_ranges").style.display = "none";
-            }else if (selection == "field6"){
-                var tabcontent = document.getElementById("Change_humidity_ranges")
-                for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-                }
-                document.getElementById("Change_channel_id").style.display = "none";
-                document.getElementById("Change_product_type").style.display = "none";
-                document.getElementById("Change_api_key_write").style.display = "none";
-                document.getElementById("Change_api_key_read").style.display = "none";
-                document.getElementById("Change_temperature_ranges").style.display = "none";
-                document.getElementById("Change_humidity_ranges").style.display = "block";
-                document.getElementById("Change_smoke_ranges").style.display = "none";
-            } else {
-                var tabcontent = document.getElementById("Change_smoke_ranges")
-                for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-                }
-                document.getElementById("Change_channel_id").style.display = "none";
-                document.getElementById("Change_product_type").style.display = "none";
-                document.getElementById("Change_api_key_write").style.display = "none";
-                document.getElementById("Change_api_key_read").style.display = "none";
-                document.getElementById("Change_temperature_ranges").style.display = "none";
-                document.getElementById("Change_humidity_ranges").style.display = "none";
-                document.getElementById("Change_smoke_ranges").style.display = "block";
+        }else if (selection == "field4"){
+            var tabcontent = document.getElementById("Change_api_key_write")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
             }
-            document.getElementById("Menu").style.display = "none";
-            //evt.currentTarget.className += " active";
-
-        }
-
-        // // è lo script che permette di visualizzare e selezionare la form corretta per l'update dei campi utente
-        function selectUsersForm(){
-            var selection = document.getElementById("field_user").value;
-
-            if (selection == "field_1"){
-                var tabcontent = document.getElementById("Change_assigned_rooms")
-                for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-                }
-                document.getElementById("Change_assigned_role").style.display = "none";
-                document.getElementById("Change_assigned_rooms").style.display = "block";
-            } else {
-                var tabcontent = document.getElementById("Change_assigned_role")
-                for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-                }
-                document.getElementById("Change_assigned_role").style.display = "block";
-                document.getElementById("Change_assigned_rooms").style.display = "none";
-
+            document.getElementById("Change_channel_id").style.display = "none";
+            document.getElementById("Change_product_type").style.display = "none";
+            document.getElementById("Change_api_key_write").style.display = "block";
+            document.getElementById("Change_api_key_read").style.display = "none";
+            document.getElementById("Change_temperature_ranges").style.display = "none";
+            document.getElementById("Change_humidity_ranges").style.display = "none";
+            document.getElementById("Change_smoke_ranges").style.display = "none";
+        }else if (selection == "field5"){
+            var tabcontent = document.getElementById("Change_temperature_ranges")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
             }
-            document.getElementById("Menu").style.display = "none";
-            evt.currentTarget.className += " active";
-        }
-
-        function selectDevicesForm() {
-            var selection = document.getElementById("field_device").value;
-
-            if (selection == "field11"){
-                var tabcontent = document.getElementById("Change_name")
-                for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-                }
-                document.getElementById("Change_name").style.display = "block";
-                document.getElementById("Change_meas_type").style.display = "none";
-                document.getElementById("Change_services").style.display = "none";
-                document.getElementById("Change_topic").style.display = "none";
-                document.getElementById("Change_field").style.display = "none";
-
-            } else if (selection == "field22"){
-                var tabcontent = document.getElementById("Change_meas_type")
-                for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-                }
-                document.getElementById("Change_name").style.display = "none";
-                document.getElementById("Change_meas_type").style.display = "block";
-                document.getElementById("Change_services").style.display = "none";
-                document.getElementById("Change_topic").style.display = "none";
-                document.getElementById("Change_field").style.display = "none";
-            } else if (selection == "field33"){
-                var tabcontent = document.getElementById("Change_services")
-                for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-                }
-                document.getElementById("Change_name").style.display = "none";
-                document.getElementById("Change_meas_type").style.display = "none";
-                document.getElementById("Change_services").style.display = "block";
-                document.getElementById("Change_topic").style.display = "none";
-                document.getElementById("Change_field").style.display = "none";
-
-            }else if (selection == "field44"){
-                var tabcontent = document.getElementById("Change_topic")
-                for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-                }
-                document.getElementById("Change_name").style.display = "none";
-                document.getElementById("Change_meas_type").style.display = "none";
-                document.getElementById("Change_services").style.display = "none";
-                document.getElementById("Change_topic").style.display = "block";
-                document.getElementById("Change_field").style.display = "none";
-            }else {
-                var tabcontent = document.getElementById("Change_field")
-                for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-                }
-                document.getElementById("Change_name").style.display = "none";
-                document.getElementById("Change_meas_type").style.display = "none";
-                document.getElementById("Change_services").style.display = "none";
-                document.getElementById("Change_topic").style.display = "none";
-                document.getElementById("Change_field").style.display = "block";
+            document.getElementById("Change_channel_id").style.display = "none";
+            document.getElementById("Change_product_type").style.display = "none";
+            document.getElementById("Change_api_key_write").style.display = "none";
+            document.getElementById("Change_api_key_read").style.display = "none";
+            document.getElementById("Change_temperature_ranges").style.display = "block";
+            document.getElementById("Change_humidity_ranges").style.display = "none";
+            document.getElementById("Change_smoke_ranges").style.display = "none";
+        }else if (selection == "field6"){
+            var tabcontent = document.getElementById("Change_humidity_ranges")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
             }
-            document.getElementById("Menu").style.display = "none";
+            document.getElementById("Change_channel_id").style.display = "none";
+            document.getElementById("Change_product_type").style.display = "none";
+            document.getElementById("Change_api_key_write").style.display = "none";
+            document.getElementById("Change_api_key_read").style.display = "none";
+            document.getElementById("Change_temperature_ranges").style.display = "none";
+            document.getElementById("Change_humidity_ranges").style.display = "block";
+            document.getElementById("Change_smoke_ranges").style.display = "none";
+        } else {
+            var tabcontent = document.getElementById("Change_smoke_ranges")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_channel_id").style.display = "none";
+            document.getElementById("Change_product_type").style.display = "none";
+            document.getElementById("Change_api_key_write").style.display = "none";
+            document.getElementById("Change_api_key_read").style.display = "none";
+            document.getElementById("Change_temperature_ranges").style.display = "none";
+            document.getElementById("Change_humidity_ranges").style.display = "none";
+            document.getElementById("Change_smoke_ranges").style.display = "block";
+        }
+        document.getElementById("Menu").style.display = "none";
+        //evt.currentTarget.className += " active";
+
+    }
+    // è lo script che permette di visualizzare e selezionare la form corretta per l'update dei campi utente
+    function selectUsersForm(){
+        var selection = document.getElementById("field_user").value;
+
+        if (selection == "field_1"){
+            var tabcontent = document.getElementById("Change_assigned_rooms")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_assigned_role").style.display = "none";
+            document.getElementById("Change_assigned_rooms").style.display = "block";
+        } else {
+            var tabcontent = document.getElementById("Change_assigned_role")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_assigned_role").style.display = "block";
+            document.getElementById("Change_assigned_rooms").style.display = "none";
 
         }
+        document.getElementById("Menu").style.display = "none";
+        evt.currentTarget.className += " active";
+    }
+    // è lo script che permette di visualizzare e selezionare la form corretta per gli uptade dei campi devices
+    function selectDevicesForm() {
+        var selection = document.getElementById("field_device").value;
 
-        // functions for popups
-        function myFunction() {
-            alert("Registration confirmed! Please, select another action.");
+        if (selection == "field11"){
+            var tabcontent = document.getElementById("Change_name")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_name").style.display = "block";
+            document.getElementById("Change_meas_type").style.display = "none";
+            document.getElementById("Change_services").style.display = "none";
+            document.getElementById("Change_topic").style.display = "none";
+            document.getElementById("Change_field").style.display = "none";
+
+        } else if (selection == "field22"){
+            var tabcontent = document.getElementById("Change_meas_type")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_name").style.display = "none";
+            document.getElementById("Change_meas_type").style.display = "block";
+            document.getElementById("Change_services").style.display = "none";
+            document.getElementById("Change_topic").style.display = "none";
+            document.getElementById("Change_field").style.display = "none";
+        } else if (selection == "field33"){
+            var tabcontent = document.getElementById("Change_services")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_name").style.display = "none";
+            document.getElementById("Change_meas_type").style.display = "none";
+            document.getElementById("Change_services").style.display = "block";
+            document.getElementById("Change_topic").style.display = "none";
+            document.getElementById("Change_field").style.display = "none";
+
+        }else if (selection == "field44"){
+            var tabcontent = document.getElementById("Change_topic")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_name").style.display = "none";
+            document.getElementById("Change_meas_type").style.display = "none";
+            document.getElementById("Change_services").style.display = "none";
+            document.getElementById("Change_topic").style.display = "block";
+            document.getElementById("Change_field").style.display = "none";
+        }else {
+            var tabcontent = document.getElementById("Change_field")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_name").style.display = "none";
+            document.getElementById("Change_meas_type").style.display = "none";
+            document.getElementById("Change_services").style.display = "none";
+            document.getElementById("Change_topic").style.display = "none";
+            document.getElementById("Change_field").style.display = "block";
         }
-        function myFunction1() {
-            alert("Updating success! Please, select another action.");
-        }
-        function myFunction2() {
-            alert("Delete success! Please, select another action.");
-        }
-        function myFunctionConfirm(string) {
+        document.getElementById("Menu").style.display = "none";
+
+    }
+     // functions for popups
+    function myFunction() {
+        alert("Registration confirmed! Please, select another action.");
+    }
+    function myFunction1() {
+        alert("Updating success! Please, select another action.");
+    }
+    function myFunction2() {
+        alert("Delete success! Please, select another action.");
+    }
+    function myFunctionConfirm(string) {
             var r = confirm("Are you sure to delete?");
             if (r == true && string == 'device') {
                 sendDeviceDeleteRequest();
