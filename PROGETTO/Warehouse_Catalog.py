@@ -189,13 +189,13 @@ class WareHouse_Catalog:
                         else:
                             raise cherrypy.HTTPError(
                                 400, "Unexpected command - ID NOT CLASSIFIED ")
-                        
+
                     else:
                         # controllare a quale azione riguardo le stanze si
                         # riferisce
                         roomID = IDReference
                         cmd = uri[2]
-                        
+
                         if cmd == 'assigned_product_type':
                             product_type, flag = self.RoomManager.findRoomType(
                                 self.catalog, roomID)
@@ -220,7 +220,7 @@ class WareHouse_Catalog:
                             data, flag = self.RoomManager.getDevices(
                                 self.catalog, roomID)
                             result = dict(devices=data)
-                            
+
                         else:
                             raise cherrypy.HTTPError(
                                 401, "Unexpected command - Wrong Command ")
@@ -230,7 +230,7 @@ class WareHouse_Catalog:
                             return jsonOut
                         elif flag == 3:
                             raise cherrypy.HTTPError(506, "Room not found")
-                        elif flag==4: 
+                        elif flag==4:
                             raise cherrypy.HTTPError(506, "User not found")
 
                 else:
@@ -670,5 +670,7 @@ if __name__ == "__main__":
             'tool.session.on': True
         }
     }
-    cherrypy.config.update({'server.socket_port': Settings['port_catalog']})
-    cherrypy.quickstart(WareHouse_Catalog(Settings), '/', conf)
+    cherrypy.tree.mount(WareHouse_Catalog(Settings),'/',conf)
+    cherrypy.config.update({'server.socket_host': '0.0.0.0','server.socket_port': Settings['port_catalog']})
+    cherrypy.engine.start()
+    cherrypy.engine.block()

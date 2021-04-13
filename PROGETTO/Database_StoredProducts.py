@@ -245,7 +245,7 @@ class Database_StoredProducts():
             "month": dateTimeObj.month,
             "year": dateTimeObj.year,
             "product_type": product_type
-            
+
         }
         # Request URL to catalog
         r_url = requests.get(f'{URL}/catalog/URL')
@@ -274,5 +274,7 @@ if __name__ == "__main__":
             'tool.session.on': True
         }
     }
-    cherrypy.config.update({'server.socket_port': port})
-    cherrypy.quickstart(Database_StoredProducts(), '/', conf)
+    cherrypy.tree.mount(Database_StoredProducts(),'/',conf)
+    cherrypy.config.update({'server.socket_host': '0.0.0.0','server.socket_port':port})
+    cherrypy.engine.start()
+    cherrypy.engine.block()

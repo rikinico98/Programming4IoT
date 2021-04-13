@@ -5,6 +5,7 @@ import BarcodeScanner
 from MyMQTT import *
 import requests
 import DailyMonitor
+import time
 
 
 class WareBot:
@@ -115,17 +116,20 @@ class WareBot:
         r = requests.get(f'{self.catalog_URL}/catalog/users')
         body = json.dumps(r.json(), indent=4)
         userDict = json.loads(body)
-        userList = userDict['userList']
+        userList = [item['userID'] for item in userDict['userList']]
         for status in self.sessionStatus:
             # iterazione su sessionStatus per capire se il
             # chatID del messaggio ricevuto è di un utente
             # registrato
             if status['chatID'] == chat_ID :
                 if 'userID' in status.keys():
-                    if status['userID'] not in userList:
-                        self.sessionStatus.remove(status)
-                        text = "Your username no longer appears in the catalog please click /start and register again"
-                        self.bot.sendMessage(chat_ID, text=text)
+                    if status['userID'] is not None :
+                        if status['userID'] not in userList:
+                            self.sessionStatus.remove(status)
+                            text = "Your username no longer appears in the catalog please click /start and register again"
+                            self.bot.sendMessage(chat_ID, text=text)
+                            break
+
 
         if 'text' in msg:
             # se è un messaggio di testo aggiorna il flag e salva il body del
@@ -404,17 +408,20 @@ class WareBot:
         r = requests.get(f'{self.catalog_URL}/catalog/users')
         body = json.dumps(r.json(), indent=4)
         userDict = json.loads(body)
-        userList = userDict['userList']
+        userList = [item['userID'] for item in userDict['userList']]
         for status in self.sessionStatus:
             # iterazione su sessionStatus per capire se il
             # chatID del messaggio ricevuto è di un utente
             # registrato
             if status['chatID'] == chat_ID :
                 if 'userID' in status.keys():
-                    if status['userID'] not in userList:
-                        self.sessionStatus.remove(status)
-                        text = "Your username no longer appears in the catalog please click /start and register again"
-                        self.bot.sendMessage(chat_ID, text=text)
+                    if status['userID'] is not None :
+                        if status['userID'] not in userList:
+                            self.sessionStatus.remove(status)
+                            text = "Your username no longer appears in the catalog please click /start and register again"
+                            self.bot.sendMessage(chat_ID, text=text)
+                            break
+
 
         if query_data == 'accedi':
             found = False
@@ -1874,7 +1881,7 @@ if __name__ == "__main__":
                             status['logOutBackup'] += retrivedDict['msg']
                         else:
                             status['logOutBackup'] += retrivedDict['msg']
-
+        time.sleep(300)
         for status in bot.sessionStatus:
             if status['Log_in_status'] == 1 and (
                     'logOutBackup' in status.keys()):
