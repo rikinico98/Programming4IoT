@@ -22,8 +22,8 @@ class MyThread(threading.Thread):
         self.loc1=np.mean(self.alert_val_temp)
         self.loc2=np.mean(self.alert_val_hum)
         
-        self.failuretemprange=list(range(0,self.alert_val_temp[0]-1))+list(range(self.alert_val_temp[1]-1,100))+list(range(self.alert_val_temp[0],self.alert_val_temp[1]))
-        self.failurehumrange=list(range(0,self.alert_val_hum[0]-1))+list(range(self.alert_val_hum[1]-1,100))+list(range(self.alert_val_hum[1],self.alert_val_hum[1]))
+        self.failuretemprange=list(range(0,self.alert_val_temp[0]-1))+list(range(self.alert_val_temp[1]-1,50))+list(range(self.alert_val_temp[0],self.alert_val_temp[1]))
+        self.failurehumrange=list(range(0,self.alert_val_hum[0]-1))+list(range(self.alert_val_hum[1]-1,90))+list(range(self.alert_val_hum[1],self.alert_val_hum[1]))
         
         threading.Thread.__init__(self)
         #Setup thread
@@ -34,23 +34,22 @@ class MyThread(threading.Thread):
 
     def run(self):
         while self.iterate:
-            # Concentration scope: from 200ppm to 10000ppm
-            # When the gas concentration is high enough, the sensor usually outputs value greater than 300.
+            
             p = random.uniform(0,1)
             if p > self.failure:
-                print("fallimento")
-                a=random.randint(0,len(self.failuretemprange)-1)
-                u = self.failuretemprange[a]
-                b=random.randint(0,len(self.failurehumrange)-1)
-                v= self.failurehumrange[b]
-                print(u,v)
-            else:
                 loc, scale = self.loc1, 0.1
                 a= np.random.logistic(loc, scale, 10000)
                 u = random.choice(a)
                 loc, scale = self.loc2, 0.1
                 b= np.random.logistic(loc, scale, 10000)
                 v = random.choice(b)
+            else:
+                print("fallimento")
+                a=random.randint(0,len(self.failuretemprange)-1)
+                u = self.failuretemprange[a]
+                b=random.randint(0,len(self.failurehumrange)-1)
+                v= self.failurehumrange[b]
+                print(u,v)
 
             if (u >=self.alert_val_temp[0] and u<= self.alert_val_temp[1] ) and (v>= self.alert_val_hum[0] and v<= self.alert_val_hum[1]):
                 # Everything works!
@@ -80,15 +79,11 @@ class TEMHUMSensor():
         self.roomID = roomID
         self.failure = failure
         # Request broker from catalog
-        r_broker = requests.get(f'http://127.0.0.1:8070/catalog/msg_broker')
+        r_broker = requests.get(f'http://127.0.0.1:8070/catalog/MQTT_utilities')
         j_broker = json.dumps(r_broker.json(),indent=4)
         d_broker = json.loads(j_broker)
-        self.broker = d_broker["msgBroker"]
-        # Request port from catalog
-        r_port = requests.get(f'http://127.0.0.1:8070/catalog/port')
-        j_port = json.dumps(r_port.json(),indent=4)
-        d_port = json.loads(j_port)
-        self.port = d_port["port"]
+        self.broker = d_broker["MQTT_utilities"]["msgBroker"]
+        self.port = d_broker["MQTT_utilities"]["port"]
         # Create the device
         self.device = MyMQTT(self.ID, self.broker, self.port, None)
         # Request topic from catalog

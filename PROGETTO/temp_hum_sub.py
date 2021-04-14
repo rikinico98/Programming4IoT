@@ -9,31 +9,32 @@ from telepot.loop import MessageLoop
 
 class TEMPHUMReceiver():
 
-    def __init__(self, deviceID, roomID):
+    def __init__(self, deviceID, roomID,catalog_URL):
         self.deviceID = deviceID
         self.roomID = roomID ## devo cercare tramite la roomID la apikey 
-        self.apikey = '4O6ZLEXF1XAQ933O' #va letto dal Catalog 
-        self.baseURL = f"https://api.thingspeak.com/update?api_key={self.apikey}" 
+        #self.apikey = '4O6ZLEXF1XAQ933O' #va letto dal Catalog 
+         #self.baseURL = f"https://api.thingspeak.com/update?api_key={self.apikey}" 
         # Request broker from catalog
-        r_broker = requests.get(f'http://127.0.0.1:8070/catalog/msg_broker')
+        self.catalog_URL=catalog_URL
+        r_broker = requests.get(f'{self.catalog_URL}/catalog/MQTT_utilities')
         j_broker = json.dumps(r_broker.json(),indent=4)
-        d_broker = json.loads(j_broker)
-        self.broker = d_broker["msgBroker"]
-        # Request port from catalog
-        r_port = requests.get(f'http://127.0.0.1:8070/catalog/port')
-        j_port = json.dumps(r_port.json(),indent=4)
-        d_port = json.loads(j_port)
-        self.port = d_port["port"]
+        d_broker = json.loads(j_broker) 
+        self.broker = d_broker["MQTT_utilities"]["msgBroker"]
+        self.port = d_broker["MQTT_utilities"]["port"]
+        field = requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/{self.deviceID}/get_field')
+        field_field1 = json.dumps(field.json(), indent = 4)
+        self.field_field = json.loads(field_field1)
+        print(self.field_field)
         # Create the device
         self.device = MyMQTT(self.deviceID, self.broker, self.port, self)
         # Request topic from catalog
-        r_topic = requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/{self.deviceID}/topic')
+        r_topic = requests.get(f'{self.catalog_URL}/catalog/{self.roomID}/{self.deviceID}/topic')
         j_topic = json.dumps(r_topic.json(),indent=4)
         d_topic = json.loads(j_topic)
         self.topic = d_topic["topic"] #Note: topic is a list
         self.__message1={"TS_api":"", "ThingSpeak_field": "", "v": None}
         self.__msg_bot1={"measure_type":"","ranges":[],"value":None,"Room":"","chatID":""}
-      
+        print(self.topic)
     
     def __FindChatID(self,userID):
         chat_dict1=requests.get(f'http://127.0.0.1:8070/catalog/{userID}/chatID')
@@ -64,13 +65,13 @@ class TEMPHUMReceiver():
         message1=self.__message1
         
         message1["TS_api"]=TS["api_key_write"]
-        message1["ThingSpeak_field"]="field1"
+        message1["ThingSpeak_field"]=self.field_field["field"][0]
         message1["v"]=temval 
         time.sleep(3)     
         self.device.myPublish("ThingSpeak/channel/allsensor",message1)
         message2=self.__message1
         message2["TS_api"]=TS["api_key_write"]
-        message2["ThingSpeak_field"]="field2"
+        message2["ThingSpeak_field"]=self.field_field["field"][1]
         message2["v"]=humval
         time.sleep(3)
         self.device.myPublish("ThingSpeak/channel/allsensor",message1)
@@ -79,25 +80,6 @@ class TEMPHUMReceiver():
         ranges_dict = json.loads(ranges_dict2)
         alert_val_temp=ranges_dict["ranges"]["Temperature"]
         alert_val_hum=ranges_dict["ranges"]["Humidity"]
-            # r = requests.get(self.baseURL+f'&field2={smoke_value}') 
-        # If the value of the message received is out of the normal range
-        # When the gas concentration is high enough, the sensor usually outputs value greater than 300.
-        # if ((int(temval)>= int(alert_val_temp[1])) or (int(temval) <= int(alert_val_temp[0]))) and ((int(humval)>= int(alert_val_hum[1])) or (int(humval) <= int(alert_val_hum[0]))):
-        #     msg_bot=self.__msg_bot1
-        #     users_dict1=requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/users')
-        #     users_dict2= json.dumps(users_dict1.json(),indent=4)
-        #     users_dict = json.loads(users_dict2)
-        #     print(users_dict)
-        #     for user in users_dict["user"]:
-        #         chatID=self.__FindChatID(user)
-        #         msg_bot["measure_type"]='temperature'
-        #         msg_bot["ranges"] = alert_val_temp
-        #         msg_bot["value"] = temval
-        #         msg_bot["Room"] = self.roomID
-        #         msg_bot["chatID"] = chatID
-        #         self.device.myPublish(f"WareHouse/team5/alarm/{self.roomID}",msg_bot)
-
-
         if ((int(temval)>= int(alert_val_temp[1])) or (int(temval) <= int(alert_val_temp[0]))):
             msg_bot=self.__msg_bot1
             users_dict1=requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/users')
@@ -148,12 +130,13 @@ class TEMPHUMReceiver():
 
 if __name__ == "__main__":
 
-    
-
     myDevicesList = []
     current_rooms = []
+    APIs = json.load(open("Settings.json"))
+    catalog_URL = APIs['catalogURL']
     # Get all the rooms currently used
-    r_rooms = requests.get(f'http://127.0.0.1:8070/catalog/rooms')
+    r_rooms = requests.get(f'{catalog_URL}/catalog/rooms')
+    
     if r_rooms.status_code == 200:
         j_rooms = json.dumps(r_rooms.json(),indent=4)
         d_rooms = json.loads(j_rooms)
@@ -163,14 +146,16 @@ if __name__ == "__main__":
     
         # For all the rooms take all the smoke devices
         for room in current_rooms:
-            r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/temphum')
+            print(room)
+            r_devices = requests.get(f'{catalog_URL}/catalog/{room}/measure_type/temphum')
             if r_devices.status_code == 200:
                 j_devices = json.dumps(r_devices.json(),indent=4)
                 d_devices = json.loads(j_devices)
                 devices = d_devices["foundIDs"] #Note: devices is a list
+                print(devices)
                 # Create a thread for each device
                 for device in devices:
-                    myDevicesList.append(TEMPHUMReceiver(device,room))
+                    myDevicesList.append(TEMPHUMReceiver(device,room,catalog_URL))
                     print(f"New device added: {device}")
 
         for device in myDevicesList:
@@ -181,7 +166,8 @@ if __name__ == "__main__":
         time.sleep(30)
         # Get all the updated rooms
         update_rooms = []
-        r_rooms = requests.get(f'http://127.0.0.1:8070/catalog/rooms')
+        
+        r_rooms = requests.get(f'{catalog_URL}/catalog/rooms')
         if r_rooms.status_code == 200:
             j_rooms = json.dumps(r_rooms.json(),indent=4)
             d_rooms = json.loads(j_rooms)
@@ -209,7 +195,7 @@ if __name__ == "__main__":
 
             # Check for changes in the remaining rooms
             for room in current_rooms:
-                r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/temphum')
+                r_devices = requests.get(f'{catalog_URL}/catalog/{room}/measure_type/temphum')
                 if r_devices.status_code == 200:
                     j_devices = json.dumps(r_devices.json(),indent=4)
                     d_devices = json.loads(j_devices)
@@ -236,7 +222,7 @@ if __name__ == "__main__":
                     # Add new devices
                     missing_devices = list(set(devices) - set(device_in_room))
                     for device in missing_devices:
-                        myDevicesList.append(TEMHUMReceiver(device,room))
+                        myDevicesList.append(TEMHUMReceiver(device,room,catalog_URL))
                         myDevicesList[-1].start()
                         print(f"New device added: {device}")
 
@@ -247,13 +233,13 @@ if __name__ == "__main__":
             current_rooms = current_rooms + rooms_to_add
             # Add all the devices within the rooms to add
             for room in rooms_to_add:
-                r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/temphum')
+                r_devices = requests.get(f'{catalog_URL}/catalog/{room}/measure_type/temphum')
                 if r_devices.status_code == 200:
                     j_devices = json.dumps(r_devices.json(),indent=4)
                     d_devices = json.loads(j_devices)
                     devices = d_devices["foundIDs"] #Note: devices is a list
                     # Create a thread for each device
                     for device in devices:
-                        myDevicesList.append(TEMHUMReceiver(device,room,botTelegram))
+                        myDevicesList.append(TEMHUMReceiver(device,room,catalog_URL))
                         myDevicesList[-1].start()
                         print(f"New device added: {device}")

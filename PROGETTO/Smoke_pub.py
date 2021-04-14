@@ -55,15 +55,11 @@ class smokeSensor():
         self.roomID = roomID
         self.failure = failure
         # Request broker from catalog
-        r_broker = requests.get(f'http://127.0.0.1:8070/catalog/msg_broker')
+        r_broker = requests.get(f'http://127.0.0.1:8070/catalog/MQTT_utilities')
         j_broker = json.dumps(r_broker.json(),indent=4)
         d_broker = json.loads(j_broker)
-        self.broker = d_broker["msgBroker"]
-        # Request port from catalog
-        r_port = requests.get(f'http://127.0.0.1:8070/catalog/port')
-        j_port = json.dumps(r_port.json(),indent=4)
-        d_port = json.loads(j_port)
-        self.port = d_port["port"]
+        self.broker = d_broker["MQTT_utilities"]["msgBroker"]
+        self.port = d_broker["MQTT_utilities"]["port"]
         # Create the device
         self.device = MyMQTT(self.ID, self.broker, self.port, None)
         # Request topic from catalog

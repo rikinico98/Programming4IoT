@@ -8,6 +8,19 @@ import json
 import time
 import requests
 
+def _Findparametrs():
+    r_thingspeak = requests.get(f'http://127.0.0.1:8070/catalog/Thingspeak_API')
+    r_thingspeak1 = json.dumps(r_thingspeak.json(),indent=4)
+    thinspeak_param = json.loads(r_thingspeak1)
+    topic=thinspeak_param["Thingspeak_API"]["mqttTopicThingspeak"]
+    thinkspeak_id= thinspeak_param["Thingspeak_API"]["clientID_Thingspeak_MQTT"]
+    r_broker = requests.get(f'http://127.0.0.1:8070/catalog/MQTT_utilities')
+    j_broker = json.dumps(r_broker.json(),indent=4)
+    d_broker = json.loads(j_broker)
+    broker = d_broker["MQTT_utilities"]["msgBroker"]
+    port = d_broker["MQTT_utilities"]["port"]
+    dict_return={"topic":topic,"thinkspeak_id":thinkspeak_id,"broker":broker,"port":port}
+    return dict_return
 class SensorSubscriber():
     def __init__(self, clientID, broker, port, topic):
         self.topic = topic
@@ -20,9 +33,6 @@ class SensorSubscriber():
         self.port = port
         self.client = PahoMQTT.Client(clientID, True)
         self.client.on_message = self.myOnMessageReceived
-        # self.channelID = 1321136 #va letto dal catalog
-        # self.apikey = '4O6ZLEXF1XAQ933O' #va passata come messaggio 
-        # self.baseURL = f"https://api.thingspeak.com/update?api_key={self.apikey}" #va passata come messaggio
     def myOnMessageReceived(self, paho_mqtt , userdata, msg):
         self.notifier.notify(msg.topic, msg.payload)
     def start(self):
@@ -40,8 +50,7 @@ class SensorSubscriber():
         self.TS_api.append(self.payload["TS_api"])
         self.field.append(self.payload["ThingSpeak_field"]) # devo avere in aggiunta al campo anche l'URL del canale ThingSpeak della stanza
         self.value.append(self.payload["v"])
-        # print(field,value)
-        # print(field,value)
+        
     def sendThingSpeak(self):
         print(self.field,self.value)
         if len(self.field) > 0: 
@@ -52,11 +61,8 @@ class SensorSubscriber():
             self.TS_api.pop(0)
 
 if __name__ == '__main__':
-    #anche questi vanno presi dal Catalog
-    #broker = requests.get("...catalog/msg_broker")
-    #port = requests.get("...catalog/port")
-    #topic = requests.get("...catalog/.../topic")
-    sensor = SensorSubscriber('allsensor_sub_pob',"test.mosquitto.org", 1883, 'ThingSpeak/channel/allsensor')
+    parameters=_Findparametrs()
+    sensor = SensorSubscriber(parameters["thinkspeak_id"],parameters["broker"], parameters["port"], parameters["topic"])
     sensor.start()
     while True: #pubblica in continuazione
         time.sleep(15)
