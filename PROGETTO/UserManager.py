@@ -54,7 +54,7 @@ class UserManager:
             catalog['userList'].append(
                 dict(
                     userID=userID,
-                    chatID=None,
+                    chatID=newUser["chatID"],
                     roomIDs=newUser["roomIDs"]))
             return catalog, userFound
 
