@@ -56,7 +56,7 @@ function sendDevicesPOSTrequest() {
   services = [];
   services_details = [];
 
-  if (services_array[1] == '-'){
+  if (services_array[1] == 'none'){
     services = services_array[0];
     services_details = [{
       serviceType: service1,
@@ -104,11 +104,16 @@ function sendDevicesPOSTrequest() {
     }]
   };
   // necessario nel caso in cui come nel DHT11 è necessario avere più fields
+  // o come nel caso del blackout in cui non se ne hanno
   fields = [];
-  if (field2 == 'none') {
+  if (field2 == 'none' && field != 'none') {
     fields = [field];
-  } else {
+  } else if (field2 != 'none' && field == 'none') {
+    fields = [field2];
+  } else if (field2 != 'none' && field != 'none') {
     fields = [field, field2];
+  } else {
+    fields = [];
   }
   // il body è quello che verrà poi inviato nel catalog, mentre il command andrà a definire l'ulr
   body = {
@@ -528,12 +533,17 @@ function sendDeviceFieldPUTrequest(){
   field = $("#field_123").val(); 
   field2 = $("#field_2").val(); 
   command = 'change_field';
-  // necessario if nel caso di più fields come per DHT11
+  // necessario nel caso in cui come nel DHT11 è necessario avere più fields
+  // o come nel caso del blackout in cui non se ne hanno
   fields = [];
-  if (field2 == 'none') {
+  if (field2 == 'none' && field != 'none') {
     fields = [field];
-  } else {
+  } else if (field2 != 'none' && field == 'none') {
+    fields = [field2];
+  } else if (field2 != 'none' && field != 'none') {
     fields = [field, field2];
+  } else {
+    fields = [];
   }
   // costruisco il body
   body = {

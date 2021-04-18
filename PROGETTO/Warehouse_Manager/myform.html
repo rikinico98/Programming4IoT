@@ -5,7 +5,7 @@
     <script src="/js/jquery.min.js"></script>
     <script src="/js/popper.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
-    <script src="/js/myform.js"></script>
+    <script src="/js/myWebForm.js"></script>
 </heaer>
 <head>
 <link rel="shortcut icon" href="#">
@@ -80,9 +80,15 @@ padding-right: 20px;
                         Instructions: typical Device ID is "D_001"<br>
                         <input type="text" class="form-control" id="deviceID"><br>
                         <label for="deviceName">Device name:   </label><br><input type="text" class="form-control" id="deviceName"><br>
-                        <label for="measureType">Measure type:   </label><br><input type="text" class="form-control" id="measureType"><br>
+                        <label for="measureType">Measure type:   </label><br>
+                        <select id="measureType" name="measureType">
+                            <option value="temphum">temphum</option>
+                            <option value="smoke">smoke</option>
+                            <option value="blackout">blackout</option>
+                        </select><br><br>
                         <label for="field">Thingspeak field 1:   </label><br>
                         <select id="field" name="field">
+                            <option value="none">none</option>
                             <option value="field1">field1</option>
                             <option value="field2">field2</option>
                             <option value="field3">field3</option>
@@ -491,7 +497,11 @@ padding-right: 20px;
                         <label for="device_idD">Device ID:   </label><br>
                         <br><input type="text" class="form-control" id="device_idD"><br>
                         <label for="meas_typeD">Measure Type:   </label><br>
-                        <br><input type="text" class="form-control" id="meas_typeD"><br>
+                        <select id="meas_typeD" name="meas_typeD">
+                            <option value="temphum">temphum</option>
+                            <option value="smoke">smoke</option>
+                            <option value="blackout">blackout</option>
+                        </select><br><br>
                     </div>
                     <button type="submit" onclick="sendDeviceMeasurePUTrequest();myFunction1() " class="btn btn-primary">Update</button>
                 </form>
@@ -586,6 +596,7 @@ padding-right: 20px;
                         <br><input type="text" class="form-control" id="device_id123"><br>
                         <label for="field_123">Thingspeak channel field 1:   </label><br>
                         <select id="field_123" name="field_123">
+                            <option value="none">none</option>
                             <option value="field1">field1</option>
                             <option value="field2">field2</option>
                             <option value="field3">field3</option>
