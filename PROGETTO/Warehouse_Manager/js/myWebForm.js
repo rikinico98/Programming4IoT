@@ -145,12 +145,11 @@ function sendRoomsPOSTrequest() {
   hum_min = parseInt($("#hum_min").val());
   hum_max = parseInt($("#hum_max").val());
   smoke_min = parseInt($("#smoke_min").val());
-  smoke_max = parseInt($("#smoke_max").val());
   // costruzione del body da inviare
   body = {
     roomID : roomID,
     devicesList: [],
-    ranges: {"Temperature": [temp_min,temp_max], "Humidity": [hum_min, hum_max], "Smoke": [smoke_min, smoke_max]},
+    ranges: {"Temperature": [temp_min,temp_max], "Humidity": [hum_min, hum_max], "Smoke": [smoke_min]},
     product_type: product_type,
     ThingSpeak:{"channelID": "", "api_key_read": "", "api_key_write": ""}
     };
@@ -318,13 +317,12 @@ function sendRoomHumidityPUTrequest() {
 function sendRoomSmokePUTrequest() {
   // leggo i campi dalla form
   roomID1 = $("#roomID7").val();
-  smoke_min = parseInt($("#smoke_min_1").val());  
-  smoke_max = parseInt($("#smoke_max_1").val()); 
+  smoke_min = parseInt($("#smoke_min_1").val());
   command = 'change_ranges';
   // costruisco il body
   body = {
     roomID : roomID1,
-    ranges:{Smoke : [smoke_min, smoke_max]}
+    ranges:{Smoke : [smoke_min]}
   };
   // richiesta PUT
   $.ajax({
