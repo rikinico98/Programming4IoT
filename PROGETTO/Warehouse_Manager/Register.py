@@ -53,8 +53,8 @@ class OpenWebService():
             diz = json.loads(diz1)  # la risposta diventa dizionario
             # mi prendo le specifiche del canale e le salvo
             body["ThingSpeak"]["channelID"] = diz["id"]
-            body["ThingSpeak"]["api_key_read"] = diz["api_keys"][0]["api_key"]
-            body["ThingSpeak"]["api_key_write"] = diz["api_keys"][1]["api_key"]
+            body["ThingSpeak"]["api_key_read"] = diz["api_keys"][1]["api_key"]
+            body["ThingSpeak"]["api_key_write"] = diz["api_keys"][0]["api_key"]
             print(json.dumps(body, indent=4))
             r = requests.post(
                 self.url_catalog +
