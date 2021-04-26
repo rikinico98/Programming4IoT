@@ -1,4 +1,5 @@
-#Blackout sensor simulator
+#BLACKOUT SENSOR
+#PUBLISHER DI sensore di BLACKOUT
 
 
 from MyMQTT import *
@@ -7,7 +8,6 @@ import json
 import time
 import random
 import requests
-
 
 class MyThread(threading.Thread):
 
@@ -18,8 +18,6 @@ class MyThread(threading.Thread):
         self.device = device
         self.failure = failure
         self.iterate = True
-        
-        
 
     def run(self):
         while self.iterate:
@@ -32,37 +30,41 @@ class MyThread(threading.Thread):
                 # Simulation of failure (failure holds for some time untill resolution of the problem)
                 # Stop sending MQTT messages
                 t=random.uniform(10,40)
-                print(t)
                 time.sleep(t)
-                
-    
+ 
     def stop(self):
         self.iterate = False
 
 
 class blackoutSensor():
 
-    def __init__(self, ID, deviceID, roomID, failure):
+    def __init__(self, ID, deviceID, roomID, failure,URL):
         self.ID = ID
         self.deviceID = deviceID
         self.roomID = roomID
         self.failure = failure
+        self.URL=URL
         # Request broker from catalog
-        r_broker = requests.get(f'http://127.0.0.1:8070/catalog/MQTT_utilities')
-        print(r_broker)
-        j_broker = json.dumps(r_broker.json(),indent=4)
-        d_broker = json.loads(j_broker) 
-        self.broker = d_broker["MQTT_utilities"]["msgBroker"]
-        self.port = d_broker["MQTT_utilities"]["port"]
-        self.general_topic=d_broker["MQTT_utilities"]["mqttTopicGeneral"]
-        # Create the device
-        self.device = MyMQTT(self.ID, self.broker, self.port, None)
+        r_broker = requests.get(f'{self.URL}/catalog/MQTT_utilities') #richiesta di broker,port 
+        if r_broker.status_code==200:
+            j_broker = json.dumps(r_broker.json(),indent=4)
+            d_broker = json.loads(j_broker) 
+            self.broker = d_broker["MQTT_utilities"]["msgBroker"]
+            self.port = d_broker["MQTT_utilities"]["port"]
+           
+            # Create the device
+            self.device = MyMQTT(self.ID, self.broker, self.port, None)
+        else:
+            pass
         # Request topic from catalog
-        r_topic = requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/{self.deviceID}/topic')
-        j_topic = json.dumps(r_topic.json(),indent=4)
-        d_topic = json.loads(j_topic)
-        self.topic = d_topic["topic"] #Note: topic is a list
-        # Define standard message to send
+        r_topic = requests.get(f'{self.URL}/catalog/{self.roomID}/{self.deviceID}/topic') #richiesta del topic del dispositivo
+        if r_topic.status_code==200:
+            j_topic = json.dumps(r_topic.json(),indent=4)
+            d_topic = json.loads(j_topic)
+            self.topic = d_topic["topic"] #Note: topic is a list
+            # Define standard message to send
+        else:
+            pass
         self.__message = {"bn": self.deviceID, "e": [{"n": "blackout detector", "u": "bool", "t": None, "v": 1}]}
     
     def start(self):
@@ -91,7 +93,9 @@ class blackoutSensor():
 
 
 if __name__ == "__main__":
-
+    f = open('Settings.json',)
+    data = json.load(f)
+    URL = data["catalogURL"]
     # To simulate failure of the real sensor
     failure_probability = -1
     while failure_probability < 0 or failure_probability > 1:
@@ -100,7 +104,7 @@ if __name__ == "__main__":
     myDevicesList = []
     current_rooms = []
     # Get all the rooms currently used
-    r_rooms = requests.get(f'http://127.0.0.1:8070/catalog/rooms')
+    r_rooms = requests.get(f'{URL}/catalog/rooms')
     if r_rooms.status_code == 200:
         j_rooms = json.dumps(r_rooms.json(),indent=4)
         d_rooms = json.loads(j_rooms)
@@ -110,14 +114,14 @@ if __name__ == "__main__":
         
         # For all the rooms take all the blackout devices
         for room in current_rooms:
-            r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/blackout')
+            r_devices = requests.get(f'{URL}/catalog/{room}/measure_type/blackout')
             if r_devices.status_code == 200:
                 j_devices = json.dumps(r_devices.json(),indent=4)
                 d_devices = json.loads(j_devices)
                 devices = d_devices["foundIDs"] #Note: devices is a list
                 # Create a thread for each device
                 for device in devices:
-                    myDevicesList.append(blackoutSensor(device+"_pub", device, room, failure_probability))
+                    myDevicesList.append(blackoutSensor(device+"_pub", device, room, failure_probability,URL))
                     print(f"New device added: {device}")
 
         for device in myDevicesList:
@@ -128,7 +132,7 @@ if __name__ == "__main__":
         time.sleep(30)
         # Get all the updated rooms
         update_rooms = []
-        r_rooms = requests.get(f'http://127.0.0.1:8070/catalog/rooms')
+        r_rooms = requests.get(f'{URL}/catalog/rooms')
         if r_rooms.status_code == 200:
             j_rooms = json.dumps(r_rooms.json(),indent=4)
             d_rooms = json.loads(j_rooms)
@@ -157,7 +161,7 @@ if __name__ == "__main__":
             # Check for changes in the remaining rooms
             device_to_delete = []
             for room in current_rooms:
-                r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/blackout')
+                r_devices = requests.get(f'{URL}/catalog/{room}/measure_type/blackout')
                 if r_devices.status_code == 200:
                     j_devices = json.dumps(r_devices.json(),indent=4)
                     d_devices = json.loads(j_devices)
@@ -184,7 +188,7 @@ if __name__ == "__main__":
                     # Add new devices
                     missing_devices = list(set(devices) - set(device_in_room))
                     for device in missing_devices:
-                        myDevicesList.append(blackoutSensor(device+"_pub", device, room, failure_probability))
+                        myDevicesList.append(blackoutSensor(device+"_pub", device, room, failure_probability,URL))
                         myDevicesList[-1].start()
                         print(f"New device added: {device}")
 
@@ -195,13 +199,13 @@ if __name__ == "__main__":
             current_rooms = current_rooms + rooms_to_add
             # Add all the devices within the rooms to add
             for room in rooms_to_add:
-                r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/blackout')
+                r_devices = requests.get(f'{URL}/catalog/{room}/measure_type/blackout')
                 if r_devices.status_code == 200:
                     j_devices = json.dumps(r_devices.json(),indent=4)
                     d_devices = json.loads(j_devices)
                     devices = d_devices["foundIDs"] #Note: devices is a list
                     # Create a thread for each device
                     for device in devices:
-                        myDevicesList.append(blackoutSensor(device+"_pub", device, room, failure_probability))
+                        myDevicesList.append(blackoutSensor(device+"_pub", device, room, failure_probability,URL))
                         myDevicesList[-1].start()
                         print(f"New device added: {device}")

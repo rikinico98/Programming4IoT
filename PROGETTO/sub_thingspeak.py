@@ -1,5 +1,5 @@
-# Receives messages from smoke sensor
-# Rise telegram alarms if smoke detected is too high 
+#THINGSPEAK SUBSCRIBER
+# inoltra i dati ai canali thingspeak ricevendo le caratteristiche e i dati stessi da tutti i sensori di fumo e temperatura/umidità presenti
 
 
 from MyMQTT import *
@@ -8,17 +8,25 @@ import json
 import time
 import requests
 
-def _Findparametrs():
-    r_thingspeak = requests.get(f'http://127.0.0.1:8070/catalog/Thingspeak_API')
-    r_thingspeak1 = json.dumps(r_thingspeak.json(),indent=4)
-    thinspeak_param = json.loads(r_thingspeak1)
-    topic=thinspeak_param["Thingspeak_API"]["mqttTopicThingspeak"]
-    thinkspeak_id= thinspeak_param["Thingspeak_API"]["clientID_Thingspeak_MQTT"]
-    r_broker = requests.get(f'http://127.0.0.1:8070/catalog/MQTT_utilities')
-    j_broker = json.dumps(r_broker.json(),indent=4)
-    d_broker = json.loads(j_broker)
-    broker = d_broker["MQTT_utilities"]["msgBroker"]
-    port = d_broker["MQTT_utilities"]["port"]
+def Findparametrs(URL):
+
+    r_thingspeak = requests.get(f'{URL}/catalog/Thingspeak_API') #richiesta delle caratteristiche di ThinfSpeak
+    if r_thingspeak.status_code==200:
+        r_thingspeak1 = json.dumps(r_thingspeak.json(),indent=4)
+        thinspeak_param = json.loads(r_thingspeak1)
+        topic=thinspeak_param["Thingspeak_API"]["mqttTopicThingspeak"]
+        thinkspeak_id= thinspeak_param["Thingspeak_API"]["clientID_Thingspeak_MQTT"]
+    else: 
+            raise Exception(f"Request status code: {r_thingspeak.status_code},Error occurred!")
+    r_broker = requests.get(f'{URL}/catalog/MQTT_utilities') #richiesta della porta e del broker
+    if r_broker.status_code==200:
+        j_broker = json.dumps(r_broker.json(),indent=4)
+        d_broker = json.loads(j_broker)
+        broker = d_broker["MQTT_utilities"]["msgBroker"]
+        port = d_broker["MQTT_utilities"]["port"]
+    else:
+        raise Exception(f"Request status code: {r_broker.status_code},Error occurred!")
+    
     dict_return={"topic":topic,"thinkspeak_id":thinkspeak_id,"broker":broker,"port":port}
     return dict_return
 class SensorSubscriber():
@@ -52,20 +60,25 @@ class SensorSubscriber():
         self.value.append(self.payload["v"])
         
     def sendThingSpeak(self):
-        print(self.field,self.value)
+        #print(self.field,self.value)
         if len(self.field) > 0: 
-            print(self.TS_api[0])
-            r = requests.get(f'https://api.thingspeak.com/update?api_key={self.TS_api[0]}'+f'&{self.field[0]}={self.value[0]}') 
+            r = requests.get(f'https://api.thingspeak.com/update?api_key={self.TS_api[0]}'+f'&{self.field[0]}={self.value[0]}') #invio il primo ed elimino gli altri
             self.field.pop(0)
             self.value.pop(0)
             self.TS_api.pop(0)
 
 if __name__ == '__main__':
-    parameters=_Findparametrs()
-    sensor = SensorSubscriber(parameters["thinkspeak_id"],parameters["broker"], parameters["port"], parameters["topic"])
+    f = open('Settings.json',)
+    data = json.load(f)
+    URL = data["catalogURL"]
+    f = open('Settings.json',)
+    data = json.load(f)
+    URL = data["catalogURL"]  # lettura dell'indirizzo del catalog 
+    parameters=Findparametrs(URL) #riciamo della funzione per trovare i parametri 
+    sensor = SensorSubscriber(parameters["thinkspeak_id"],parameters["broker"], parameters["port"], parameters["topic"]) #istanziazione dell'oggetto
     sensor.start()
     while True: #pubblica in continuazione
-        time.sleep(15)
+        time.sleep(15) # ogni 15 secondi perchè ha problemi se i messaggi sono troppo vicini 
         sensor.sendThingSpeak()
     sensor.stop()
 

@@ -1,6 +1,7 @@
+#SMOKE SIMULATOR
+#SUBSCRIBER DEL SENSORE DI SMOKE
 # Receives messages from smoke sensor
 # Rise telegram alarms if smoke detected is too high 
-
 
 from MyMQTT import *
 import threading
@@ -10,39 +11,50 @@ import requests
 
 class smokeReceiver():
 
-    def __init__(self, deviceID, roomID):
+    def __init__(self, deviceID, roomID,URL):
         self.deviceID = deviceID
         self.roomID = roomID
-        self.apikey = '4O6ZLEXF1XAQ933O' #va letto dal Catalog 
-        self.baseURL = f"https://api.thingspeak.com/update?api_key={self.apikey}" 
+        self.URL=URL
         # Request broker from catalog
-        r_broker = requests.get(f'http://127.0.0.1:8070/catalog/msg_broker')
-        j_broker = json.dumps(r_broker.json(),indent=4)
-        d_broker = json.loads(j_broker)
-        self.broker = d_broker["msgBroker"]
-        # Request port from catalog
-        r_port = requests.get(f'http://127.0.0.1:8070/catalog/port')
-        j_port = json.dumps(r_port.json(),indent=4)
-        d_port = json.loads(j_port)
-        self.port = d_port["port"]
+        r_broker = requests.get(f'{self.URL}/catalog/MQTT_utilities')# richiesta al catalog di broker,porta e topic generale 
+        if r_broker.status_code==200:
+            j_broker = json.dumps(r_broker.json(),indent=4)
+            d_broker = json.loads(j_broker) 
+            self.broker = d_broker["MQTT_utilities"]["msgBroker"]
+            self.port = d_broker["MQTT_utilities"]["port"]
+            self.general_topic=d_broker["MQTT_utilities"]["mqttTopicGeneral"]
+            field = requests.get(f'{self.URL}/catalog/{self.roomID}/{self.deviceID}/get_field') #richiesta dei campi di ThingSpeak 
+            if field.status_code==200:
+                field_field1 = json.dumps(field.json(), indent = 4)
+                self.field_field = json.loads(field_field1)
+            else: 
+                self.field_field=[]
         # Create the device
-        self.device = MyMQTT(self.deviceID, self.broker, self.port, self)
+            self.device = MyMQTT(self.deviceID, self.broker, self.port, self)
         # Request topic from catalog
-        r_topic = requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/{self.deviceID}/topic')
-        j_topic = json.dumps(r_topic.json(),indent=4)
-        d_topic = json.loads(j_topic)
-        self.topic = d_topic["topic"] #Note: topic is a list
-        # self.botTelegram = botTelegram
-        print(self.topic)
+        else:
+            raise Exception(f"Request status code: {r_broker.status_code},Error occurred!")
+        
+        r_topic = requests.get(f'{self.URL}/catalog/{self.roomID}/{self.deviceID}/topic') #richiesta dei topic del device 
+        if r_topic.status_code==200:
+            j_topic = json.dumps(r_topic.json(),indent=4)
+            d_topic = json.loads(j_topic)
+            self.topic = d_topic["topic"] #Note: topic is a list
+        else:
+            raise Exception(f"Request status code: {r_topic.status_code},Error occurred!")
         self.__message1={"TS_api":"","ThingSpeak_field": "", "v": None}
         self.__msg_bot1={"measure_type":"","ranges":[],"value":None,"Room":"","chatID":""}
+        print(f'Room ID: {self.roomID}, Device ID:{self.deviceID}')
 
-    def __FindChatID(self,userID):
-        chat_dict1=requests.get(f'http://127.0.0.1:8070/catalog/{userID}/chatID')
-        chat_dict2= json.dumps(chat_dict1.json(),indent=4)
-        chat_dict = json.loads(chat_dict2)
-        print(chat_dict)
-        chatID=chat_dict["chatID"]
+    def FindChatID(self,userID):
+        chat_dict1=requests.get(f'{self.URL}/catalog/{userID}/chatID') #richiesta dei chatID connessi alla stanza
+        if chat_dict1.status_code==200:
+            chat_dict2= json.dumps(chat_dict1.json(),indent=4)
+            chat_dict = json.loads(chat_dict2)
+            print(chat_dict)
+            chatID=chat_dict["chatID"]
+        else: 
+            chatID=None
         return chatID
     
     def start(self):
@@ -59,37 +71,47 @@ class smokeReceiver():
         smoke_value = payload['e'][0]['v']
         time.sleep(5)
         message=self.__message1
-        r_TS = requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/TS_utilities')
-        j_TS = json.dumps(r_TS.json(),indent=4)
-        d_TS = json.loads(j_TS)
-        TS=d_TS["ThingSpeak"]
-        print(d_TS)
-        message["TS_api"]=TS["api_key_write"]
-        message["ThingSpeak_field"]="field3"
-        message["v"]=smoke_value
-        self.device.myPublish("ThingSpeak/channel/allsensor",message)
-        ranges_dict1=requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/ranges') 
-        ranges_dict2= json.dumps(ranges_dict1.json(),indent=4)
-        ranges_dict = json.loads(ranges_dict2)
-        print(ranges_dict)
-        alert_val=ranges_dict["ranges"]["Smoke"]
+        r_TS = requests.get(f'{self.URL}/catalog/{self.roomID}/TS_utilities') # richiesta delle APIkey di ThingSpeak per scrivere i dati nel canale 
+        if r_TS.status_code==200 and len(self.field_field["field"])==1:
+            j_TS = json.dumps(r_TS.json(),indent=4)
+            d_TS = json.loads(j_TS)
+            TS=d_TS["ThingSpeak"]
+            message["TS_api"]=TS["api_key_write"]
+            message["ThingSpeak_field"]=self.field_field["field"][0]
+            message["v"]=smoke_value
+            topic_TS = requests.get(f'{self.URL}/catalog/Thingspeak_API') 
+            if topic_TS.status_code==200:
+                topic_TS1 = json.dumps(topic_TS.json(),indent=4)
+                topic_TS = json.loads(topic_TS1)
+                TS_topic=topic_TS["Thingspeak_API"]["mqttTopicThingspeak"]
+                if TS_topic!='':
+                    self.device.myPublish(TS_topic,message)
+            
+        ranges_dict1=requests.get(f'{self.URL}/catalog/{self.roomID}/ranges')  # richiesat dei range di normalità 
+        if ranges_dict1.status_code==200:
+            ranges_dict2= json.dumps(ranges_dict1.json(),indent=4)
+            ranges_dict = json.loads(ranges_dict2)
+            alert_val=ranges_dict["ranges"]["Smoke"]
+        else:
+            raise Exception(f"Request status code: {ranges_dict1.status_code},Error occurred!")
         
-        if int(smoke_value)>= int(alert_val[1]):
+        if int(smoke_value)>= int(alert_val[0]): # se si è in codizioni sopra la soglia critica 
             msg_bot=self.__msg_bot1
-            users_dict1=requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/users')
-            users_dict2= json.dumps(users_dict1.json(),indent=4)
-            users_dict = json.loads(users_dict2)
-            print(users_dict)
-            for user in users_dict["user"]:
-                if 'M_' not in user:
-                    chatID=self.__FindChatID(user)
-                    msg_bot["measure_type"]='smoke'
-                    msg_bot["ranges"] = alert_val
-                    msg_bot["value"] = smoke_value
-                    msg_bot["Room"] = self.roomID
-                    msg_bot["chatID"] = chatID
-                    self.device.myPublish(f"WareHouse/team5/alarm/{self.roomID}/{self.deviceID}",msg_bot)
-        
+            users_dict1=requests.get(f'{self.URL}/catalog/{self.roomID}/users') # richiesta degli utenti 
+            if users_dict1.status_code==200:
+                users_dict2= json.dumps(users_dict1.json(),indent=4)
+                users_dict = json.loads(users_dict2)
+                for user in users_dict["user"]:
+                    if 'M_' not in user:
+                        chatID=self.FindChatID(user) # richiamo alla funzione per trovare i chatID
+                        if chatID!=None:
+                            msg_bot["measure_type"]='smoke'
+                            msg_bot["ranges"] = alert_val
+                            msg_bot["value"] = smoke_value
+                            msg_bot["Room"] = self.roomID
+                            msg_bot["chatID"] = chatID
+                            self.device.myPublish(f"{self.general_topic}/alarm/{self.roomID}/{self.deviceID}",msg_bot)
+            
 
     def getRoom(self):
         return json.dumps({"roomID": self.roomID})
@@ -100,13 +122,15 @@ class smokeReceiver():
 
 
 if __name__ == "__main__":
-
-    # botTelegram = MyBot("1669000654:AAFKE-wI5v4Lm--42edkv9T8PS6ruMneybE")
-
     myDevicesList = []
     current_rooms = []
+    myDevicesList = []
+    current_rooms = []
+    f = open('Settings.json') 
+    data = json.load(f)
+    URL = data["catalogURL"]
     # Get all the rooms currently used
-    r_rooms = requests.get(f'http://127.0.0.1:8070/catalog/rooms')
+    r_rooms = requests.get(f' {URL}/catalog/rooms') 
     if r_rooms.status_code == 200:
         j_rooms = json.dumps(r_rooms.json(),indent=4)
         d_rooms = json.loads(j_rooms)
@@ -116,16 +140,17 @@ if __name__ == "__main__":
     
         # For all the rooms take all the smoke devices
         for room in current_rooms:
-            r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/smoke')
+            r_devices = requests.get(f'{URL}/catalog/{room}/measure_type/smoke')
             if r_devices.status_code == 200:
                 j_devices = json.dumps(r_devices.json(),indent=4)
                 d_devices = json.loads(j_devices)
                 devices = d_devices["foundIDs"] #Note: devices is a list
                 # Create a thread for each device
                 for device in devices:
-                    myDevicesList.append(smokeReceiver(device,room))
-                    # myDevicesList.append(smokeReceiver(device,room,botTelegram))
+                    myDevicesList.append(smokeReceiver(device,room,URL))
                     print(f"New device added: {device}")
+            else:
+                raise Exception(f"{r_devices.status_code},Error occurred!")
 
         for device in myDevicesList:
             device.start()
@@ -135,7 +160,7 @@ if __name__ == "__main__":
         time.sleep(5)
         # Get all the updated rooms
         update_rooms = []
-        r_rooms = requests.get(f'http://127.0.0.1:8070/catalog/rooms')
+        r_rooms = requests.get(f'{URL}/catalog/rooms')
         if r_rooms.status_code == 200:
             j_rooms = json.dumps(r_rooms.json(),indent=4)
             d_rooms = json.loads(j_rooms)
@@ -163,7 +188,7 @@ if __name__ == "__main__":
 
             # Check for changes in the remaining rooms
             for room in current_rooms:
-                r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/smoke')
+                r_devices = requests.get(f'{URL}/catalog/{room}/measure_type/smoke')
                 if r_devices.status_code == 200:
                     j_devices = json.dumps(r_devices.json(),indent=4)
                     d_devices = json.loads(j_devices)
@@ -190,7 +215,7 @@ if __name__ == "__main__":
                     # Add new devices
                     missing_devices = list(set(devices) - set(device_in_room))
                     for device in missing_devices:
-                        myDevicesList.append(smokeReceiver(device,room,botTelegram))
+                        myDevicesList.append(smokeReceiver(device,room,URL))
                         myDevicesList[-1].start()
                         print(f"New device added: {device}")
 
@@ -201,13 +226,13 @@ if __name__ == "__main__":
             current_rooms = current_rooms + rooms_to_add
             # Add all the devices within the rooms to add
             for room in rooms_to_add:
-                r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/smoke')
+                r_devices = requests.get(f'{URL}/catalog/{room}/measure_type/smoke')
                 if r_devices.status_code == 200:
                     j_devices = json.dumps(r_devices.json(),indent=4)
                     d_devices = json.loads(j_devices)
                     devices = d_devices["foundIDs"] #Note: devices is a list
                     # Create a thread for each device
                     for device in devices:
-                        myDevicesList.append(smokeReceiver(device,room,botTelegram))
+                        myDevicesList.append(smokeReceiver(device,room,URL))
                         myDevicesList[-1].start()
                         print(f"New device added: {device}")

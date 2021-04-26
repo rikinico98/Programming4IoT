@@ -1,3 +1,6 @@
+#BLACKOUT SENSOR
+# SUBSCRIBER DI sensore di BLACKOUT
+
 # Receives messages from blackout sensor
 # Rise telegram alarms if blackout occurs
 
@@ -7,117 +10,106 @@ import threading
 import json
 import time
 import requests
-import telepot
-from telepot.loop import MessageLoop
-
-
-# class MyBot():
-
-#     def __init__(self, token):
-#         self.tokenBot = token
-#         self.bot = telepot.Bot(self.tokenBot)
-#         MessageLoop(self.bot, {"chat": self.on_chat_message}).run_as_thread()
-    
-#     def on_chat_message(self,msg):
-#         # Get chat ID
-#         content_type, chat_type, chat_ID = telepot.glance(msg)
-#         self.chat_ID = chat_ID
-
-#     def SendAlarm(self, room, device_id):
-#         # Publish alarm message when blackout is detected
-#         self.bot.sendMessage(self.chat_ID, text = f"ALARM: blackout in room {room}. Check device {device_id}")
-
 
 class MyThread(threading.Thread):
 
-    def __init__(self, threadID, device):
+    def __init__(self, threadID, device,URL):
+        
         threading.Thread.__init__(self)
+    
         #Setup thread
         self.threadID = threadID
         self.device = device
         self.iterate = True
+        self.URL=URL
         self.__msg_bot1={"measure_type":"","ranges":[],"value":None,"Room":"","chatID":""}
-        r_broker = requests.get(f'http://127.0.0.1:8070/catalog/MQTT_utilities')
-        print(r_broker)
-        j_broker = json.dumps(r_broker.json(),indent=4)
-        d_broker = json.loads(j_broker) 
-        self.broker = d_broker["MQTT_utilities"]["msgBroker"]
-        self.port = d_broker["MQTT_utilities"]["port"]
-        self.general_topic=d_broker["MQTT_utilities"]["mqttTopicGeneral"]
-        self.dev = MyMQTT(self.threadID, self.broker, self.port, None)
+        r_broker = requests.get(f'{self.URL}/catalog/MQTT_utilities') # richiesta al catalog di broker,port e general_topic
+        if r_broker.status_code==200:
+            j_broker = json.dumps(r_broker.json(),indent=4)
+            d_broker = json.loads(j_broker) 
+            self.broker = d_broker["MQTT_utilities"]["msgBroker"]
+            self.port = d_broker["MQTT_utilities"]["port"]
+            self.general_topic=d_broker["MQTT_utilities"]["mqttTopicGeneral"]
+            self.dev = MyMQTT(self.threadID, self.broker, self.port, None)
+        else:
+            raise Exception(f"Request status code: {r_broker.status_code},Error occurred!")
     def run(self):
         while self.iterate:
             # If you have not received a message for more than a minute 
             currentTime = time.time()
             lastReceivedTime = json.loads(self.device.getLastReceivedTime())
             if lastReceivedTime["timestamp"] != None:
-                if currentTime - float(lastReceivedTime["timestamp"]) > 8:
+                if currentTime - float(lastReceivedTime["timestamp"]) > 8: # se per più di 8 secondi non ci sono dati del led allora c'è un blackout
                     print("ERRORE IN ARRRIVO!")
                     # Send periodically a Telegram alarm to the users
                     roomID = json.loads(self.device.getRoom())
                     deviceID = json.loads(self.device.getDeviceID())
                     room_ID=roomID["roomID"]
                     device_ID=deviceID["deviceID"]
-                    #self.botTelegram.SendAlarm(roomID["roomID"], deviceID["deviceID"])
                     msg_bot=self.__msg_bot1
-                    print(roomID["roomID"])
-                   
-                    print(f'http://127.0.0.1:8070/catalog/{room_ID}/users')
-                    users_dict1=requests.get(f'http://127.0.0.1:8070/catalog/{room_ID}/users')
-                    users_dict2= json.dumps(users_dict1.json(),indent=4)
-                    users_dict = json.loads(users_dict2)
-                    print(users_dict1)
-                    for user in users_dict["user"]:
-                        print(user)
-                        if 'M_' not in user:
-                            chatID=self.__FindChatID(user)
-                            msg_bot["measure_type"]='blackout'
-                            msg_bot["ranges"] = None
-                            msg_bot["value"] = (currentTime-float(lastReceivedTime["timestamp"]))
-                            msg_bot["Room"] = roomID
-                            msg_bot["chatID"] = chatID
-                            self.dev.myPublish(f"{self.general_topic}/alarm/{room_ID}/{device_ID}",msg_bot)
-                    time.sleep(5)
-    
+                    users_dict1=requests.get(f'{self.URL}/catalog/{room_ID}/users')
+                    if users_dict1.status_code==200:
+                        users_dict2= json.dumps(users_dict1.json(),indent=4)
+                        users_dict = json.loads(users_dict2)
+                
+                        for user in users_dict["user"]:
+                            if 'M_' not in user:
+                                chatID=self.FindChatID(user) # richiamo funzione per trovare i chatID legati all'user 
+                                if chatID!=None:
+                                    msg_bot["measure_type"]='blackout'
+                                    msg_bot["ranges"] = None
+                                    msg_bot["value"] = (currentTime-float(lastReceivedTime["timestamp"]))
+                                    msg_bot["Room"] = roomID
+                                    msg_bot["chatID"] = chatID
+                                    self.dev.myPublish(f"{self.general_topic}/alarm/{room_ID}/{device_ID}",msg_bot)
+                        time.sleep(5)
+        
     def stop(self):
         self.iterate = False
-    def __FindChatID(self,userID):
-        print(userID)
-        chat_dict1=requests.get(f'http://127.0.0.1:8070/catalog/{userID}/chatID')
-        chat_dict2= json.dumps(chat_dict1.json(),indent=4)
-        chat_dict = json.loads(chat_dict2)
-        print(chat_dict)
-        chatID=chat_dict["chatID"]
+    def FindChatID(self,userID):
+        chat_dict1=requests.get(f'{self.URL}/catalog/{userID}/chatID') # richiesta delle chatID 
+        if chat_dict1.status_code==200:
+            chat_dict2= json.dumps(chat_dict1.json(),indent=4)
+            chat_dict = json.loads(chat_dict2)
+            chatID=chat_dict["chatID"]
+        else:
+            chatID=None
         return chatID
 
 class blackoutReceiver():
 
-    def __init__(self, deviceID, roomID):
+    def __init__(self, deviceID, roomID,URL):
         self.deviceID = deviceID
         self.roomID = roomID
+        self.URL=URL
         # Request broker from catalog
-        r_broker = requests.get(f'http://127.0.0.1:8070/catalog/MQTT_utilities')
-        print(r_broker)
-        j_broker = json.dumps(r_broker.json(),indent=4)
-        d_broker = json.loads(j_broker) 
-        self.broker = d_broker["MQTT_utilities"]["msgBroker"]
-        self.port = d_broker["MQTT_utilities"]["port"]
-        self.general_topic=d_broker["MQTT_utilities"]["mqttTopicGeneral"]
-        # Create the device
-        self.device = MyMQTT(self.deviceID, self.broker, self.port, self)
+        r_broker = requests.get(f'{self.URL}/catalog/MQTT_utilities') #richiesta dI BROKER PORT E GENERAL TOPIC
+        if r_broker.status_code==200:
+            j_broker = json.dumps(r_broker.json(),indent=4)
+            d_broker = json.loads(j_broker) 
+            self.broker = d_broker["MQTT_utilities"]["msgBroker"]
+            self.port = d_broker["MQTT_utilities"]["port"]
+            self.general_topic=d_broker["MQTT_utilities"]["mqttTopicGeneral"]
+            # Create the device
+            self.device = MyMQTT(self.deviceID, self.broker, self.port, self)
+        else:
+            raise Exception(f"Request status code: {r_broker.status_code},Error occurred!")
         # Request topic from catalog
-        r_topic = requests.get(f'http://127.0.0.1:8070/catalog/{self.roomID}/{self.deviceID}/topic')
-        j_topic = json.dumps(r_topic.json(),indent=4)
-        d_topic = json.loads(j_topic)
-        self.topic = d_topic["topic"] #Note: topic is a list
-        # Define the last received timestamp
+        r_topic = requests.get(f'{self.URL}/catalog/{self.roomID}/{self.deviceID}/topic') #richiesta del topic del dispositivo 
+        if r_topic.status_code==200:
+            j_topic = json.dumps(r_topic.json(),indent=4)
+            d_topic = json.loads(j_topic)
+            self.topic = d_topic["topic"] #Note: topic is a list
+            # Define the last received timestamp
+        else:
+            raise Exception(f"Request status code: {r_topic.status_code},Error occurred!")
         self.lastReceivedTime = {"timestamp": None}
     
     def start(self):
         self.device.start()
         for topic in self.topic:
             self.device.mySubscribe(topic)
-        self.device_thread = MyThread(self.deviceID, self,)
+        self.device_thread = MyThread(self.deviceID, self,self.URL)
         self.device_thread.start()
 
     def stop(self):
@@ -143,8 +135,11 @@ class blackoutReceiver():
 if __name__ == "__main__":
     myDevicesList = []
     current_rooms = []
+    f = open('Settings.json',) # lettura dell'indirizzo del catalog dal file di Settings
+    data = json.load(f)
+    URL = data["catalogURL"]
     # Get all the rooms currently used
-    r_rooms = requests.get(f'http://127.0.0.1:8070/catalog/rooms')
+    r_rooms = requests.get(f'{URL}/catalog/rooms')
     if r_rooms.status_code == 200:
         j_rooms = json.dumps(r_rooms.json(),indent=4)
         d_rooms = json.loads(j_rooms)
@@ -154,14 +149,14 @@ if __name__ == "__main__":
         
         # For all the rooms take all the blackout devices
         for room in current_rooms:
-            r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/blackout')
+            r_devices = requests.get(f'{URL}/catalog/{room}/measure_type/blackout')
             if r_devices.status_code == 200:
                 j_devices = json.dumps(r_devices.json(),indent=4)
                 d_devices = json.loads(j_devices)
                 devices = d_devices["foundIDs"] #Note: devices is a list
                 # Create a thread for each device
                 for device in devices:
-                    myDevicesList.append(blackoutReceiver(device, room))
+                    myDevicesList.append(blackoutReceiver(device, room,URL))
                     print(f"New device added: {device}")
 
         for device in myDevicesList:
@@ -172,7 +167,7 @@ if __name__ == "__main__":
         time.sleep(5)
         # Get all the updated rooms
         update_rooms = []
-        r_rooms = requests.get(f'http://127.0.0.1:8070/catalog/rooms')
+        r_rooms = requests.get(f'{URL}/catalog/rooms')
         if r_rooms.status_code == 200:
             j_rooms = json.dumps(r_rooms.json(),indent=4)
             d_rooms = json.loads(j_rooms)
@@ -200,7 +195,7 @@ if __name__ == "__main__":
 
             # Check for changes in the remaining rooms
             for room in current_rooms:
-                r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/blackout')
+                r_devices = requests.get(f'{URL}/catalog/{room}/measure_type/blackout')
                 if r_devices.status_code == 200:
                     j_devices = json.dumps(r_devices.json(),indent=4)
                     d_devices = json.loads(j_devices)
@@ -227,7 +222,7 @@ if __name__ == "__main__":
                     # Add new devices
                     missing_devices = list(set(devices) - set(device_in_room))
                     for device in missing_devices:
-                        myDevicesList.append(blackoutReceiver(device, room))
+                        myDevicesList.append(blackoutReceiver(device, room,URL))
                         myDevicesList[-1].start()
                         print(f"New device added: {device}")
 
@@ -238,13 +233,13 @@ if __name__ == "__main__":
             current_rooms = current_rooms + rooms_to_add
             # Add all the devices within the rooms to add
             for room in rooms_to_add:
-                r_devices = requests.get(f'http://127.0.0.1:8070/catalog/{room}/measure_type/blackout')
+                r_devices = requests.get(f'{URL}/catalog/{room}/measure_type/blackout')
                 if r_devices.status_code == 200:
                     j_devices = json.dumps(r_devices.json(),indent=4)
                     d_devices = json.loads(j_devices)
                     devices = d_devices["foundIDs"] #Note: devices is a list
                     # Create a thread for each device
                     for device in devices:
-                        myDevicesList.append(blackoutReceiver(device, room))
+                        myDevicesList.append(blackoutReceiver(device, room,URL))
                         myDevicesList[-1].start()
                         print(f"New device added: {device}")
