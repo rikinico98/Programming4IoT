@@ -48,7 +48,7 @@ class OpenWebService():
                   f'?api_key={self.api_key}&name={body["roomID"]}')
             response = requests.post(
                 self.url_create_channel_thingspeak +
-                f'?api_key={self.api_key}&name={body["roomID"]}&field1=Temperature&field2=Humidity&field3=Smoke&field4=Empty&field5=Empty&field6=Empty&field7=Empty&field8=Empty')
+                f'?api_key={self.api_key}&name={body["roomID"]}&public_flag=true&field1=Temperature&field2=Humidity&field3=Smoke&field4=Empty&field5=Empty&field6=Empty&field7=Empty&field8=Empty')
             diz1 = json.dumps(response.json(), indent=4)
             diz = json.loads(diz1)  # la risposta diventa dizionario
             # mi prendo le specifiche del canale e le salvo
