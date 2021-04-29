@@ -67,7 +67,7 @@ class UpdateDevices():
                     # If so, update its timestamp
                     device["timestamp"] = timestamp
                     # Send a request to update it in the catalog
-                    requests.put(f'http://127.0.0.1:8070/catalog/{device["roomID"]}/{device["deviceID"]}/update_timestamp', data = json.dumps({"timestamp": timestamp}))
+                    requests.put(f'{URL}/catalog/{device["roomID"]}/{device["deviceID"]}/update_timestamp', data = json.dumps({"timestamp": timestamp}))
             if flag_ID == 1:
                 # Else insert a new device in memory
                 myDict = {
@@ -99,7 +99,7 @@ if __name__ == "__main__":
             if time_diff > 120:
                 # Delete the device because it is expired!!!
                 flag = 0
-                requests.delete(f'http://127.0.0.1:8070/catalog/{device["roomID"]}/{device["deviceID"]}/delete')
+                requests.delete(f'{URL}/catalog/{device["roomID"]}/{device["deviceID"]}/delete')
                 to_remove = device
         if flag == 0:
             up_device.deleteDevice(to_remove)
