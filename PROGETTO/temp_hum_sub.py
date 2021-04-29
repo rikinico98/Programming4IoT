@@ -117,8 +117,7 @@ class TEMPHUMReceiver():
             users_dict = json.loads(users_dict2)
 ################## TEMPERATURE ####################################
             if ((int(temval)>= int(alert_val_temp[1])) or (int(temval) <= int(alert_val_temp[0]))): #controllo se il messaggio pubblicato è nel range di normalità sia per tem 
-                # print(users_dict)
-                # print(alert_val_temp)
+              
                 for user in users_dict["user"]:
                     if 'M_' not in user: # il messaggio viene inviato agli utenti associati alla stanza non ai manager
                         chatID=self.FindChatID(user)
@@ -128,10 +127,10 @@ class TEMPHUMReceiver():
                             msg_bot["value"] = temval
                             msg_bot["Room"] = self.roomID
                             msg_bot["chatID"] = chatID
-                            self.device.myPublish(f"{self.Generaltopic}/alarm/{self.roomID}/{self.deviceID}",msg_bot) # pubblicazione del messaggio di allarme al bot telegram
+                            self.device.myPublish(f"BOT/{self.Generaltopic}/alarm/{self.roomID}/{self.deviceID}",msg_bot) # pubblicazione del messaggio di allarme al bot telegram
 ############## HUMIDITY #############################################
             if ((int(humval)>= int(alert_val_hum[1])) or (int(humval) <= int(alert_val_hum[0]))):#controllo se il messaggio pubblicato è nel range di normalità  
-                print("SCAPPPAAAAAA problema di umidita")
+                
                 msg_bot=self.__msg_bot1
                 # print(f'{self.URL}/catalog/{self.roomID}/users')
                 # users_dict1=requests.get(f'{self.URL}/catalog/{self.roomID}/users')
@@ -150,7 +149,7 @@ class TEMPHUMReceiver():
                                 msg_bot["Room"] = self.roomID
                                 msg_bot["chatID"] = chatID
                                 time.sleep(6)
-                                self.device.myPublish(f"{self.Generaltopic}/alarm/{self.roomID}/{self.deviceID}",msg_bot)# pubblicazione del messaggio di allarme al bot telegram
+                                self.device.myPublish(f"BOT/{self.Generaltopic}/alarm/{self.roomID}/{self.deviceID}",msg_bot)# pubblicazione del messaggio di allarme al bot telegram
                         
         
     def getRoom(self):
