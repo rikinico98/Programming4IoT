@@ -18,11 +18,11 @@ class UpdateDevices():
         # Get catalog URL from settings file
         f = open('Settings.json',)
         data = json.load(f)
-        URL = data["catalogURL"]
+        self.URL = data["catalogURL"]
         # Request broker from catalog
         # Request port from catalog
         # Request topic from catalog
-        r_mqtt = requests.get(f'{URL}/catalog/MQTT_utilities')
+        r_mqtt = requests.get(f'{self.URL}/catalog/MQTT_utilities')
         j_mqtt = json.dumps(r_mqtt.json(),indent=4)
         d_mqtt = json.loads(j_mqtt)
         self.broker = d_mqtt["MQTT_utilities"]["msgBroker"]
@@ -67,7 +67,7 @@ class UpdateDevices():
                     # If so, update its timestamp
                     device["timestamp"] = timestamp
                     # Send a request to update it in the catalog
-                    requests.put(f'{URL}/catalog/{device["roomID"]}/{device["deviceID"]}/update_timestamp', data = json.dumps({"timestamp": timestamp}))
+                    requests.put(f'{self.URL}/catalog/{device["roomID"]}/{device["deviceID"]}/update_timestamp', data = json.dumps({"timestamp": timestamp}))
             if flag_ID == 1:
                 # Else insert a new device in memory
                 myDict = {
@@ -86,6 +86,10 @@ class UpdateDevices():
 
 
 if __name__ == "__main__":
+    # Get catalog URL from settings file
+    f = open('Settings.json',)
+    data = json.load(f)
+    URL = data["catalogURL"]
     up_device = UpdateDevices("UpdateDevices_Wharehouse_Team5")
     up_device.start()
     while True:
@@ -96,7 +100,7 @@ if __name__ == "__main__":
         flag = 1
         for device in devices["devices"]:
             time_diff = now - float(device["timestamp"])
-            if time_diff > 120:
+            if time_diff > 180:
                 # Delete the device because it is expired!!!
                 flag = 0
                 requests.delete(f'{URL}/catalog/{device["roomID"]}/{device["deviceID"]}/delete')
