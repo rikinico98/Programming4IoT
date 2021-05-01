@@ -26,10 +26,11 @@ class MyThread(threading.Thread):
             ranges_dict2= json.dumps(ranges_dict1.json(),indent=4)
             ranges_dict = json.loads(ranges_dict2)
             self.alert_val=ranges_dict["ranges"]["Smoke"]
+            self.loc1=random.uniform(200,int(self.alert_val[0]))# impostando una soglia anomala al di sopra del 300 in questo modo otteniamo una distribuzione
+        # tra 200 ppm  minimo valore acquisibile da un tipico sensore e la soglia impostata per il sensore 
         else:
             raise Exception(f"Request status code: {ranges_dict1.status_code},Error occurred!")
-        self.loc1=random.uniform(200,int(self.alert_val[0])) # impostando una soglia anomala al di sopra del 300 in questo modo otteniamo una distribuzione
-        # tra 200 ppm  minimo valore acquisibile da un tipico sensore e la soglia impostata per il sensore 
+         
 
     def run(self):
         while self.iterate:

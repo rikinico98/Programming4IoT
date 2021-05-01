@@ -25,11 +25,11 @@ class MyThread(threading.Thread):
             self.loc2=np.mean(self.alert_val_hum)
             
             if self.roomtype=='10' or self.roomtype=='01': # differenzio i range di fallimento a seconda del tipo di stanza in questione, se la stanza è freezer non necessita del range inferiore 
-                self.failuretemprange=list(range(0,self.alert_val_temp[0]-1,0.01))+list(range(self.alert_val_temp[1]-1,50,0.01))+list(range(self.alert_val_temp[0],self.alert_val_temp[1],0.01))
-                self.failurehumrange=list(range(0,self.alert_val_hum[0]-1,0.01))+list(range(self.alert_val_hum[1]-1,90,0.01))+list(range(self.alert_val_hum[1],self.alert_val_hum[1],0.01))
+                self.failuretemprange=list(np.arange(0,self.alert_val_temp[0]-1),0.01)+list(np.arange(self.alert_val_temp[1]-1,50,0.01))+list(np.arange(self.alert_val_temp[0],self.alert_val_temp[1],0.01))
+                self.failurehumrange=list(np.arange(0,self.alert_val_hum[0]-1,0.01))+list(np.arange(self.alert_val_hum[1]-1,90,0.01))+list(np.arange(self.alert_val_hum[1],self.alert_val_hum[1],0.01))
             else:
-                self.failuretemprange=list(range(self.alert_val_temp[1]+1,50,0.01))+list(range(self.alert_val_temp[0],self.alert_val_temp[1],0.01)) 
-                self.failurehumrange=list(range(self.alert_val_hum[1]+1,90,0.01))+list(range(self.alert_val_hum[1],self.alert_val_hum[1],0.01)) 
+                self.failuretemprange=list(np.arange(self.alert_val_temp[1]+1,50,0.01))+list(np.arange(self.alert_val_temp[0],self.alert_val_temp[1],0.01)) 
+                self.failurehumrange=list(np.arange(self.alert_val_hum[1]+1,90,0.01))+list(np.arange(self.alert_val_hum[1],self.alert_val_hum[1],0.01)) 
             #massima temp=50°C massima umidità =90%. Valori inseriti considerando un tipico esempio di sensore di temperatura
                 
             threading.Thread.__init__(self)

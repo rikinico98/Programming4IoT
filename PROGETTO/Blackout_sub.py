@@ -61,7 +61,7 @@ class MyThread(threading.Thread):
                                     msg_bot["value"] = (currentTime-float(lastReceivedTime["timestamp"]))
                                     msg_bot["Room"] = roomID
                                     msg_bot["chatID"] = chatID
-                                    self.dev.myPublish(f"{self.general_topic}/alarm/{room_ID}/{device_ID}",msg_bot)
+                                    self.dev.myPublish(f"BOT/{self.general_topic}/alarm/{room_ID}/{device_ID}",msg_bot)
                         time.sleep(5)
         
     def stop(self):

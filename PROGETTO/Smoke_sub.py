@@ -110,7 +110,7 @@ class smokeReceiver():
                             msg_bot["value"] = smoke_value
                             msg_bot["Room"] = self.roomID
                             msg_bot["chatID"] = chatID
-                            self.device.myPublish(f"{self.general_topic}/alarm/{self.roomID}/{self.deviceID}",msg_bot)
+                            self.device.myPublish(f"BOT/{self.general_topic}/alarm/{self.roomID}/{self.deviceID}",msg_bot)
             
 
     def getRoom(self):
