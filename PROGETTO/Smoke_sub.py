@@ -94,8 +94,8 @@ class smokeReceiver():
             alert_val=ranges_dict["ranges"]["Smoke"]
         else:
             raise Exception(f"Request status code: {ranges_dict1.status_code},Error occurred!")
-        
-        if int(smoke_value)>= int(alert_val[0]): # se si è in codizioni sopra la soglia critica 
+        #print((float(smoke_value)),float(alert_val[0]))
+        if (float(smoke_value))>= float(alert_val[0]): # se si è in codizioni sopra la soglia critica 
             msg_bot=self.__msg_bot1
             users_dict1=requests.get(f'{self.URL}/catalog/{self.roomID}/users') # richiesta degli utenti 
             if users_dict1.status_code==200:

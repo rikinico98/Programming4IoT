@@ -46,7 +46,7 @@ class MyThread(threading.Thread):
     def run(self):
         while self.iterate:
             p = random.uniform(0,1)
-            time.sleep(120)
+            time.sleep(20)
             if p > self.failure: # se il valore p estratto è maggiore del valore di fallimento allora si è  in una condizione di normalità
                 loc, scale = self.loc1, 0.1
                 a= np.random.logistic(loc, scale, 10000) # simulazione dei dati temperatura, questa distribuzione consente di avere dei dati attorno allo stesso valore ben simulando una condizione controllata
@@ -54,6 +54,9 @@ class MyThread(threading.Thread):
                 loc, scale = self.loc2, 0.1
                 b= np.random.logistic(loc, scale, 10000) # simulazione per l'umidità
                 v = random.choice(b)
+                
+
+               
             else:
                 print("fallimento") # simuazione del fallimento prendendo random uno dei numeri presenti nelle liste di fallimento 
                 a=random.randint(0,len(self.failuretemprange)-1)
@@ -65,7 +68,9 @@ class MyThread(threading.Thread):
             if (u >=self.alert_val_temp[0] and u<= self.alert_val_temp[1] ) and (v>= self.alert_val_hum[0] and v<= self.alert_val_hum[1]):
                 # Everything works!
                 print('Everything works!')
+                
                 self.device.publish(u,v)
+             
             
             else:
                 # Simulation of failure (failure holds for some time until resolution of the problem)
@@ -74,7 +79,7 @@ class MyThread(threading.Thread):
                 print(f'tempo in cui si ripete il problema: {time_to_solve}')
                 for it in range(time_to_solve):
                     self.device.publish(u,v)
-                    time.sleep(120)
+                    time.sleep(20)
                 
     
     def stop(self):
@@ -131,8 +136,11 @@ class TEMHUMSensor():
     def publish(self, valueT, valueH):
         message=self.__message
         # Add timestamp
+        valueH="{:.2f}".format(valueH)
+        valueT="{:.2f}".format(valueT)
         message["e"][0]["t"] = str(time.time()) 
         # Add value
+
         message["e"][0]["v"] = valueT
         # Add value
         message["e"][1]["v"] = valueH

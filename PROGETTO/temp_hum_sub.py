@@ -72,7 +72,7 @@ class TEMPHUMReceiver():
     def notify(self,topic,msg,qos):
         payload = json.loads(msg)
         print(f"Message received! Everything works correctly! Topic: {topic}, Measure: {payload['e'][0]['n']}, Value: {payload['e'][0]['v']},  Measure: {payload['e'][1]['n']}, Value: {payload['e'][1]['v']}, Timestamp: {payload['e'][0]['t']} with QoS: {qos}")
-        print(self.roomID)
+        
         temval = payload['e'][0]['v']
         humval = payload['e'][1]['v']
         r_TS = requests.get(f'{self.URL}/catalog/{self.roomID}/TS_utilities') # ottengo le utilities di Thing Speak dal catalog 
@@ -116,7 +116,7 @@ class TEMPHUMReceiver():
             users_dict2= json.dumps(users_dict1.json(),indent=4)
             users_dict = json.loads(users_dict2)
 ################## TEMPERATURE ####################################
-            if ((int(temval)>= int(alert_val_temp[1])) or (int(temval) <= int(alert_val_temp[0]))): #controllo se il messaggio pubblicato è nel range di normalità sia per tem 
+            if ((float(temval)>= float(alert_val_temp[1])) or (float(temval) <= float(alert_val_temp[0]))): #controllo se il messaggio pubblicato è nel range di normalità sia per tem 
               
                 for user in users_dict["user"]:
                     if 'M_' not in user: # il messaggio viene inviato agli utenti associati alla stanza non ai manager
@@ -129,7 +129,7 @@ class TEMPHUMReceiver():
                             msg_bot["chatID"] = chatID
                             self.device.myPublish(f"BOT/{self.Generaltopic}/alarm/{self.roomID}/{self.deviceID}",msg_bot) # pubblicazione del messaggio di allarme al bot telegram
 ############## HUMIDITY #############################################
-            if ((int(humval)>= int(alert_val_hum[1])) or (int(humval) <= int(alert_val_hum[0]))):#controllo se il messaggio pubblicato è nel range di normalità  
+            if ((float(humval)>= float(alert_val_hum[1])) or (float(humval) <= float(alert_val_hum[0]))):#controllo se il messaggio pubblicato è nel range di normalità  
                 
                 msg_bot=self.__msg_bot1
                 # print(f'{self.URL}/catalog/{self.roomID}/users')

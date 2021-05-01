@@ -37,14 +37,18 @@ class MyThread(threading.Thread):
             # Concentration scope: from 200ppm to 10000ppm
             # When the gas concentration is high enough, the sensor usually outputs value greater than 300.
             p = random.uniform(0,1)
-            time.sleep(120)
+            time.sleep(20)
             if p > self.failure:
                 #u = random.uniform(200,300)
                 loc, scale = self.loc1, 0.1
                 a= np.random.logistic(loc, scale, 10000)
                 u = random.choice(a)
+                
+               
             else:
                 u = random.uniform(int(self.alert_val[0]),10000) # tutti i valori al di sopra della soglia del sensore  e 10000 valore massimo acquisibile 
+                
+               
             if u < 400:
                 # Everything works!
                 self.device.publish(u)
@@ -55,7 +59,7 @@ class MyThread(threading.Thread):
                 time_to_solve = math.ceil(random.uniform(5,15)) 
                 for it in range(time_to_solve):
                     self.device.publish(u)
-                    time.sleep(120)
+                    time.sleep(20)
                     
     def stop(self):
         self.iterate = False
@@ -102,6 +106,7 @@ class smokeSensor():
 
     def publish(self, value):
         message=self.__message
+        value="{:.2f}".format(value)
         # Add timestamp
         message["e"][0]["t"] = str(time.time())
         # Add value
