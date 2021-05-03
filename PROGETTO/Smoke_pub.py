@@ -37,7 +37,7 @@ class MyThread(threading.Thread):
             # Concentration scope: from 200ppm to 10000ppm
             # When the gas concentration is high enough, the sensor usually outputs value greater than 300.
             p = random.uniform(0,1)
-            time.sleep(20)
+            time.sleep(900)
             if p > self.failure:
                 #u = random.uniform(200,300)
                 loc, scale = self.loc1, 0.1
@@ -59,7 +59,7 @@ class MyThread(threading.Thread):
                 time_to_solve = math.ceil(random.uniform(5,15)) 
                 for it in range(time_to_solve):
                     self.device.publish(u)
-                    time.sleep(20)
+                    time.sleep(900)
                     
     def stop(self):
         self.iterate = False

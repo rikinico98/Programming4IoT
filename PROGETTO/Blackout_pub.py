@@ -125,6 +125,7 @@ if __name__ == "__main__":
                     print(f"New device added: {device}")
 
         for device in myDevicesList:
+            time.sleep(20)
             device.start()
 
     # Keep updating the previous devices
