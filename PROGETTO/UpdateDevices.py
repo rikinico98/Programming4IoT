@@ -44,8 +44,10 @@ class UpdateDevices():
 
     def notify(self, topic, msg, qos):
         payload = json.loads(msg)
+        print(payload)
         device_ID = payload['bn']
         timestamp = payload['e'][0]['t']
+        sensor = payload['e'][0]['n']
         print(f"Message received! Device: {device_ID}, Timestamp: {timestamp}")
         # Get device ID and room ID
         devices = self.lastReceivedTime["devices"]
@@ -55,7 +57,8 @@ class UpdateDevices():
             myDict = {
                 "deviceID": device_ID,
                 "roomID": room,
-                "timestamp": timestamp
+                "timestamp": timestamp,
+                "sensor": sensor
             }
             devices.append(myDict)
         else:
@@ -73,7 +76,8 @@ class UpdateDevices():
                 myDict = {
                     "deviceID": device_ID,
                     "roomID": room,
-                    "timestamp": timestamp
+                    "timestamp": timestamp,
+                    "sensor": sensor
                 }
                 devices.append(myDict)
     
@@ -100,11 +104,18 @@ if __name__ == "__main__":
         flag = 1
         for device in devices["devices"]:
             time_diff = now - float(device["timestamp"])
-            if time_diff > 180:
-                # Delete the device because it is expired!!!
-                flag = 0
-                requests.delete(f'{URL}/catalog/{device["roomID"]}/{device["deviceID"]}/delete')
-                to_remove = device
+            if device["sensor"] == "blackout detector":
+                if time_diff > 10:
+                    # Delete the device because it is expired!!!
+                    flag = 0
+                    requests.delete(f'{URL}/catalog/{device["roomID"]}/{device["deviceID"]}/delete')
+                    to_remove = device
+            else:
+                if time_diff > 1800:
+                    # Delete the device because it is expired!!!
+                    flag = 0
+                    requests.delete(f'{URL}/catalog/{device["roomID"]}/{device["deviceID"]}/delete')
+                    to_remove = device
         if flag == 0:
             up_device.deleteDevice(to_remove)
         time.sleep(5)
