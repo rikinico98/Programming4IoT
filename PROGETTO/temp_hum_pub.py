@@ -75,7 +75,7 @@ class MyThread(threading.Thread):
             else:
                 # Simulation of failure (failure holds for some time until resolution of the problem)
                 # Keep sending the wrong result to simulate the time needed to solve the problem
-                time_to_solve = math.ceil(random.uniform(5,15)) 
+                time_to_solve = math.ceil(random.uniform(4,8)) 
                 print(f'tempo in cui si ripete il problema: {time_to_solve}')
                 for it in range(time_to_solve):
                     self.device.publish(u,v)
