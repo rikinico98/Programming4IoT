@@ -4,7 +4,7 @@ from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 import BarcodeScanner
 from MyMQTT import *
 import requests
-import DailyMonitor
+from DailyMonitor import *
 import time
 
 
@@ -13,7 +13,7 @@ class WareBot:
     def __init__(self, APIs):
         #############--IP per le richieste--#################
         # self._catalog_URL = APIs['catalogURL']
-        self._catalog_URL = "http://0.0.0.0:8070"
+        self._catalog_URL = "http://40.68.161.235:8070"
         r = requests.get(f'{self._catalog_URL }/catalog/Telegram')
         body = json.dumps(r.json(), indent=4)
         TelegramDict = json.loads(body)
@@ -21,8 +21,8 @@ class WareBot:
         port = conf['brokerPort']
         # self._stored_products_IP = APIs['storedProductsURL']
         # self._database_stats_URL = APIs['databaseStatsURL']
-        self._database_stats_URL = "http://0.0.0.0:8040"
-        self._stored_products_IP = "http://0.0.0.0:8060"
+        self._database_stats_URL =  "http://40.68.161.235:8040"
+        self._stored_products_IP =  "http://40.68.161.235:8060"
         # Definisco il nome del client, topic, e MyMqtt object per la
         # registrazione MQTT
         self._clientID = conf['clientID_MQTT']
@@ -31,6 +31,7 @@ class WareBot:
         self._client = MyMQTT(self._clientID, self._broker, port, self)
         # Local token
         self._tokenBot = conf['telegramToken']
+        # self._tokenBot = "1856773611:AAHoZrI8czDwtxZadiLRY0gQrWe6Cs2qT-g"
         # Definisco il bot con il token
         self._bot = telepot.Bot(self._tokenBot)
         MessageLoop(self._bot,
@@ -57,7 +58,7 @@ class WareBot:
 
         # }
         self._productRequestStatus = []
-        self._queueAlarms = []
+        self.queueAlarms = []
         # Per capire quando è possibile inserire un input da tastiera
         # {
         #     'chatID':
@@ -95,23 +96,20 @@ class WareBot:
         if payload['measure_type'] in rangedDevice:
             message = f"ALARM!!! Value out of range\nRoom: {payload['Room']}\nDevice: {topic_splitted[4]}\nSensor type: {payload['measure_type']}\nCRITICAL VALUE: {payload['value']}"
             to_store_dict = dict(chatID={payload['chatID']}, msg=message)
-            self._queueAlarms.append(to_store_dict)
+            self.queueAlarms.append(to_store_dict)
         else:
             message = f"ALARM, BLACKOUT!!!\nRoom: {payload['Room']}\nDevice: {topic_splitted[4]}\nTime duration of blackout: {payload['value']}"
             to_store_dict = dict(chatID={payload['chatID']}, msg=message)
-            self._queueAlarms.append(to_store_dict)
+            self.queueAlarms.append(to_store_dict)
 
 ##########################################################################
 ##########################################################################
 
-    def getAlarms(self):
-        return self._queueAlarms
+
 
     def getStatus(self):
         return self._sessionStatus
 
-    def setAlarms(self):
-        return self._queueAlarms.pop(0)
 
     def sendCriticalMessage(self, chatID, msg):
         self._bot.sendMessage(chatID, text=msg)
@@ -701,6 +699,7 @@ class WareBot:
             self._bot.sendMessage(chat_ID, text=text)
 
         elif query_data == 'most_room_products':
+            self._productRequestStatus = []
             # Get the most sold products in a given room
             productRequest = dict(chatID=chat_ID, action='most')
             self._productRequestStatus.append(productRequest)
@@ -796,6 +795,7 @@ class WareBot:
             self._bot.sendMessage(chat_ID, text=text)
 
         elif query_data == 'room_most_month_products':
+            self._productRequestStatus = []
             # Get the most sold products in a given month in a given room
             productRequest = dict(chatID=chat_ID, action='most_month')
             self._productRequestStatus.append(productRequest)
@@ -886,6 +886,7 @@ class WareBot:
             self._bot.sendMessage(chat_ID, text=text)
 
         elif query_data == 'room_most_year_products':
+            self._productRequestStatus = []
             # Get the most sold products in a given year in a given room
             productRequest = dict(chatID=chat_ID, action='most_year')
             self._productRequestStatus.append(productRequest)
@@ -969,6 +970,7 @@ class WareBot:
             self._bot.sendMessage(chat_ID, text=text)
 
         elif query_data == 'least_room_products':
+            self._productRequestStatus = []
             # Get the least sold products in a given room
             productRequest = dict(chatID=chat_ID, action='least')
             self._productRequestStatus.append(productRequest)
@@ -1064,6 +1066,7 @@ class WareBot:
             self._bot.sendMessage(chat_ID, text=text)
 
         elif query_data == 'room_least_month_products':
+            self._productRequestStatus = []
             # Get the least sold products in a given month in a given room
             productRequest = dict(chatID=chat_ID, action='least_month')
             self._productRequestStatus.append(productRequest)
@@ -1154,6 +1157,7 @@ class WareBot:
             self._bot.sendMessage(chat_ID, text=text)
 
         elif query_data == 'room_least_year_products':
+            self._productRequestStatus = []
             # Get the least sold products in a given year in a given room
             productRequest = dict(chatID=chat_ID, action='least_year')
             self._productRequestStatus.append(productRequest)
@@ -1251,6 +1255,7 @@ class WareBot:
             self._bot.sendMessage(chat_ID, text=text)
 
         elif query_data == 'get_room_all_stored_products':
+            self._productRequestStatus = []
             # Retrieve all the stored products within a given room
             productRequest = dict(chatID=chat_ID, action='stored')
             self._productRequestStatus.append(productRequest)
@@ -1337,6 +1342,7 @@ class WareBot:
             self._bot.sendMessage(chat_ID, text=text)
 
         elif query_data == 'get_room_overall_total_products':
+            self._productRequestStatus = []
             # Retrieve the overall number of stored products in a given room
             productRequest = dict(chatID=chat_ID, action='count')
             self._productRequestStatus.append(productRequest)
@@ -1407,6 +1413,7 @@ class WareBot:
             self._bot.sendMessage(chat_ID, text=text)
 
         elif query_data == 'get_room_mode_products':
+            self._productRequestStatus = []
             # Retrieve the overall mode of the stored products in a given room
             productRequest = dict(chatID=chat_ID, action='mode')
             self._productRequestStatus.append(productRequest)
@@ -1444,6 +1451,7 @@ class WareBot:
             self._bot.sendMessage(chat_ID, text=text)
 
         elif query_data == 'get_specific_products':
+            self._productRequestStatus = []
             # Retrieve the info about some specific product in a given room
             productRequest = dict(chatID=chat_ID, action='product')
             self._productRequestStatus.append(productRequest)
@@ -1572,6 +1580,7 @@ class WareBot:
             self._bot.sendMessage(chat_ID, text=text)
 
         elif query_data == 'get_room_th_products':
+            self._productRequestStatus = []
             # Retrieve all the products that are under some threshold in a
             # given room
             productRequest = dict(chatID=chat_ID, action='th')
@@ -1620,6 +1629,7 @@ class WareBot:
             self._bot.sendMessage(chat_ID, text=text)
 
         elif query_data == 'Prod_av':
+            self._productRequestStatus = []
             productRequest = dict(chatID=chat_ID, action='stats')
             self._productRequestStatus.append(productRequest)
             for status in self._sessionStatus:
@@ -1627,20 +1637,25 @@ class WareBot:
                     userID = status['userID']
                     self._roomRoutine(chat_ID, userID, 1)
 
-        elif query_data == 'Product_stored':
+        elif query_data.split('+')[0] == 'Product_stored':
             for productRequest in self._productRequestStatus:
                 if productRequest['chatID'] == chat_ID:
-                    roomID = productRequest['roomID']
+                    to_remove = productRequest
+                    roomID = query_data.split('+')[1]
                     r = requests.get(
                         f"{self._database_stats_URL}/db/stored/{roomID}/all")
                     body = json.dumps(r.json(), indent=4)
                     productsDict = json.loads(body)
-                    productsList = productsDict['products_stored']
+                    productsList = productsDict['products']
                     text = ""
-                    for product in productsList:
-                        text += f"Product ID : {product['product_ID']}\nQuantity : {product['quantity']}\n"
-                    text += "\n\n Press \\start to return to the dashboard"
+                    if productsList == -1:
+                        text += f"Some error occurred!"
+                    else:
+                        for product in productsList:
+                            text += f"Product ID : {product['product_ID']}\nQuantity : {product['quantity']}\n"
+                    text += "\n\n Press /start to return to the dashboard"
                     self._bot.sendMessage(chat_ID, text=text)
+            self._productRequestStatus.remove(to_remove)
 
         elif query_data == 'Manage_product':
             buttons = [[InlineKeyboardButton(text=f'Insert new products🟩',
@@ -1656,15 +1671,18 @@ class WareBot:
             for productReq in self._productRequestStatus:
                 if productReq['chatID'] == chat_ID:
                     productReq['roomID'] = query_data.split('+')[1]
+                    break
             text = "Please scan product :"
             self._bot.sendMessage(chat_ID, text=text)
 
         elif query_data == 'Remove_product':
+            self._productRequestStatus = []
             productRequest = dict(chatID=chat_ID, action='delete')
             self._productRequestStatus.append(productRequest)
             text = "Please insert the quantity of the product that you want to remove:"
             self._bot.sendMessage(chat_ID, text=text)
         elif query_data == 'Insert_product':
+            self._productRequestStatus = []
             productRequest = dict(chatID=chat_ID, action='new')
             self._productRequestStatus.append(productRequest)
             text = "Please insert the quantity of the product that you want to add :"
@@ -1676,7 +1694,8 @@ class WareBot:
                     userID = status['userID']
                     break
             roomID = query_data
-            dm = DailyMonitor(roomID, self._catalog_URL)
+            x=self._catalog_URL
+            dm = DailyMonitor(roomID, x)
             msg = dm.data_retrieve()
             self._bot.sendMessage(chat_ID, text=msg)
 
@@ -1779,7 +1798,7 @@ class WareBot:
                         emoji = '❄'
                     elif room['product_type'] == '01':
                         emoji = '💧'
-                    elif room['product_type'] == '11':
+                    elif room['product_type'] == '10':
                         emoji = '🔥'
                     cnt = cnt + 1
                     ID = room['roomID']
@@ -1787,10 +1806,11 @@ class WareBot:
                     for productReq in self._productRequestStatus:
                         if productReq['chatID'] == chat_ID:
                             productReq['product_type'] = room['product_type']
+
                         if productReq['action'] == 'stats':
                             inline.append(
                                 InlineKeyboardButton(
-                                    text=text, callback_data='Product_stored'))
+                                    text=text, callback_data=f"Product_stored+{ID}"))
                         elif productReq['action'] == 'most':
                             inline.append(
                                 InlineKeyboardButton(
@@ -1876,6 +1896,7 @@ class WareBot:
                                     text=text,
                                     callback_data=f"Product_scan+{room['roomID']}"))
 
+
                     if cnt == 4:
                         buttons.append(inline)
                         inline = []
@@ -1894,22 +1915,22 @@ if __name__ == "__main__":
     bot.run()
     bot.follow()
     while True:
-        queue_alarms = bot.getAlarms()
+        time.sleep(30)
         sessionStatus = bot.getStatus()
-        if len(queue_alarms) > 0:
-            retrivedDict = bot.setAlarms
+        if len(bot.queueAlarms) > 0:
+            retrivedDict = bot.queueAlarms.pop(0)
             for status in sessionStatus:
-                if status['chatID'] == retrivedDict['chatID']:
+                x=list(retrivedDict['chatID'])[0]
+                if status['chatID'] == x :
                     if status['Log_in_status'] == 1:
                         bot.sendCriticalMessage(
-                            retrivedDict['chatID'], retrivedDict['msg'])
+                            x, retrivedDict['msg'])
                     else:
                         if 'logOutBackup' not in status.keys():
                             status['logOutBackup'] = "Welcome back!!!\nWhen you  logged out you received this warnings:\n"
                             status['logOutBackup'] += retrivedDict['msg']
                         else:
                             status['logOutBackup'] += retrivedDict['msg']
-        time.sleep(300)
         sessionStatus = bot.getStatus()
         for status in sessionStatus:
             if status['Log_in_status'] == 1 and (
