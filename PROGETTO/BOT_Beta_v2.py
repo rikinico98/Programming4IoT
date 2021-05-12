@@ -27,6 +27,7 @@ class WareBot:
         # registrazione MQTT
         self._clientID = conf['clientID_MQTT']
         self._topic = conf['mqttTopic']
+        #self._topic = "BOT/WareHouse/team5/alarm/#"
         self._broker = conf['brokerURL']
         self._client = MyMQTT(self._clientID, self._broker, port, self)
         # Local token
@@ -1671,6 +1672,7 @@ class WareBot:
             for productReq in self._productRequestStatus:
                 if productReq['chatID'] == chat_ID:
                     productReq['roomID'] = query_data.split('+')[1]
+                    productReq['product_type'] = query_data.split('+')[2]
                     break
             text = "Please scan product :"
             self._bot.sendMessage(chat_ID, text=text)
@@ -1804,8 +1806,6 @@ class WareBot:
                     ID = room['roomID']
                     text = f'{ID} {emoji}'
                     for productReq in self._productRequestStatus:
-                        if productReq['chatID'] == chat_ID:
-                            productReq['product_type'] = room['product_type']
 
                         if productReq['action'] == 'stats':
                             inline.append(
@@ -1894,7 +1894,7 @@ class WareBot:
                             inline.append(
                                 InlineKeyboardButton(
                                     text=text,
-                                    callback_data=f"Product_scan+{room['roomID']}"))
+                                    callback_data=f"Product_scan+{room['roomID']}+{room['product_type']}"))
 
 
                     if cnt == 4:
