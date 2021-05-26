@@ -10,17 +10,19 @@
 	"port_storedProducts":80,
 	"port_soldProducts":80,
 	"port_databaseStats":80,
+	"port_dm":80,
 	
 	"catalogURL": "http://warehousecatalog",
 	"databaseStatsURL": "http://databaseStats",
 	"storedProductsURL": "http://storedProducts",
 	"soldProductsURL": "http://soldProducts",
 	"formURL": "http://warehouseform",
+	"dmURL": "http://dm",
 	
 	
 	
 	"telegramToken":"1434648914:AAGBPw3mi9AumKqF4n0fOroitaPqDkwgrzU",
-	"mqttTopicTelegram":"WareHouse/team5/alarm/#",
+	"mqttTopicTelegram":"BOT/WareHouse/team5/alarm/#",
 	"clientID_Telegram_MQTT":"Bot_Telegram_Sub",
 
 	"api_key_thingspeak": "LL8A82J0EWRBDUSQ",

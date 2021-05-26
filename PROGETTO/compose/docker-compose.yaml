@@ -46,13 +46,28 @@ services:
     - "warehousecatalog"
     links:
     - "warehousecatalog"
-    
+  dm:
+    build: ./soldproducts
+    image: soldproducts:latest
+    ports:
+     - "8030:80"
+    depends_on:
+    - "warehousecatalog"
+    links:
+    - "warehousecatalog"
+   
   bot:
     build: ./bot
     image: bot:latest
     depends_on:
     - "warehousecatalog"
+    - "dm"
+    - "warehousecatalog"
+    - "storedproducts"
+    - "databasestats"
     links:
     - "warehousecatalog"
     - "storedproducts"
     - "databasestats"
+    - "dm"
+

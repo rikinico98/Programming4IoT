@@ -41,6 +41,8 @@ class StatisticsProducts():
 
     def __init__(self):
         # Request URL to catalog
+        # self.url_sold = "http://0.0.0.0:8050"
+        # self.url_stored = "http://0.0.0.0:8060"
         r_url = requests.get(f'{URL}/catalog/URL')
         j_url = json.dumps(r_url.json(),indent=4)
         d_url = json.loads(j_url)
@@ -432,5 +434,7 @@ if __name__ == "__main__":
             'tool.session.on': True
         }
     }
-    cherrypy.config.update({'server.socket_port': port})
-    cherrypy.quickstart(StatisticsProducts(), '/', conf)
+    cherrypy.tree.mount(StatisticsProducts(),'/',conf)
+    cherrypy.config.update({'server.socket_host': '0.0.0.0','server.socket_port':port})
+    cherrypy.engine.start()
+    cherrypy.engine.block()

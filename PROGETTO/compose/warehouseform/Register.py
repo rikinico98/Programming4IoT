@@ -48,13 +48,13 @@ class OpenWebService():
                   f'?api_key={self.api_key}&name={body["roomID"]}')
             response = requests.post(
                 self.url_create_channel_thingspeak +
-                f'?api_key={self.api_key}&name={body["roomID"]}&field1=Temperature&field2=Humidity&field3=Smoke&field4=Empty&field5=Empty&field6=Empty&field7=Empty&field8=Empty')
+                f'?api_key={self.api_key}&name={body["roomID"]}&public_flag=true&field1=Temperature&field2=Humidity&field3=Smoke&field4=Empty&field5=Empty&field6=Empty&field7=Empty&field8=Empty')
             diz1 = json.dumps(response.json(), indent=4)
             diz = json.loads(diz1)  # la risposta diventa dizionario
             # mi prendo le specifiche del canale e le salvo
             body["ThingSpeak"]["channelID"] = diz["id"]
-            body["ThingSpeak"]["api_key_read"] = diz["api_keys"][0]["api_key"]
-            body["ThingSpeak"]["api_key_write"] = diz["api_keys"][1]["api_key"]
+            body["ThingSpeak"]["api_key_read"] = diz["api_keys"][1]["api_key"]
+            body["ThingSpeak"]["api_key_write"] = diz["api_keys"][0]["api_key"]
             print(json.dumps(body, indent=4))
             r = requests.post(
                 self.url_catalog +
@@ -308,6 +308,6 @@ if __name__ == '__main__':
         },
     }
     cherrypy.tree.mount(OpenWebService(url_catalog, api_key), '/', conf)
-    cherrypy.config.update({'server.socket_port': port})
+    cherrypy.config.update({'server.socket_host': '0.0.0.0','server.socket_port':port})
     cherrypy.engine.start()
     cherrypy.engine.block()
