@@ -61,6 +61,10 @@ class UpdateDevices():
                 "sensor": sensor
             }
             devices.append(myDict)
+            # Send a request to update it in the catalog
+            requests.put(f'{self.URL}/catalog/{room}\
+                /{device_ID}/update_timestamp', data = \
+                json.dumps({"timestamp": timestamp}))
         else:
             # Else check if device is already present
             flag_ID = 1
@@ -70,7 +74,9 @@ class UpdateDevices():
                     # If so, update its timestamp
                     device["timestamp"] = timestamp
                     # Send a request to update it in the catalog
-                    requests.put(f'{self.URL}/catalog/{device["roomID"]}/{device["deviceID"]}/update_timestamp', data = json.dumps({"timestamp": timestamp}))
+                    requests.put(f'{self.URL}/catalog/{device["roomID"]}\
+                        /{device["deviceID"]}/update_timestamp', data = \
+                        json.dumps({"timestamp": timestamp}))
             if flag_ID == 1:
                 # Else insert a new device in memory
                 myDict = {
@@ -80,6 +86,10 @@ class UpdateDevices():
                     "sensor": sensor
                 }
                 devices.append(myDict)
+                # Send a request to update it in the catalog
+                requests.put(f'{self.URL}/catalog/{room}\
+                    /{device_ID}/update_timestamp', data = \
+                    json.dumps({"timestamp": timestamp}))
     
     def returnDevices(self):
         return json.dumps({"devices": self.lastReceivedTime})
@@ -108,13 +118,15 @@ if __name__ == "__main__":
                 if time_diff > 10:
                     # Delete the device because it is expired!!!
                     flag = 0
-                    requests.delete(f'{URL}/catalog/{device["roomID"]}/{device["deviceID"]}/delete')
+                    requests.delete(f'{URL}/catalog/{device["roomID"]}\
+                        /{device["deviceID"]}/delete')
                     to_remove = device
             else:
                 if time_diff > 1800:
                     # Delete the device because it is expired!!!
                     flag = 0
-                    requests.delete(f'{URL}/catalog/{device["roomID"]}/{device["deviceID"]}/delete')
+                    requests.delete(f'{URL}/catalog/{device["roomID"]}\
+                        /{device["deviceID"]}/delete')
                     to_remove = device
         if flag == 0:
             up_device.deleteDevice(to_remove)
