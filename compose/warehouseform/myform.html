@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html>
+<header>
+    <link rel="stylesheet" href="/css/form2.css">
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/myWebForm.js"></script>
+</heaer>
+<head>
+<link rel="shortcut icon" href="#">
+<title>Device/User/Room Update and Registration</title>
+<style>
+.container {
+position: relative;
+font-family: Arial;
+}
+.text-block {
+position: absolute;
+bottom: 50%;
+right: 50%;
+background-color: black;
+color: white;
+padding-left: 20px;
+padding-right: 20px;
+}
+</style>
+</head>
+<body>
+<!-- DEFINIZIONE DEI MENU  -->
+<ul>
+  <li class="dropdown">
+    <a href="javascript:void(0)" class="dropbtn">Registration</a>
+    <div class="dropdown-content">
+        <a href="#" onclick="openRooms(event, 'Rooms')">Rooms</a>
+        <a href="#" onclick="openUsers(event, 'Users')">Users</a>
+        <a href="#" onclick="openDevices(event, 'Devices')">Devices</a>
+    </div>
+  </li>
+  <li class="dropdown">
+    <a href="javascript:void(0)" class="dropbtn">Update</a>
+    <div class="dropdown-content">
+        <a href="#" onclick="openRooms(event, 'Update_selection')">Update Room fields</a>
+        <a href="#" onclick="openUsers(event, 'Update_users')">Update User fields</a>
+        <a href="#" onclick="openDevices(event, 'Update_devices')">Update Device fields</a>
+    </div>
+  </li>
+  <li class="dropdown">
+  <a href="javascript:void(0)">Delete</a>
+    <div class="dropdown-content">
+        <a href="#" onclick="openRooms(event, 'Delete_device')">Delete a device</a>
+        <a href="#" onclick="openUsers(event, 'Delete_room')">Delete a room</a>
+        <a href="#" onclick="openDevices(event, 'Delete_user')">Delete a user</a>
+    </div>
+  </li>
+</ul>
+<!-- LAYOUT PAGINA DI LANDING -->
+<div class="container">
+    <div id = "Menu" style="padding-left:16px" style="display:block;">
+        <img src="https://cdn.pixabay.com/photo/2016/11/22/19/24/archive-1850170_1280.jpg" alt="Nature" style="width:100%;">
+        <div class="text-block">
+        <h4>Welcome to the WareHouse Manager!</h4>
+        <p>From this page you can register, update and delete elements from the Device and Service Catalog</p>
+        </div>
+    </div>
+</div>
+
+<!-- PER I POST DEI DEVICES, USERS E ROOMS-->
+<ul id="Devices" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform1'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="roomID">Room ID:   </label><br>
+                        Instructions: typical Room ID is "R_001"<br>
+                        <input type="text" class="form-control" id="roomID"><br>
+                        <label for="deviceID">Device ID:   </label><br>
+                        Instructions: typical Device ID is "D_001"<br>
+                        <input type="text" class="form-control" id="deviceID"><br>
+                        <label for="deviceName">Device name:   </label><br><input type="text" class="form-control" id="deviceName"><br>
+                        <label for="measureType">Measure type:   </label><br>
+                        <select id="measureType" name="measureType">
+                            <option value="temphum">temphum</option>
+                            <option value="smoke">smoke</option>
+                            <option value="blackout">blackout</option>
+                        </select><br><br>
+                        <label for="field">Thingspeak field 1:   </label><br>
+                        <select id="field" name="field">
+                            <option value="none">none</option>
+                            <option value="field1">field1</option>
+                            <option value="field2">field2</option>
+                            <option value="field3">field3</option>
+                            <option value="field4">field4</option>
+                            <option value="field5">field5</option>
+                            <option value="field6">field6</option>
+                            <option value="field7">field7</option>
+                            <option value="field8">field8</option>
+                        </select><br><br>
+                        <label for="field2">Thingspeak field 2:   </label><br>
+                        <select id="field2" name="field2">
+                            <option value="none">none</option>
+                            <option value="field1">field1</option>
+                            <option value="field2">field2</option>
+                            <option value="field3">field3</option>
+                            <option value="field4">field4</option>
+                            <option value="field5">field5</option>
+                            <option value="field6">field6</option>
+                            <option value="field7">field7</option>
+                            <option value="field8">field8</option>
+                        </select><br><br>
+                    <!-- First available service -->
+                    ***********************************************************************************************************
+                    <br><label for="service1">Service 1 - Type:</label><br>
+                        <select id="service1" name="service1">
+                            <option value="MQTT">MQTT</option>
+                            <option value="REST">REST</option>
+                        </select><br>
+                        <label for="serviceIP">Service 1 - Service IP:   </label><br>
+                        <input type="text" id ="serviceIP" name="serviceIP"><br>
+                        <label for="topic1">Service 1 - topic 1:   </label><br>
+                        <input type="text" id ="topic1" name="topic1"><br><br>
+                        <label for="topic2">Service 1 - topic 2:   </label><br>
+                        <input type="text" id ="topic2" name="topic2"><br>
+                        <label for="topic3">Service 1 - topic 3:   </label><br>
+                        <input type="text" id ="topic3" name="topic3"><br><br>
+
+                    <!-- Second available service -->
+                    **********************************************************************************************************
+                    <br><label for="service2">Service 2 - Type:</label><br>
+                        <select id="service2_http" name="service2_http">
+                            <option value="none">NONE</option>
+                            <option value="MQTT">MQTT</option>
+                            <option value="REST">REST</option>
+                        </select><br>
+                        <label for="serviceIP2">Service 2 - Service IP:</label><br>
+                        <input type="text" id ="serviceIP2" name="serviceIP2"><br>
+                        <label for="topic11">Service 2 - topic 1:   </label><br>
+                        <input type="text" id ="topic11" name="topic11"><br>
+                        <label for="topic22">Service 2 - topic 2:   </label><br>
+                        <input type="text" id ="topic22" name="topic22"><br>
+                        <label for="topic33">Service 2 - topic 3:   </label><br>
+                        <input type="text" id ="topic33" name="topic33"><br>
+                    </div>
+
+                    <button type="submit" id="myBtn1" onclick="sendDevicesPOSTrequest();myFunction()" class="btn btn-primary">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+<ul id="Users" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform2'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="roomIDs">Room ID/IDs:   </label><br>
+                        Instructions: if there is a single room please insert "R_001"<br>
+                                    if there are more rooms, please insert "R_001-R_002-R_003..."
+                        <br><input type="text" class="form-control" id="roomIDs"> <br>
+                    </div>
+                    <div class="form-inline">
+                        <label for="userID">User ID:   </label><br>
+                        Instructions: typical User ID are "U_001": for workers and "M_001": for owners
+                        <br><input type="text" class="form-control" id="userID"><br>
+                    </div>
+                    <!-- il chat ID può essere inserito vuoto -->
+                    <button type="submit" id="myBtn2" onclick="sendUsersPOSTrequest(); myFunction()" class="btn btn-primary">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+<ul id="Rooms" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform3'>
+
+                    <div class="form-inline">
+                        <br>
+                        <label for="room_ID">Room ID:   </label><br>
+                        Instructions: typical Room ID is "R_001"
+                        <input type="text" class="form-control" id="room_ID"><br>
+                        <label for="product_type">Product type:   </label><br>
+                        <input type="text" class="form-control" id="product_type"><br>
+                    </div>
+
+                    <div class="form-inline">
+                        ***********************************************************************************************************<br>
+                        Temperature range<br>
+                        <label for="temp_min">Min [Celsius]: </label><br>
+                        <input type="text" class="form-control" id="temp_min"><br>
+                        <label for="temp_max">Max [Celsius]: </label><br>
+                        <input type="text" class="form-control" id="temp_max"><br>
+                    </div>
+
+                    <div class="form-inline">
+                        ***********************************************************************************************************<br>
+                        Humidity range<br>
+                        <label for="hum_min">Min [%]: </label><br>
+                        <input type="text" class="form-control" id="hum_min"><br>
+                        <label for="hum_max">Max [%]: </label><br>
+                        <input type="text" class="form-control" id="hum_max"><br>
+                    </div>
+
+                    <div class="form-inline">
+                        ***********************************************************************************************************<br>
+                        Smoke threshold<br>
+                        <label for="smoke_min">[ppm]: </label><br>
+                        <input type="text" class="form-control" id="smoke_min"><br>
+                    </div>
+
+                    <button type="submit" id="myBtn3" onclick="sendRoomsPOSTrequest(); myFunction()" class="btn btn-primary">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+
+<!-- PER I PUT delle stanze- quindi per effettuare gli updates -->
+<ul id="Update_selection" class="tabcontent" style="display:none;">
+    <form name = 'myform3'>
+        <div class="form-inline">
+            <br><br>
+            <label for="field_room">Select what you want to update:   </label><br>
+                        <select id="field_room" name="field_room" onchange="selectRoomsForm()">
+                            <option disabled selected value> -- select an option -- </option>
+                            <option value="field1">Product type</option>
+                            <option value="field2">Thingspeak channel ID</option>
+                            <option value="field3">Thingspeak api key read</option>
+                            <option value="field4">Thingspeak api key write</option>
+                            <option value="field5">Temperature ranges</option>
+                            <option value="field6">Humidity ranges</option>
+                            <option value="field7">Smoke ranges</option>
+                        </select><br><br>
+
+        </div>
+    </form>
+</ul>
+<!-- Form change Thingspeak api key read-->
+<ul id="Change_api_key_read" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform3'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="roomID3">Room ID:   </label><br>
+                        <br><input type="text" class="form-control" id="roomID3"> <br>
+                        <label for="api_key_r">API key read:   </label><br>
+                        <br><input type="text" class="form-control" id="api_key_r"><br>
+                    </div>
+                    <button type="submit" onclick="sendRoomApiKeyReadPUTrequest();myFunction1() " class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+<!-- Form change Thingspeak channel ID-->
+<ul id="Change_channel_id" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform3'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="roomID_2">Room ID:   </label><br>
+                        <br><input type="text" class="form-control" id="roomID_2"> <br>
+                        <label for="chann_id">Channel ID:   </label><br>
+                        <br><input type="text" class="form-control" id="chann_id"><br>
+                    </div>
+                    <button type="submit" onclick="sendRoomChannelPUTrequest();myFunction1()" class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+<!-- Form change product type -->
+<ul id="Change_product_type" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform3'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="roomID_1">Room ID:   </label><br>
+                        <br><input type="text" class="form-control" id="roomID_1"> <br>
+                        <label for="prod_type">Product Type:   </label><br>
+                        <br><input type="text" class="form-control" id="prod_type"><br>
+                    </div>
+                    <button type="submit" onclick="sendRoomProductPUTrequest();myFunction1() " class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+<!-- Form change Thingspeak api key write -->
+<ul id="Change_api_key_write" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform3'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="roomID4">Room ID:   </label><br>
+                        <br><input type="text" class="form-control" id="roomID4"> <br>
+                        <label for="api_key_w">API key write:   </label><br>
+                        <br><input type="text" class="form-control" id="api_key_w"><br>
+                    </div>
+                    <button type="submit" onclick="sendRoomApiKeyWritePUTrequest();myFunction1() " class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+<!-- Form change Temperature ranges-->
+<ul id="Change_temperature_ranges" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform5'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="roomID5">Room ID:   </label><br>
+                        <br><input type="text" class="form-control" id="roomID5"> <br>
+                        ***********************************************************************************************************<br>
+                        Temperature range<br>
+                        <label for="temp_min_1">Min [Celsius]: </label><br>
+                        <input type="text" class="form-control" id="temp_min_1"><br>
+                        <label for="temp_max_1">Max [Celsius]: </label><br>
+                        <input type="text" class="form-control" id="temp_max_1"><br>
+
+                    </div>
+                    <button type="submit" onclick="sendRoomTemperaturePUTrequest();myFunction1() " class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+<!-- Form change Humidity ranges-->
+<ul id="Change_humidity_ranges" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform6'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="roomID6">Room ID:   </label><br>
+                        <br><input type="text" class="form-control" id="roomID6"> <br>
+                        ***********************************************************************************************************<br>
+                        Humidity range<br>
+                        <label for="hum_min_1">Min [%]: </label><br>
+                        <input type="text" class="form-control" id="hum_min_1"><br>
+                        <label for="hum_max_1">Max [%]: </label><br>
+                        <input type="text" class="form-control" id="hum_max_1"><br>
+
+                    </div>
+                    <button type="submit" onclick="sendRoomHumidityPUTrequest();myFunction1()" class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+<!-- Form change Smoke ranges -->
+<ul id="Change_smoke_ranges" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform7'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="roomID7">Room ID:   </label><br>
+                        <br><input type="text" class="form-control" id="roomID7"> <br>
+                        ***********************************************************************************************************<br>
+                        Smoke threshold<br>
+                        <label for="smoke_min_1">[ppm]: </label><br>
+                        <input type="text" class="form-control" id="smoke_min_1"><br>
+
+                    </div>
+                    <button type="submit" onclick="sendRoomSmokePUTrequest();myFunction1()" class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+
+<!-- PER I PUT DEGLI USERS - quindi per effettuare gli updates DEI CAMPI DEGLI USERS -->
+<ul id="Update_users" class="tabcontent" style="display:none;">
+    <form name = 'myform3'>
+        <div class="form-inline">
+            <br><br>
+            <label for="field_user">Select what you want to update:   </label><br>
+            <select id="field_user" name="field_user" onchange="selectUsersForm()">
+                <option disabled selected value> -- select an option -- </option>
+                <option value="field_1">Assigned rooms</option>
+                <option value="field_2">Role</option>
+            </select><br><br>
+        </div>
+    </form>
+</ul>
+<!-- PUT USER Form change assigned rooms -->
+<ul id="Change_assigned_rooms" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform3'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="rooms">Room ID/IDs:   </label><br>
+                        <br><input type="text" class="form-control" id="rooms"> <br>
+                        <label for="user_id">User ID:   </label><br>
+                        <br><input type="text" class="form-control" id="user_id"><br>
+                    </div>
+                    <button type="submit" onclick="sendUserRoomsAddPUTrequest(); myFunction1()" class="btn btn-primary">Add</button>
+                    <button type="submit" onclick="sendUserRoomsDeletePUTrequest(); myFunction1()" class="btn btn-primary">Remove</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+<!-- PUT USER Form change assigned role -->
+<ul id="Change_assigned_role" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform3'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="old_user_id">Old user ID:   </label><br>
+                        <br><input type="text" class="form-control" id="old_user_id"> <br>
+                        <label for="new_user_id">New User ID:   </label><br>
+                        <br><input type="text" class="form-control" id="new_user_id"><br>
+                    </div>
+                    <button type="submit" onclick="sendUserRolePUTrequest(); myFunction1()" class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+
+<!-- PER I PUT DEI DEVICES - quindi per effettuare gli updates DEI CAMPI DEI DEVICES -->
+<ul id="Update_devices" class="tabcontent" style="display:none;">
+    <form name = 'myform3'>
+        <div class="form-inline">
+            <br><br>
+            <label for="field_device">Select what you want to update:   </label><br>
+            <select id="field_device" name="field_device" onchange="selectDevicesForm()">
+                <option disabled selected value> -- select an option -- </option>
+                <option value="field11">Name</option>
+                <option value="field22">Measure Type</option>
+                <option value="field33">Service Details</option>
+                <option value="field44">Topics</option>
+                <option value="field55">Thingspeak field</option>
+            </select><br><br>
+        </div>
+    </form>
+</ul>
+<!--PUT DEVICES CHANGE NAME -->
+<ul id="Change_name" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform3'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="room">Room ID:   </label><br>
+                        <br><input type="text" class="form-control" id="room"> <br>
+                        <label for="device_id">Device ID:   </label><br>
+                        <br><input type="text" class="form-control" id="device_id"><br>
+                        <label for="device_name">Device name:   </label><br>
+                        <br><input type="text" class="form-control" id="device_name"><br>
+                    </div>
+                    <button type="submit" onclick="sendDeviceNamePUTrequest();myFunction1() " class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+<!--PUT DEVICES CHANGE measure type -->
+<ul id="Change_meas_type" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform3'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="roomD">Room ID:   </label><br>
+                        <br><input type="text" class="form-control" id="roomD"> <br>
+                        <label for="device_idD">Device ID:   </label><br>
+                        <br><input type="text" class="form-control" id="device_idD"><br>
+                        <label for="meas_typeD">Measure Type:   </label><br>
+                        <select id="meas_typeD" name="meas_typeD">
+                            <option value="temphum">temphum</option>
+                            <option value="smoke">smoke</option>
+                            <option value="blackout">blackout</option>
+                        </select><br><br>
+                    </div>
+                    <button type="submit" onclick="sendDeviceMeasurePUTrequest();myFunction1() " class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+<!--PUT DEVICES change services details -->
+<ul id="Change_services" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform3'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="roomid">Room ID:   </label><br>
+                        <br><input type="text" class="form-control" id="roomid"> <br>
+                        <label for="device_Id">Device ID:   </label><br>
+                        <br><input type="text" class="form-control" id="device_Id"><br>
+                        <!-- First available service -->
+                    ***********************************************************************************************************
+                    <br><label for="service_1">Service 1 - Type:</label><br>
+                        <select id="service_1" name="service_1">
+                            <option value="MQTT">MQTT</option>
+                            <option value="REST">REST</option>
+                        </select><br>
+                        <label for="service__IP">Service 1 - Service IP:   </label><br>
+                        <input type="text" id ="service__IP" name="service__IP"><br>
+                        <label for="topic111">Service 1 - topic 1:   </label><br>
+                        <input type="text" id ="topic111" name="topic111"><br><br>
+                        <label for="topic222">Service 1 - topic 2:   </label><br>
+                        <input type="text" id ="topic222" name="topic222"><br>
+                        <label for="topic333">Service 1 - topic 3:   </label><br>
+                        <input type="text" id ="topic333" name="topic333"><br><br>
+
+                    <!-- Second available service -->
+                    **********************************************************************************************************
+                    <br><label for="service_2">Service 2 - Type:</label><br>
+                        <select id="service_2" name="service_2">
+                            <option value="none">NONE</option>
+                            <option value="MQTT">MQTT</option>
+                            <option value="REST">REST</option>
+                        </select><br>
+                        <label for="service__IP2">Service 2 - Service IP:</label><br>
+                        <input type="text" id ="service__IP2" name="service__IP2"><br>
+                        <label for="topic_11">Service 2 - topic 1:   </label><br>
+                        <input type="text" id ="topic_11" name="topic_11"><br>
+                        <label for="topic_22">Service 2 - topic 2:   </label><br>
+                        <input type="text" id ="topic_22" name="topic_22"><br>
+                        <label for="topic_33">Service 2 - topic 3:   </label><br>
+                        <input type="text" id ="topic_33" name="topic_33"><br>
+                    </div>
+                    </div>
+                    <button type="submit" onclick="sendDeviceServicePUTrequest();myFunction1() " class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+<!--PUT DEVICES CHANGE TOPIC -->
+<ul id="Change_topic" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform3'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="room__D">Room ID:   </label><br>
+                        <br><input type="text" class="form-control" id="room__D"> <br>
+                        <label for="device__idD">Device ID:   </label><br>
+                        <br><input type="text" class="form-control" id="device__idD"><br>
+                        <label for="topic_D">Topics (if more than one please use "-" as separator):   </label><br>
+                        <br><input type="text" class="form-control" id="topic_D"><br>
+                    </div>
+                    <button type="submit" onclick="sendDeviceTopicPUTrequest();myFunction1() " class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+<!--PUT DEVICES change field -->
+<ul id="Change_field" class="tabcontent" style="display:none;">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-xs-12 mx-auto my-3">
+                <form name = 'myform3'>
+                    <div class="form-inline">
+                        <br>
+                        <label for="roomID10">Room ID:   </label><br>
+                        <br><input type="text" class="form-control" id="roomID10"> <br>
+                        <label for="device_id123">Device ID:   </label><br>
+                        <br><input type="text" class="form-control" id="device_id123"><br>
+                        <label for="field_123">Thingspeak channel field 1:   </label><br>
+                        <select id="field_123" name="field_123">
+                            <option value="none">none</option>
+                            <option value="field1">field1</option>
+                            <option value="field2">field2</option>
+                            <option value="field3">field3</option>
+                            <option value="field4">field4</option>
+                            <option value="field5">field5</option>
+                            <option value="field6">field6</option>
+                            <option value="field7">field7</option>
+                            <option value="field8">field8</option>
+                        </select><br><br>
+                        <label for="field_2">Thingspeak channel field 2:   </label><br>
+                        <select id="field_2" name="field_2">
+                            <option value="none">none</option>
+                            <option value="field1">field1</option>
+                            <option value="field2">field2</option>
+                            <option value="field3">field3</option>
+                            <option value="field4">field4</option>
+                            <option value="field5">field5</option>
+                            <option value="field6">field6</option>
+                            <option value="field7">field7</option>
+                            <option value="field8">field8</option>
+                        </select><br><br>
+                    </div>
+                    <button type="submit" onclick="sendDeviceFieldPUTrequest();myFunction1() " class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</ul>
+
+<!--PER I DELETE -->
+
+<!--delete device -->
+<ul id="Delete_device" class="tabcontent" style="display:none;">
+    <form name = 'myform3'>
+        <div class="col-xl-4 col-xs-12 mx-auto my-3">
+            <form name = 'myform3'>
+                <div class="form-inline">
+                    <br>
+                    <label for="id_room">Room ID:   </label><br>
+                    <br><input type="text" class="form-control" id="id_room"> <br>
+                    <label for="id_device">Device ID:   </label><br>
+                    <br><input type="text" class="form-control" id="id_device"><br>
+                </div>
+                <button type="submit" onclick="myFunctionConfirm('device')" class="btn btn-primary">Delete</button>
+            </form>
+        </div>
+    </form>
+</ul>
+<!--delete room -->
+<ul id="Delete_room" class="tabcontent" style="display:none;">
+    <form name = 'myform3'>
+        <div class="col-xl-4 col-xs-12 mx-auto my-3">
+            <form name = 'myform3'>
+                <div class="form-inline">
+                    <br>
+                    <label for="id1_room">Room ID:   </label><br>
+                    <br><input type="text" class="form-control" id="id1_room"> <br>
+                </div>
+                <button type="submit" onclick="myFunctionConfirm('room') " class="btn btn-primary">Delete</button>
+            </form>
+        </div>
+    </form>
+</ul>
+
+<!--delete user -->
+<ul id="Delete_user" class="tabcontent" style="display:none;">
+    <form name = 'myform3'>
+        <div class="col-xl-4 col-xs-12 mx-auto my-3">
+            <form name = 'myform3'>
+                <div class="form-inline">
+                    <br>
+                    <label for="id_user">User ID:   </label><br>
+                    <br><input type="text" class="form-control" id="id_user"> <br>
+                </div>
+                <button type="submit" onclick="myFunctionConfirm('user') " class="btn btn-primary">Delete</button>
+            </form>
+        </div>
+    </form>
+</ul>
+
+</body>
+
+<script>
+    // funzioni per aprire le forms corrette relative alla selezione dell'utente
+    function openDevices(evt, device) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(device).style.display = "block";
+            document.getElementById("Menu").style.display = "none";
+            evt.currentTarget.className += " active";
+        }
+    function openUsers(evt, device) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(device).style.display = "block";
+        document.getElementById("Menu").style.display = "none";
+        evt.currentTarget.className += " active";
+    }
+    function openRooms(evt, device) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(device).style.display = "block";
+        document.getElementById("Menu").style.display = "none";
+        evt.currentTarget.className += " active";
+    }
+    // è lo script che  permette di selezionare e visualizzare la form corretta per compilare correttamente i campi
+    // per effettuare l'update delle stanze
+    function selectRoomsForm() {
+        var selection = document.getElementById("field_room").value;
+
+        if (selection == "field1"){
+            var tabcontent = document.getElementById("Change_product_type")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_channel_id").style.display = "none";
+            document.getElementById("Change_product_type").style.display = "block";
+            document.getElementById("Change_api_key_write").style.display = "none";
+            document.getElementById("Change_api_key_read").style.display = "none";
+            document.getElementById("Change_temperature_ranges").style.display = "none";
+            document.getElementById("Change_humidity_ranges").style.display = "none";
+            document.getElementById("Change_smoke_ranges").style.display = "none";
+        } else if (selection == "field2"){
+            var tabcontent = document.getElementById("Change_channel_id")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_channel_id").style.display = "block";
+            document.getElementById("Change_product_type").style.display = "none";
+            document.getElementById("Change_api_key_write").style.display = "none";
+            document.getElementById("Change_api_key_read").style.display = "none";
+            document.getElementById("Change_temperature_ranges").style.display = "none";
+            document.getElementById("Change_humidity_ranges").style.display = "none";
+            document.getElementById("Change_smoke_ranges").style.display = "none";
+        } else if (selection == "field3"){
+            var tabcontent = document.getElementById("Change_api_key_read")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_channel_id").style.display = "none";
+            document.getElementById("Change_product_type").style.display = "none";
+            document.getElementById("Change_api_key_write").style.display = "none";
+            document.getElementById("Change_api_key_read").style.display = "block";
+            document.getElementById("Change_temperature_ranges").style.display = "none";
+            document.getElementById("Change_humidity_ranges").style.display = "none";
+            document.getElementById("Change_smoke_ranges").style.display = "none";
+
+        }else if (selection == "field4"){
+            var tabcontent = document.getElementById("Change_api_key_write")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_channel_id").style.display = "none";
+            document.getElementById("Change_product_type").style.display = "none";
+            document.getElementById("Change_api_key_write").style.display = "block";
+            document.getElementById("Change_api_key_read").style.display = "none";
+            document.getElementById("Change_temperature_ranges").style.display = "none";
+            document.getElementById("Change_humidity_ranges").style.display = "none";
+            document.getElementById("Change_smoke_ranges").style.display = "none";
+        }else if (selection == "field5"){
+            var tabcontent = document.getElementById("Change_temperature_ranges")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_channel_id").style.display = "none";
+            document.getElementById("Change_product_type").style.display = "none";
+            document.getElementById("Change_api_key_write").style.display = "none";
+            document.getElementById("Change_api_key_read").style.display = "none";
+            document.getElementById("Change_temperature_ranges").style.display = "block";
+            document.getElementById("Change_humidity_ranges").style.display = "none";
+            document.getElementById("Change_smoke_ranges").style.display = "none";
+        }else if (selection == "field6"){
+            var tabcontent = document.getElementById("Change_humidity_ranges")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_channel_id").style.display = "none";
+            document.getElementById("Change_product_type").style.display = "none";
+            document.getElementById("Change_api_key_write").style.display = "none";
+            document.getElementById("Change_api_key_read").style.display = "none";
+            document.getElementById("Change_temperature_ranges").style.display = "none";
+            document.getElementById("Change_humidity_ranges").style.display = "block";
+            document.getElementById("Change_smoke_ranges").style.display = "none";
+        } else {
+            var tabcontent = document.getElementById("Change_smoke_ranges")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_channel_id").style.display = "none";
+            document.getElementById("Change_product_type").style.display = "none";
+            document.getElementById("Change_api_key_write").style.display = "none";
+            document.getElementById("Change_api_key_read").style.display = "none";
+            document.getElementById("Change_temperature_ranges").style.display = "none";
+            document.getElementById("Change_humidity_ranges").style.display = "none";
+            document.getElementById("Change_smoke_ranges").style.display = "block";
+        }
+        document.getElementById("Menu").style.display = "none";
+        //evt.currentTarget.className += " active";
+
+    }
+    // è lo script che permette di visualizzare e selezionare la form corretta per l'update dei campi utente
+    function selectUsersForm(){
+        var selection = document.getElementById("field_user").value;
+
+        if (selection == "field_1"){
+            var tabcontent = document.getElementById("Change_assigned_rooms")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_assigned_role").style.display = "none";
+            document.getElementById("Change_assigned_rooms").style.display = "block";
+        } else {
+            var tabcontent = document.getElementById("Change_assigned_role")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_assigned_role").style.display = "block";
+            document.getElementById("Change_assigned_rooms").style.display = "none";
+
+        }
+        document.getElementById("Menu").style.display = "none";
+        evt.currentTarget.className += " active";
+    }
+    // è lo script che permette di visualizzare e selezionare la form corretta per gli uptade dei campi devices
+    function selectDevicesForm() {
+        var selection = document.getElementById("field_device").value;
+
+        if (selection == "field11"){
+            var tabcontent = document.getElementById("Change_name")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_name").style.display = "block";
+            document.getElementById("Change_meas_type").style.display = "none";
+            document.getElementById("Change_services").style.display = "none";
+            document.getElementById("Change_topic").style.display = "none";
+            document.getElementById("Change_field").style.display = "none";
+
+        } else if (selection == "field22"){
+            var tabcontent = document.getElementById("Change_meas_type")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_name").style.display = "none";
+            document.getElementById("Change_meas_type").style.display = "block";
+            document.getElementById("Change_services").style.display = "none";
+            document.getElementById("Change_topic").style.display = "none";
+            document.getElementById("Change_field").style.display = "none";
+        } else if (selection == "field33"){
+            var tabcontent = document.getElementById("Change_services")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_name").style.display = "none";
+            document.getElementById("Change_meas_type").style.display = "none";
+            document.getElementById("Change_services").style.display = "block";
+            document.getElementById("Change_topic").style.display = "none";
+            document.getElementById("Change_field").style.display = "none";
+
+        }else if (selection == "field44"){
+            var tabcontent = document.getElementById("Change_topic")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_name").style.display = "none";
+            document.getElementById("Change_meas_type").style.display = "none";
+            document.getElementById("Change_services").style.display = "none";
+            document.getElementById("Change_topic").style.display = "block";
+            document.getElementById("Change_field").style.display = "none";
+        }else {
+            var tabcontent = document.getElementById("Change_field")
+            for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            }
+            document.getElementById("Change_name").style.display = "none";
+            document.getElementById("Change_meas_type").style.display = "none";
+            document.getElementById("Change_services").style.display = "none";
+            document.getElementById("Change_topic").style.display = "none";
+            document.getElementById("Change_field").style.display = "block";
+        }
+        document.getElementById("Menu").style.display = "none";
+
+    }
+     // functions for popups
+    function myFunction() {
+        alert("Registration confirmed! Please, select another action.");
+    }
+    function myFunction1() {
+        alert("Updating success! Please, select another action.");
+    }
+    function myFunction2() {
+        alert("Delete success! Please, select another action.");
+    }
+    function myFunctionConfirm(string) {
+            var r = confirm("Are you sure to delete?");
+            if (r == true && string == 'device') {
+                sendDeviceDeleteRequest();
+                myFunction2();
+            }
+            if (r == true && string == 'room') {
+                sendRoomDeleteRequest();
+                myFunction2();
+            }
+            if (r == true && string == 'user') {
+                sendUserDeleteRequest();
+                myFunction2();
+            }
+        }
+</script>
+</html>

@@ -1,7 +1,0 @@
-{
-    "broker": "mqtt.eclipse.org",
-    "port": 1883,
-    "baseTopic": "IoT_project",
-    "ledTopic":"",
-    "messageTemplate":{}
-}
