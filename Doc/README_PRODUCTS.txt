@@ -55,4 +55,3 @@ db/statistics/mode/ID_stanza/all                  # return the products that are
 
 Possibili errori:
 401, "Unexpected command - Wrong Command"
-NOTA: (sta parte la posso cambiare perchè non ne sono molto convinta :P) se la request è corretta, ma l' errore proviene dai database il messaggio che viene passato all'utente da riportare su telegram è il seguente: {"devices": "Something went wrong :C"}
