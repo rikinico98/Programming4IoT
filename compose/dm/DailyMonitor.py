@@ -157,11 +157,7 @@ if __name__ == '__main__':
     f = open('Settings.json',)
     data = json.load(f)
     URL = data["catalogURL"]
-    # Request port to catalog
-    r_port = requests.get(f'{URL}/catalog/service_comm_port')
-    j_port = json.dumps(r_port.json(),indent=4)
-    d_port = json.loads(j_port)
-    port = d_port["service_comm_port"]["port_dm"]
+    port = data["port_dm"]
     # Define conf dict
     conf = {
         '/': {

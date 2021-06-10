@@ -6,18 +6,12 @@
 	"port_MQTT":1883,
 	
 
-	"server_port":80,
-	"port_catalog":8070,
-	"port_form":8090,
-	"port_storedProducts":8060,
-	"port_soldProducts":8050,
-	"port_databaseStats":8040,
-	
 	"catalogURL": "http://warehousecatalog",
 	"databaseStatsURL": "http://databaseStats",
 	"storedProductsURL": "http://storedProducts",
 	"soldProductsURL": "http://soldProducts",
 	"formURL": "http://warehouseform",
+	"dmURL": "http://dm",
 	
 	
 	

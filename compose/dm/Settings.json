@@ -1,5 +1,6 @@
 {
-	"catalogURL": "http://warehousecatalog"
+	"catalogURL": "http://warehousecatalog",
+	"port_dm":80
 }
 
 
