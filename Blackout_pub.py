@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
     # Keep updating the previous devices
     while True:
-        time.sleep(30)
+        time.sleep(5)
         # Get all the updated rooms
         update_rooms = []
         r_rooms = requests.get(f'{URL}/catalog/rooms')

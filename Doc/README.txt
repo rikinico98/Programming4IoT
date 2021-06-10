@@ -6,48 +6,43 @@ Usare un prefisso specifico per tutti gli ID riferiti a una stessa categoria:
 LISTA DI TUTTE LE POSSIBILI RICHIESTE REST DA CONSIDERARE:
 
 CATALOG:
+        # GET
+        # catalog/msg_broker
+        # catalog/
+        #
+        # catalog/ID_stanza/ID_Device/topic
+        # catalog/ID_utente/assigned_rooms
+        # catalog/ID_stanza/assigned_product_type
+        # catalog/ID_utente/chatID
+        # catalog/ID_stanza/users
+        # catalog/ID_stanza/measure_type/TIPO_DI_MISURA
+        # catalog/ID_stanza/TS_utilities
+        # catalog/ID_stanza/ranges
 
-	### GET
-	# catalog/msg_broker
-	# catalog/port
-	# catalog/rooms
-	# catalog/users
-	# catalog/ID_stanza/ID_Device/topic
-	# catalog/ID_utente/assigned_rooms
-	# catalog/ID_stanza/assigned_product_type
-	# catalog/ID_utente/role
-	# catalog/ID_stanza/measure_type/TIPO_DI_MISURA
-	# catalog/ID_stanza/ID_Device/get_field
-	# catalog/ID_stanza/TS_utilities
-	# catalog/ID_utente/chatID
-	# catalog/ID_stanza/users
-	# catalog/ID_stanza/ranges
-
-
-
-******************************************************************************************
-        ### POST
+        # POST
         # catalog/ID_stanza/ID_device/new
         # catalog/ID_utente/new
         # catalog/ID_stanza/new
-        ### PUT
+        # PUT
         # catalog/ID_stanza/ID_device/update_name
         # catalog/ID_stanza/ID_device/change_meas_type
-        # catalog/ID_stanza/ID_device/change_service_details
+        # catalog/ID_stanza/ID_device/add_service_details
         # catalog/ID_stanza/ID_device/change_topic
+        # ctalog/ID_stanza/ID_device/update_timestamp
+        # catalog/ID_utente/change_chatID
         # catalog/ID_utente/change_role
-        # catalog/ID_utente/change_assigned_rooms
+        # catalog/ID_utente/add_assigned_rooms
         # catalog/ID_stanza/change_product_type
-        # catalog/ID_stanza/ID_Device/change_field
+        # catalog/ID_stanza/change_ranges
         # catalog/ID_stanza/TS_channel
         # catalog/ID_stanza/TS_get
         # catalog/ID_stanza/TS_post
-
-	
-        ### DELETE
+        # DELETE
         # catalog/ID_stanza/ID_device/delete
         # catalog/ID_utente/delete
         # catalog/ID_stanza/delete
+        # catalog/ID_stanza/ID_device/delete_service_details/TIPO_DI_SERVIZIO
+        # catalog/ID_utente/delete_assigned_rooms
 
 ####### ERRORS ##########
 

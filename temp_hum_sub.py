@@ -9,7 +9,10 @@ import requests
 
 class TEMPHUMReceiver():
 
-    def __init__(self, deviceID, roomID,URL):
+    def __init__(self, deviceID, roomID,URL,baseBOTtopic):
+        self.baseBOTtopic=baseBOTtopic.replace('#','')
+        if self.baseBOTtopic[-1]!='/':
+            self.baseBOTtopic=self.baseBOTtopic+'/'
         self.URL=URL
         self.deviceID = deviceID
         self.roomID = roomID 
@@ -19,7 +22,6 @@ class TEMPHUMReceiver():
             d_broker = json.loads(j_broker) 
             self.broker = d_broker["MQTT_utilities"]["msgBroker"]
             self.port = d_broker["MQTT_utilities"]["port"]
-            self.Generaltopic=d_broker["MQTT_utilities"]["mqttTopicGeneral"]
             field = requests.get(f'{self.URL}/catalog/{self.roomID}/{self.deviceID}/get_field') # ottengo la lista dei campi di thingspeak
             if field.status_code==200:
                 field_field1 = json.dumps(field.json(), indent = 4)
@@ -55,7 +57,6 @@ class TEMPHUMReceiver():
         if chat_dict1.status_code==200:
             chat_dict2= json.dumps(chat_dict1.json(),indent=4)
             chat_dict = json.loads(chat_dict2)
-            print(chat_dict)
             chatID=chat_dict["chatID"]
         else: 
             chatID=None
@@ -127,7 +128,7 @@ class TEMPHUMReceiver():
                             msg_bot["value"] = temval
                             msg_bot["Room"] = self.roomID
                             msg_bot["chatID"] = chatID
-                            self.device.myPublish(f"BOT/{self.Generaltopic}/alarm/{self.roomID}/{self.deviceID}",msg_bot) # pubblicazione del messaggio di allarme al bot telegram
+                            self.device.myPublish(f"{self.baseBOTtopic}{self.roomID}/{self.deviceID}",msg_bot) # pubblicazione del messaggio di allarme al bot telegram
 ############## HUMIDITY #############################################
             if ((float(humval)>= float(alert_val_hum[1])) or (float(humval) <= float(alert_val_hum[0]))):#controllo se il messaggio pubblicato è nel range di normalità  
                 
@@ -149,7 +150,7 @@ class TEMPHUMReceiver():
                                 msg_bot["Room"] = self.roomID
                                 msg_bot["chatID"] = chatID
                                 time.sleep(6)
-                                self.device.myPublish(f"BOT/{self.Generaltopic}/alarm/{self.roomID}/{self.deviceID}",msg_bot)# pubblicazione del messaggio di allarme al bot telegram
+                                self.device.myPublish(f"{self.baseBOTtopic}{self.roomID}/{self.deviceID}",msg_bot)# pubblicazione del messaggio di allarme al bot telegram
                         
         
     def getRoom(self):
@@ -164,11 +165,11 @@ if __name__ == "__main__":
 
     myDevicesList = []
     current_rooms = []
-
     f = open('Settings.json')
     data = json.load(f)
     URL = data["catalogURL"] ### apertura dai setting del file contenente indirizzo del catalog
-    #print(URL)
+    baseBOTtopic=data["mqttTopicTelegram"]
+   
     # Get all the rooms currently used
     r_rooms = requests.get(f'{URL}/catalog/rooms') # richiesta al catalog delle stanze disponibili 
     # print(r_rooms)
@@ -190,7 +191,7 @@ if __name__ == "__main__":
                 # print(devices)
                 # Create a thread for each device
                 for device in devices:
-                    myDevicesList.append(TEMPHUMReceiver(device,room,URL)) # inserimento in una lista di subscriber dei dati pubblicati dai device 
+                    myDevicesList.append(TEMPHUMReceiver(device,room,URL,baseBOTtopic)) # inserimento in una lista di subscriber dei dati pubblicati dai device 
                     print(f"New device added: {device}")
 
         for device in myDevicesList:
@@ -198,7 +199,7 @@ if __name__ == "__main__":
 
     # Keep updating the previous devices
     while True:
-        time.sleep(30)
+        time.sleep(5)
         # Get all the updated rooms
         update_rooms = []
         
@@ -257,7 +258,7 @@ if __name__ == "__main__":
                     # Add new devices
                     missing_devices = list(set(devices) - set(device_in_room))
                     for device in missing_devices:
-                        myDevicesList.append(TEMHUMReceiver(device,room,URL)) # parte il thread per i debive che non sono precenti nella lista iniziale 
+                        myDevicesList.append(TEMHUMReceiver(device,room,URL,baseBOTtopic)) # parte il thread per i debive che non sono precenti nella lista iniziale 
                         myDevicesList[-1].start()
                         print(f"New device added: {device}")
 
@@ -275,6 +276,6 @@ if __name__ == "__main__":
                     devices = d_devices["foundIDs"] #Note: devices is a list
                     # Create a thread for each device
                     for device in devices:
-                        myDevicesList.append(TEMHUMReceiver(device,room,URL))# si aggiunge alla lista e si fa partire l'ultimo aggiunto di volta in volta
+                        myDevicesList.append(TEMHUMReceiver(device,room,URL,baseBOTtopic))# si aggiunge alla lista e si fa partire l'ultimo aggiunto di volta in volta
                         myDevicesList[-1].start()
                         print(f"New device added: {device}")

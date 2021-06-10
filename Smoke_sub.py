@@ -11,7 +11,10 @@ import requests
 
 class smokeReceiver():
 
-    def __init__(self, deviceID, roomID,URL):
+    def __init__(self, deviceID, roomID,URL,baseBOTtopic):
+        self.baseBOTtopic=baseBOTtopic.replace('#','')
+        if self.baseBOTtopic[-1]!='/':
+            self.baseBOTtopic=self.baseBOTtopic+'/'
         self.deviceID = deviceID
         self.roomID = roomID
         self.URL=URL
@@ -22,7 +25,6 @@ class smokeReceiver():
             d_broker = json.loads(j_broker) 
             self.broker = d_broker["MQTT_utilities"]["msgBroker"]
             self.port = d_broker["MQTT_utilities"]["port"]
-            self.general_topic=d_broker["MQTT_utilities"]["mqttTopicGeneral"]
             field = requests.get(f'{self.URL}/catalog/{self.roomID}/{self.deviceID}/get_field') #richiesta dei campi di ThingSpeak 
             if field.status_code==200:
                 field_field1 = json.dumps(field.json(), indent = 4)
@@ -51,7 +53,6 @@ class smokeReceiver():
         if chat_dict1.status_code==200:
             chat_dict2= json.dumps(chat_dict1.json(),indent=4)
             chat_dict = json.loads(chat_dict2)
-            print(chat_dict)
             chatID=chat_dict["chatID"]
         else: 
             chatID=None
@@ -110,7 +111,7 @@ class smokeReceiver():
                             msg_bot["value"] = smoke_value
                             msg_bot["Room"] = self.roomID
                             msg_bot["chatID"] = chatID
-                            self.device.myPublish(f"BOT/{self.general_topic}/alarm/{self.roomID}/{self.deviceID}",msg_bot)
+                            self.device.myPublish(f"{self.baseBOTtopic}{self.roomID}/{self.deviceID}",msg_bot)
             
 
     def getRoom(self):
@@ -126,9 +127,10 @@ if __name__ == "__main__":
     current_rooms = []
     myDevicesList = []
     current_rooms = []
-    f = open('Settings.json') 
+    f = open('Settings.json')
     data = json.load(f)
-    URL = data["catalogURL"]
+    URL = data["catalogURL"] ### apertura dai setting del file contenente indirizzo del catalog
+    baseBOTtopic=data["mqttTopicTelegram"]
     # Get all the rooms currently used
     r_rooms = requests.get(f' {URL}/catalog/rooms') 
     if r_rooms.status_code == 200:
@@ -147,7 +149,7 @@ if __name__ == "__main__":
                 devices = d_devices["foundIDs"] #Note: devices is a list
                 # Create a thread for each device
                 for device in devices:
-                    myDevicesList.append(smokeReceiver(device,room,URL))
+                    myDevicesList.append(smokeReceiver(device,room,URL,baseBOTtopic))
                     print(f"New device added: {device}")
             else:
                 raise Exception(f"{r_devices.status_code},Error occurred!")
@@ -181,7 +183,7 @@ if __name__ == "__main__":
                     if room == device_room["roomID"]:
                         device.stop()
                         device_to_delete.append(json.loads(device.getDeviceID())["deviceID"])
-            for del_device in device_to_delete:
+            for del_dev_ice in device_to_delete:
                 for i, device in enumerate(myDevicesList):
                     if del_device == json.loads(device.getDeviceID())["deviceID"]:
                         del myDevicesList[i]
@@ -215,7 +217,7 @@ if __name__ == "__main__":
                     # Add new devices
                     missing_devices = list(set(devices) - set(device_in_room))
                     for device in missing_devices:
-                        myDevicesList.append(smokeReceiver(device,room,URL))
+                        myDevicesList.append(smokeReceiver(device,room,URL,baseBOTtopic))
                         myDevicesList[-1].start()
                         print(f"New device added: {device}")
 
@@ -233,6 +235,6 @@ if __name__ == "__main__":
                     devices = d_devices["foundIDs"] #Note: devices is a list
                     # Create a thread for each device
                     for device in devices:
-                        myDevicesList.append(smokeReceiver(device,room,URL))
+                        myDevicesList.append(smokeReceiver(device,room,URL,baseBOTtopic))
                         myDevicesList[-1].start()
                         print(f"New device added: {device}")

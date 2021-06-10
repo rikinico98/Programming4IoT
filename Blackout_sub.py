@@ -13,24 +13,26 @@ import requests
 
 class MyThread(threading.Thread):
 
-    def __init__(self, threadID, device,URL):
+    def __init__(self, threadID, device, URL, myMqttDevice,baseBOTtopic):
         
         threading.Thread.__init__(self)
-    
-        #Setup thread
+            #Setup thread
         self.threadID = threadID
         self.device = device
         self.iterate = True
         self.URL=URL
-        self.__msg_bot1={"measure_type":"","ranges":[],"value":None,"Room":"","chatID":""}
+        self.baseBOTtopic=baseBOTtopic
+        self.baseBOTtopic=baseBOTtopic.replace('#','')
+        if self.baseBOTtopic[-1]!='/':
+            self.baseBOTtopic=self.baseBOTtopic+'/'
+        self.__msg_bot1={"measure_type":"","ranges":[],"value": "" ,"Room":"","chatID":""}
         r_broker = requests.get(f'{self.URL}/catalog/MQTT_utilities') # richiesta al catalog di broker,port e general_topic
         if r_broker.status_code==200:
             j_broker = json.dumps(r_broker.json(),indent=4)
             d_broker = json.loads(j_broker) 
             self.broker = d_broker["MQTT_utilities"]["msgBroker"]
             self.port = d_broker["MQTT_utilities"]["port"]
-            self.general_topic=d_broker["MQTT_utilities"]["mqttTopicGeneral"]
-            self.dev = MyMQTT(self.threadID, self.broker, self.port, None)
+            self.dev = myMqttDevice
         else:
             raise Exception(f"Request status code: {r_broker.status_code},Error occurred!")
     def run(self):
@@ -57,11 +59,11 @@ class MyThread(threading.Thread):
                                 chatID=self.FindChatID(user) # richiamo funzione per trovare i chatID legati all'user 
                                 if chatID!=None:
                                     msg_bot["measure_type"]='blackout'
-                                    msg_bot["ranges"] = None
+                                    msg_bot["ranges"] = []
                                     msg_bot["value"] = (currentTime-float(lastReceivedTime["timestamp"]))
                                     msg_bot["Room"] = roomID
                                     msg_bot["chatID"] = chatID
-                                    self.dev.myPublish(f"BOT/{self.general_topic}/alarm/{room_ID}/{device_ID}",msg_bot)
+                                    self.dev.myPublish(f"{self.baseBOTtopic}{room_ID}/{device_ID}",msg_bot)
                         time.sleep(5)
         
     def stop(self):
@@ -78,7 +80,10 @@ class MyThread(threading.Thread):
 
 class blackoutReceiver():
 
-    def __init__(self, deviceID, roomID,URL):
+    def __init__(self, deviceID, roomID,URL,baseBOTtopic):
+        self.baseBOTtopic=baseBOTtopic.replace('#','')
+        if self.baseBOTtopic[-1]!='/':
+            self.baseBOTtopic=self.baseBOTtopic+'/'
         self.deviceID = deviceID
         self.roomID = roomID
         self.URL=URL
@@ -109,7 +114,7 @@ class blackoutReceiver():
         self.device.start()
         for topic in self.topic:
             self.device.mySubscribe(topic)
-        self.device_thread = MyThread(self.deviceID, self,self.URL)
+        self.device_thread = MyThread(self.deviceID, self, self.URL, self.device,self.baseBOTtopic)
         self.device_thread.start()
 
     def stop(self):
@@ -138,6 +143,7 @@ if __name__ == "__main__":
     f = open('Settings.json',) # lettura dell'indirizzo del catalog dal file di Settings
     data = json.load(f)
     URL = data["catalogURL"]
+    baseBOTtopic=data["mqttTopicTelegram"]
     # Get all the rooms currently used
     r_rooms = requests.get(f'{URL}/catalog/rooms')
     if r_rooms.status_code == 200:
@@ -156,7 +162,7 @@ if __name__ == "__main__":
                 devices = d_devices["foundIDs"] #Note: devices is a list
                 # Create a thread for each device
                 for device in devices:
-                    myDevicesList.append(blackoutReceiver(device, room,URL))
+                    myDevicesList.append(blackoutReceiver(device, room,URL,baseBOTtopic))
                     print(f"New device added: {device}")
 
         for device in myDevicesList:
@@ -222,7 +228,7 @@ if __name__ == "__main__":
                     # Add new devices
                     missing_devices = list(set(devices) - set(device_in_room))
                     for device in missing_devices:
-                        myDevicesList.append(blackoutReceiver(device, room,URL))
+                        myDevicesList.append(blackoutReceiver(device, room,URL,baseBOTtopic))
                         myDevicesList[-1].start()
                         print(f"New device added: {device}")
 
@@ -240,6 +246,6 @@ if __name__ == "__main__":
                     devices = d_devices["foundIDs"] #Note: devices is a list
                     # Create a thread for each device
                     for device in devices:
-                        myDevicesList.append(blackoutReceiver(device, room,URL))
+                        myDevicesList.append(blackoutReceiver(device, room,URL,baseBOTtopic))
                         myDevicesList[-1].start()
                         print(f"New device added: {device}")

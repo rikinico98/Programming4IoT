@@ -27,6 +27,7 @@ class MyThread(threading.Thread):
             ranges_dict = json.loads(ranges_dict2)
             self.alert_val=ranges_dict["ranges"]["Smoke"]
             self.loc1=random.uniform(200,int(self.alert_val[0]))# impostando una soglia anomala al di sopra del 300 in questo modo otteniamo una distribuzione
+            print(self.loc1)
         # tra 200 ppm  minimo valore acquisibile da un tipico sensore e la soglia impostata per il sensore 
         else:
             raise Exception(f"Request status code: {ranges_dict1.status_code},Error occurred!")
@@ -37,29 +38,24 @@ class MyThread(threading.Thread):
             # Concentration scope: from 200ppm to 10000ppm
             # When the gas concentration is high enough, the sensor usually outputs value greater than 300.
             p = random.uniform(0,1)
-            time.sleep(900)
+            time.sleep(9)
             if p > self.failure:
                 #u = random.uniform(200,300)
                 loc, scale = self.loc1, 0.1
                 a= np.random.logistic(loc, scale, 10000)
-                u = random.choice(a)
-                
-               
+                u = random.choice(a)   
             else:
                 u = random.uniform(int(self.alert_val[0]),10000) # tutti i valori al di sopra della soglia del sensore  e 10000 valore massimo acquisibile 
-                
-               
-            if u < 400:
+            if u < float(self.alert_val[0]):
                 # Everything works!
                 self.device.publish(u)
-               
             else:
                 # Simulation of failure (failure holds for some time untill resolution of the problem)
                 # Keep sending the wrong result to simulate the time needed to solve the problem
                 time_to_solve = math.ceil(random.uniform(4,8)) 
                 for it in range(time_to_solve):
                     self.device.publish(u)
-                    time.sleep(900)
+                    time.sleep(9)
                     
     def stop(self):
         self.iterate = False
@@ -158,9 +154,9 @@ if __name__ == "__main__":
                     print(f"New device added: {device}")
 
         for device in myDevicesList:
-            time.sleep(20)
+            time.sleep(5)
             device.start()
-
+    time.sleep(80)
     # Keep updating the previous devices
     while True:
         time.sleep(5)
